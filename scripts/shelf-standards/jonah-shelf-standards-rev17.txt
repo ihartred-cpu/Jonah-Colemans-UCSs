@@ -1,0 +1,532 @@
+;Jonah's Shelf Standards REV 17
+;To use a library part for the part visual, uncomment the 2 libpart lines and change the path to your library Part.
+;Known Limitations:
+;   1) Part visual does not work with "1 cnc file" through boring on partitions/dividers.
+;See history at bottom of UCS
+
+;CV2025-PATCH (this repo, not Jonah Coleman's, applied when reconstructing this file from the collapsed-line-break
+;paste captured in full-docs/jonah-shelf-standards-rev17-raw.txt -- see README.md "What was changed" for the
+;full list). Two fixes applied below:
+;  1) Added the missing "Public ucs_ShelfStd" declaration (the part-level "Automatic" override read this
+;     UCS-level default but nothing ever declared it, so Automatic resolved against a non-existent parameter).
+;     REV 20 correction: the first attempt at this fix declared it before the "For Each" loop, which CV
+;     rejects with "Use of Undefined (ucs_ShelfStd)" at that line -- Public declarations only take effect
+;     inside the loop body (see the "Public is a runtime statement, not a header" note in
+;     docs/shelf-standards-jonah.md). Moved to point of use below, matching every other Public in this script.
+;  2) Changed the "less than smallest size" fallback to read the zero-padded names (Size01/Size01_MatID)
+;     that the rest of the script actually declares and writes, instead of the never-declared Size1/Size1_MatID.
+;     REV 21 correction: this fix and the ucs_ShelfStd Public declaration had ALSO been placed outside the
+;     "if OBJECT == 17 then ... end if" block that computes and stores JCS_Use_ShelfStd on the part -- moved
+;     back inside, matching the raw paste exactly. This was the actual cause of "part attributes look right
+;     but nothing ever gets created," confirmed against real CV output. See TESTING.md #2 for the full story.
+;This is a line-break reconstruction from a mangled paste, not a byte-exact export -- verify against a clean
+;UCS Manager export before trusting exact whitespace/comment placement.
+
+For Each LU|LF|S_LSE|RU|RF|S_RSE|PT|S_DIV|L?VBORE Part
+
+	if OBJECT == 17 then
+		;parts
+		if this.JCS_ShelfStd_Use == null then
+			JCS_ShelfStd_Use<int> = '<lst>1) Automatic=-1|2) Enabled=1|Disabled=0'
+			JCS_ShelfStd_Use<style> = 1
+			JCS_ShelfStd_Use<desc> = 'Shelf Standards: 01) Enable'
+		end if
+
+		;operations only from here on down (Jonah Coleman's own comment -- misleading as written: this whole
+		;block runs during the PART's own pass, computing and STORING JCS_Use_ShelfStd on the part itself
+		;so operations can read it back via ":JCS_Use_ShelfStd" below. REV 21 CV2025-PATCH: this block and
+		;the Public ucs_ShelfStd declaration were misplaced AFTER this if/end if in Revision 19/20 -- that
+		;meant JCS_Use_ShelfStd was never actually stored on the part, so ":JCS_Use_ShelfStd" below always
+		;read null and every operation exited immediately, silently creating nothing. Confirmed against real
+		;CV output: part-level attributes appeared fine, but no dado/visual ever appeared. Moved back inside
+		;OBJECT == 17, matching the raw paste exactly. See TESTING.md #2.
+		Public ucs_ShelfStd<int> = '<lst>Disabled=0|Enabled=1' ;Shelf Standards: UCS default (used when a part is set to Automatic)
+		JCS_Use_ShelfStd<int> := JCS_ShelfStd_Use
+		if JCS_Use_ShelfStd == -1 then
+			JCS_Use_ShelfStd<int> := ucs_ShelfStd
+		end if
+
+		if JCS_Use_ShelfStd == 0 then
+			;clean up
+			delete JCS_ShelfStd_LengthType
+			delete JCS_ShelfStd_Length_Over
+
+			exit
+		end if
+
+		if this.JCS_ShelfStd_LengthType == null then
+			JCS_ShelfStd_LengthType<int> = '<lst>0) Automatic=-1|1) Wizard Size=1|2) Set Sizes (centered)=2|3) Set Sizes=3|4) Stop Dado=4|5) Through Dado=5|6) Wizard Size (Centered)=6'
+			JCS_ShelfStd_LengthType<style> = 1
+			JCS_ShelfStd_LengthType<desc> = 'Shelf Standards: 02) Length Type'
+		end if
+
+		if this.JCS_ShelfStd_Length_Over == null then
+			JCS_ShelfStd_Length_Over<meas> = -1
+			JCS_ShelfStd_Length_Over<style> = 1
+			JCS_ShelfStd_Length_Over<desc> = 'Shelf Standards: 03) Length Override (-1 = default)'
+		end if
+
+		exit
+	end if
+
+	if :JCS_Use_ShelfStd == 0 then
+		exit
+	end if
+
+	;user definable items
+	Public ucs_Dado_Width<meas> = 0.625 ;Width of dado
+	Public ucs_Dado_Depth<meas> = 0.2 ;Depth of dado
+	Public ucs_Dado_Depth_BothSides<meas> = 0.2 ;Depth of dado at through holes
+
+	Public ucs_Dado_Display_Visual<int> = <lst>False=0|True=1 ;Display a part visual
+	Public ucs_Dado_Display_Visual_Protrusion<meas> = 0 ;Display a part visual - protrusion amount
+	Public ucs_Dado_LengthType<int> = <lst>1. Wizard Size=1|2. Set Sizes (centered)=2|3. Set Sizes=3|4. Stop Dado=4|5. Through Dado=5|6. Wizard Size (Centered)=6 ;Dado Type
+	Public ucs_Dado_Extend_Type_StopLength<meas> = 0.125 ;Stop Dado- stop distance (only if type = Stop Dado)
+	Public ucs_Use_Sizes_OverSizeDado<meas> = 0 ;Extend Dado length (does not apply to through dado)
+	Public ucs_Use_Sizes_No_MatID<int> = 73 ;MatID to use when not using set sizes for cutlist purposes.
+	public ucs_Dim_Part_Type<text> = CHROME ;Part Name to create for cutlists- MUST BE ALL UPPER CASE
+
+	TEMP_UCS_Dado_LengthType<int> := JCS_ShelfStd_LengthType
+	if TEMP_UCS_Dado_LengthType == -1 then
+		TEMP_UCS_Dado_LengthType<int> := ucs_Dado_LengthType
+	end if
+
+	if TEMP_UCS_Dado_LengthType == 2 or TEMP_UCS_Dado_LengthType == 3 then
+		;set sizes
+		public ucs_Use_Sizes_Behavior_When_Less_Than_Smallest<int> = <lst>1. Use minimum size anyway=1|2. Change to Wizard Size=2|3. Change to Stop Dado=3|4. Change to Through Dado=4 ;Behavior when using set sizes and size is less than minimum
+
+		;list of sizes to use, from smallest to largest, 0 = no size.
+		Public ucs_Use_Sizes_Size01<meas> = 12 ;Size 01 (0=none)
+		Public ucs_Use_Sizes_Size01_MatID<int> = 0 ;Size 01 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size02<meas> = 16 ;Size 02 (0=none)
+		Public ucs_Use_Sizes_Size02_MatID<int> = 0 ;Size 02 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size03<meas> = 18 ;Size 03 (0=none)
+		Public ucs_Use_Sizes_Size03_MatID<int> = 0 ;Size 03 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size04<meas> = 20 ;Size 04 (0=none)
+		Public ucs_Use_Sizes_Size04_MatID<int> = 0 ;Size 04 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size05<meas> = 22 ;Size 05 (0=none)
+		Public ucs_Use_Sizes_Size05_MatID<int> = 0 ;Size 05 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size06<meas> = 24 ;Size 06 (0=none)
+		Public ucs_Use_Sizes_Size06_MatID<int> = 0 ;Size 06 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size07<meas> = 36 ;Size 07 (0=none)
+		Public ucs_Use_Sizes_Size07_MatID<int> = 0 ;Size 07 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size08<meas> = 48 ;Size 08 (0=none)
+		Public ucs_Use_Sizes_Size08_MatID<int> = 0 ;Size 08 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size09<meas> = 60 ;Size 09 (0=none)
+		Public ucs_Use_Sizes_Size09_MatID<int> = 0 ;Size 09 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size10<meas> = 72 ;Size 10 (0=none)
+		Public ucs_Use_Sizes_Size10_MatID<int> = 0 ;Size 10 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size11<meas> = 84 ;Size 11 (0=none)
+		Public ucs_Use_Sizes_Size11_MatID<int> = 0 ;Size 11 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size12<meas> = 96 ;Size 12 (0=none)
+		Public ucs_Use_Sizes_Size12_MatID<int> = 0 ;Size 12 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size13<meas> = 0 ;Size 13 (0=none)
+		Public ucs_Use_Sizes_Size13_MatID<int> = 0 ;Size 13 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size14<meas> = 0 ;Size 14 (0=none)
+		Public ucs_Use_Sizes_Size14_MatID<int> = 0 ;Size 14 material ID (0=none)
+
+		Public ucs_Use_Sizes_Size15<meas> = 0 ;Size 15 (0=none)
+		Public ucs_Use_Sizes_Size15_MatID<int> = 0 ;Size 15 material ID (0=none)
+	end if
+
+	TEMP_Fix_For_1_CNC_File<bool> := false
+	if DZ = :DZ then
+		TEMP_Fix_For_1_CNC_File<bool> := true
+
+		if TEMP_Use_FACEWP == 1 then
+			TEMP_Use_Reverse_FACEWP := 2
+		else
+			TEMP_Use_Reverse_FACEWP := 1
+		end if
+
+		ucs_Dado_Depth := ucs_Dado_Depth_BothSides
+	end if
+
+	TEMP_Use_DY := (REPT-1)*SPCNG
+
+	if :JCS_ShelfStd_Length_Over > 0 then
+		TEMP_Use_DY := JCS_ShelfStd_Length_Over
+	end if
+
+	TEMP_Use_X := X
+	TEMP_Use_Y := Y
+
+	TEMP_Horizontal_Grain<int> := 0
+	if _CB:525 == 1 then
+		TEMP_Horizontal_Grain<int> := 1
+	end if
+
+	;standard sizes
+	if TEMP_UCS_Dado_LengthType == 2 or TEMP_UCS_Dado_LengthType == 3 then
+		;set sizes
+		TEMP_Use_Size := 0
+		TEMP_Use_MatID<int> := 0
+
+		TEMP_Loop1<int> := 15
+		TEMP_ZERO_PAD<text> = ''
+		while TEMP_Loop1 >= 1 and TEMP_Use_Size == 0 do
+			if TEMP_Loop1 == 9 then
+				TEMP_ZERO_PAD<text> = '0'
+			end if
+			if this.ucs_Use_Sizes_Size{TEMP_ZERO_PAD}{TEMP_Loop1} > 0 and DY >= this.ucs_Use_Sizes_Size{TEMP_ZERO_PAD}{TEMP_Loop1} then
+				TEMP_Use_Size := ucs_Use_Sizes_Size{TEMP_ZERO_PAD}{TEMP_Loop1}
+				TEMP_Use_MatID<int> := ucs_Use_Sizes_Size{TEMP_ZERO_PAD}{TEMP_Loop1}_MatID
+			end if
+			TEMP_Loop1<int> -= 1
+		end while
+		delete TEMP_Loop1
+
+		if TEMP_Use_Size == 0 then
+			;less than smallest specified size
+			if ucs_Use_Sizes_Behavior_When_Less_Than_Smallest == 1 then
+				;CV2025-PATCH: was ucs_Use_Sizes_Size1 / _Size1_MatID (never declared -- see header note)
+				TEMP_Use_Size := ucs_Use_Sizes_Size01
+				TEMP_Use_MatID<int> := ucs_Use_Sizes_Size01_MatID
+			else
+				if ucs_Use_Sizes_Behavior_When_Less_Than_Smallest == 2 then
+					;change to wizard size
+					TEMP_UCS_Dado_LengthType<int> := 1
+				else
+					if ucs_Use_Sizes_Behavior_When_Less_Than_Smallest == 3 then
+						;change to stop dado
+						TEMP_UCS_Dado_LengthType<int> := 4
+					else
+						if ucs_Use_Sizes_Behavior_When_Less_Than_Smallest == 4 then
+							;change to through dado
+							TEMP_UCS_Dado_LengthType<int> := 5
+						end if
+					end if
+				end if
+			end if
+		end if
+
+		if TEMP_Use_Size > 0 then
+			;change the size
+			TEMP_Use_DY := TEMP_USE_Size + ucs_Use_Sizes_OverSizeDado
+
+			if TEMP_UCS_Dado_LengthType == 2 or TEMP_UCS_Dado_LengthType == 6 then
+				;set sizes - centered
+				;center the new size in the old
+				TEMP_Difference := (REPT-1)*SPCNG - TEMP_USE_DY
+				TEMP_Use_X := TEMP_Use_X - sin(AZ)*TEMP_Difference/2
+				TEMP_Use_Y := TEMP_Use_Y + cos(AZ)*TEMP_Difference/2
+				delete TEMP_Difference
+			end if
+
+			;create part
+			dim {ucs_Dim_Part_Type} as new part
+			{ucs_Dim_Part_Type}.name = 'Shelf Standard {TEMP_Use_Size}'
+			;{ucs_Dim_Part_Type}.LibPart = 'FWP\Hardware Visuals\Shelf Standard'
+
+			if ucs_Dado_Display_Visual == 0 then
+				{ucs_Dim_Part_Type}.visible = false
+			end if
+
+			{ucs_Dim_Part_Type}.X := :DX - TEMP_Use_X
+			{ucs_Dim_Part_Type}.Y := TEMP_USE_Y + ucs_Use_Sizes_OverSizeDado/2
+			{ucs_Dim_Part_Type}.Z := this.{ucs_Dim_Part_Type}.DZ - ucs_Dado_Display_Visual_Protrusion
+
+			{ucs_Dim_Part_Type}.AX := AX
+			{ucs_Dim_Part_Type}.AY := AY+ 180
+			{ucs_Dim_Part_Type}.AZ := -AZ
+
+			if _FACEWP == 1 then
+				{ucs_Dim_Part_Type}.X := TEMP_Use_X
+				{ucs_Dim_Part_Type}.AY := AY
+				{ucs_Dim_Part_Type}.AZ := AZ
+				{ucs_Dim_Part_Type}.Z := :DZ - this.{ucs_Dim_Part_Type}.DZ + ucs_Dado_Display_Visual_Protrusion
+			end if
+
+			{ucs_Dim_Part_Type}.DX := ucs_Dado_Width
+			{ucs_Dim_Part_Type}.DY := TEMP_USE_SIZE
+			{ucs_Dim_Part_Type}.DZ := ucs_Dado_Depth
+
+			if TEMP_Use_MatID > 0 then
+				{ucs_Dim_Part_Type}.MATID = TEMP_USE_MatID
+			end if
+
+			if TEMP_Fix_For_1_CNC_File then
+				{ucs_Dim_Part_Type}.QTY := 2
+			end if
+
+			{ucs_Dim_Part_Type}.OWNER = OWNER
+		end if
+
+		delete TEMP_Use_Size
+		delete TEMP_Use_MatID
+	end if
+
+	if TEMP_UCS_Dado_LengthType == 1 or TEMP_UCS_Dado_LengthType == 4 or TEMP_UCS_Dado_LengthType == 5 or TEMP_UCS_Dado_Lengthtype == 6 then
+		;not using set sizes
+		if TEMP_UCS_Dado_LengthType == 5 then
+			;Through Dado
+			if TEMP_Horizontal_Grain == 1 then
+				TEMP_Use_X := 0
+				TEMP_Use_DY := :DX
+			else
+				TEMP_Use_Y := 0
+				TEMP_Use_DY := :DY
+			end if
+		else
+			if TEMP_UCS_Dado_LengthType == 4 then
+				;stop dado
+				if TEMP_Horizontal_Grain == 1 then
+					TEMP_Use_X := ucs_Dado_Extend_Type_StopLength
+					TEMP_Use_DY := :DX - 2*ucs_Dado_Extend_Type_StopLength
+				else
+					TEMP_Use_Y := ucs_Dado_Extend_Type_StopLength
+					TEMP_Use_DY := :DY - 2*ucs_Dado_Extend_Type_StopLength
+				end if
+			else
+				;oversize
+				TEMP_Use_X := TEMP_Use_X - sin(AZ)*(-1*ucs_Use_Sizes_OverSizeDado/2)
+				TEMP_Use_Y := TEMP_Use_Y + cos(AZ)*(-1*ucs_Use_Sizes_OverSizeDado/2)
+				TEMP_Use_DY += ucs_Use_Sizes_OverSizeDado
+			end if
+		end if
+
+		if ucs_Use_Sizes_No_MatID > 0 or ucs_Dado_Display_Visual == 1 then
+			;material id assigned for non-specific sizes
+			dim {ucs_Dim_Part_Type} as new part
+			{ucs_Dim_Part_Type}.name = 'Shelf Standard {TEMP_Use_DY}'
+			;{ucs_Dim_Part_Type}.LibPart = 'FWP\Hardware Visuals\Shelf Standard'
+
+			if ucs_Dado_Display_Visual == 0 then
+				{ucs_Dim_Part_Type}.visible = false
+			end if
+
+			{ucs_Dim_Part_Type}.X := :DX - TEMP_Use_X
+			{ucs_Dim_Part_Type}.Y := TEMP_USE_Y
+			{ucs_Dim_Part_Type}.Z := this.{ucs_Dim_Part_Type}.DZ - ucs_Dado_Display_Visual_Protrusion
+
+			{ucs_Dim_Part_Type}.AX := AX
+			{ucs_Dim_Part_Type}.AY := AY + 180
+			{ucs_Dim_Part_Type}.AZ := -AZ
+
+			if _FACEWP == 1 then
+				{ucs_Dim_Part_Type}.X := TEMP_Use_X
+				{ucs_Dim_Part_Type}.AY := AY
+				{ucs_Dim_Part_Type}.AZ := AZ
+				{ucs_Dim_Part_Type}.Z := :DZ - this.{ucs_Dim_Part_Type}.DZ + ucs_Dado_Display_Visual_Protrusion
+			end if
+
+			{ucs_Dim_Part_Type}.DX := ucs_Dado_Width
+			{ucs_Dim_Part_Type}.DY := TEMP_Use_DY
+			{ucs_Dim_Part_Type}.DZ := ucs_Dado_Depth
+
+			if ucs_Use_Sizes_No_MatID > 0 then
+				{ucs_Dim_Part_Type}.MatID = ucs_Use_Sizes_No_MatID
+			end if
+
+			if TEMP_Fix_For_1_CNC_File then
+				{ucs_Dim_Part_Type}.QTY := 2
+			end if
+
+			{ucs_Dim_Part_Type}.OWNER = OWNER
+		end if
+	end if
+
+	Public ucs_Operation_Type<int> = '<lst>Dado=1|Centerline Route=2' ;Operation Type
+
+	if ucs_Operation_Type == 1 then
+		dim ShelfStandardDado as new Dadoex
+	else
+		;CV2025-PATCH (Revision 22): was `dim ShelfStandardDado as new line`. A `line` object is a
+		;non-cutting visual/dimension object in CV's object model -- it draws correctly in the assembly
+		;view but carries no cutter/tool data, so nothing shows up on the CNC nest. `route` is the object
+		;type CV actually uses elsewhere in this shop's own scripts for a real machined slot
+		;(see e.g. casework-wall-10's WireChaseRectangle / casework-wall-11's REMOVABLEPANEL), flagged
+		;with _RCUT so it nests as a route cut instead of a pocket dado. See TESTING.md #5.
+		dim ShelfStandardDado as new route
+		ShelfStandardDado._RCUT := 1
+	end if
+
+	if name == 'LFVBORE' then
+		ShelfStandardDado.desc = 'Shelf Standard - Front'
+	else
+		if name == 'LRVBORE' then
+			ShelfStandardDado.desc = 'Shelf Standard - Back'
+		else
+			ShelfStandardDado.desc = 'Shelf Standard - Mid'
+		end if
+	end if
+
+	ShelfStandardDado.AX := AX
+	ShelfStandardDado.AY := AY
+	ShelfStandardDado.AZ := AZ
+
+	TEMP_Use_X := X
+	;CV2025-PATCH (Revision 22): this centering offset used to be dado-only (`if ucs_Operation_Type == 1`).
+	;That was fine when the route branch was a true zero-width line, but now that the route branch has a
+	;real cutting width (see below), it needs the same centerline-to-corner offset the dado gets, or the
+	;routed slot ends up shifted a half-width off the shelf-standard centerline instead of straddling it.
+	TEMP_Use_X := TEMP_Use_X - sin(AZ+90)*(ucs_Dado_Width/2)
+	TEMP_Use_Y := TEMP_Use_Y + cos(AZ+90)*(ucs_Dado_Width/2)
+
+	ShelfStandardDado.X := TEMP_Use_X
+	ShelfStandardDado.Y := TEMP_Use_Y
+	ShelfStandardDado.Z := Z
+
+	if ucs_Operation_Type == 1 then
+		;dado
+		ShelfStandardDado.DX := ucs_Dado_Width
+	else
+		;CV2025-PATCH (Revision 22): was `ShelfStandardDAdo.DX := 0` (note the typo -- also fixed) which
+		;is what made the old `line` object literally invisible to CNC: zero width plus a non-cutting
+		;object type. A route still needs a real cutting width like the dado does, or it's still nothing
+		;to nest even with the object-type fix above. See TESTING.md #5.
+		ShelfStandardDado.DX := ucs_Dado_Width
+	end if
+	ShelfStandardDado.DY := TEMP_Use_DY
+	ShelfStandardDado.DZ := ucs_Dado_Depth
+
+	Public ucs_ToolID_For_Dado<int> = 0 ;Operation Tool ID
+	if ucs_ToolID_For_Dado > 0 then
+		ShelfStandardDado.TOOLID := ucs_ToolID_For_Dado
+	end if
+
+	if _FACEWP > 0 then
+		TEMP_Use_FACEWP := _FACEWP
+	end if
+
+	ShelfStandardDado._FACEWP := TEMP_Use_FACEWP
+
+	ShelfStandardDado.OWNER = OWNER
+	if TEMP_Fix_For_1_CNC_File then
+		;this is a through hole, we need to add ops on the back side.
+		dim ShelfStandardDadoReverse as new Dadoex
+		ShelfStandardDadoReverse.Name = 'Shelf Standard Dado - Reverse'
+
+		ShelfStandardDadoReverse.AX := AX
+		ShelfStandardDadoReverse.AY := AY
+		ShelfStandardDadoReverse.AZ := AZ
+
+		ShelfStandardDadoReverse.X := :DX - (X - ucs_Dado_Width/2)
+		ShelfStandardDadoReverse.Y := TEMP_Use_Y
+
+		ShelfStandardDadoReverse.Z := Z
+
+		ShelfStandardDadoReverse.DX := ucs_Dado_Width
+		ShelfStandardDadoReverse.DY := TEMP_Use_DY
+		ShelfStandardDadoReverse.DZ := ucs_Dado_Depth
+
+		if TEMP_UCS_Dado_LengthType == 5 then
+			;Through Dado
+			ShelfStandardDado.S_EXTND := true
+		end if
+
+		ShelfStandardDadoReverse._FACEWP := TEMP_Use_Reverse_FACEWP
+
+		if ucs_ToolID_For_Dado > 0 then
+			ShelfStandardDadoReverse.TOOLID := ucs_ToolID_For_Dado
+		end if
+		ShelfStandardDadoReverse.OWNER = OWNER
+	end if
+
+	delete ucs_ToolID_For_Dado
+	delete TEMP_Fix_For_1_CNC_File
+	delete TEMP_Use_Reverse_FACEWP
+	delete TEMP_Use_X
+	delete TEMP_Use_Y
+	delete TEMP_Use_DY
+	delete TEMP_Use_FACEWP
+	delete TEMP_UCS_Dado_LengthType
+
+	DX := 0
+	_NOCNC := 1
+	Z := -:DZ + 0.01
+	DZ := 0.001
+
+exit
+
+;History
+;       Revision 2
+;              Fixed dado operations oriented wrong direction.
+;       Revision 3
+;              Added (0=false, 1=true) notations to all public variables.
+;              Fixed material ID not being properly set.
+;       Revision 4
+;              Added Mid-Shelf Standard Option - only works properly with vertical grain ends - only adds one in middle of panel
+;       Revision 5
+;              Added option to extend dado and dado type options
+;       Revision 6
+;              Added option to add material when not using set sizes.
+;       Revision 7
+;              Added work-around for CV bug where "generate 2 cnc files" doesn't work
+;              Added public variable for depth to use when generate 1 file causes a through operation.
+;              Fixed mid-shelf standard to truly center between the shelf standards instead of just centering on the Part.
+;       Revision 8
+;               Added choice lists to public variables
+;               Removed all mid-dado code since assembly wizard now creates mid line-bores.
+;               Replaced many public variables with one simple dado length type variable
+;       Revision 9
+;               Added exit function to beginning of UCS for performance.
+;       Revision 10
+;               Added TOOLID selection.
+;               Added operation type selection (centerline route or dado). - currently does not work due to bug in CV, somehow it gets dim'd as a dado even if it is set to route.
+;               Added part visual
+;       Revision 11
+;               Fix for part visual in wrong position when front/back holes are not equally spaced from reference edge.
+;       Revision 12
+;               Fix for oversize dado value not being used when wizard sizes used.
+;       Revision 13
+;               System operations are left in place to allow for editing in the CAM editor.
+;       Revision 14
+;               Fix for visual part facing in toward bottom of dado
+;               Fix for visual part rotating the wrong direction when line bore is rotated.
+;               Fix for visual part not working when not using set sizes and no material ID specified.
+;       Revision 15
+;               Change to use in-line parameter evaluation.
+;               Parameter to specify behavior when using set sizes, if size is smaller than minimum
+;               Add part type parameter to control what part gets created
+;       Revision 16
+;               Fix for bug of not changing to through dado when that is the selected behavior for dado shorter than smallest precut size.
+;		Revision 17
+;				Support for horizontal grain panels
+;				Add part-level overrides for enabling/disabling, length type, and length
+;		Revision 18
+;				Add wizard sizes (centered)
+;       Revision 19 (CV2025-PATCH, this repo, not Jonah Coleman's)
+;               Added the missing "Public ucs_ShelfStd" UCS-level default declaration.
+;               Fixed "less than smallest size" fallback to read the zero-padded Size01/Size01_MatID names.
+;               Reconstructed from a collapsed-line-break paste -- verify against a clean export. See README.md.
+;       Revision 20 (CV2025-PATCH, this repo, not Jonah Coleman's)
+;               Fix for Revision 19: "Public ucs_ShelfStd" was declared before the "For Each" loop, which CV
+;               rejects with "Use of Undefined (ucs_ShelfStd)" (confirmed against real CV output, see TESTING.md
+;               #2). Moved the declaration inside the loop, at its point of use, matching every other Public
+;               parameter in this script.
+;       Revision 21 (CV2025-PATCH, this repo, not Jonah Coleman's)
+;               Fix for Revision 19/20: the ucs_ShelfStd Public declaration and the JCS_Use_ShelfStd
+;               computation block had also been placed AFTER "if OBJECT == 17 then ... end if" closed, instead
+;               of inside it as the raw paste actually has it. That meant JCS_Use_ShelfStd was never stored on
+;               the part, so every operation's ":JCS_Use_ShelfStd == 0" check read null and exited immediately
+;               -- part-level attributes looked correct, but nothing was ever created. Confirmed against real
+;               CV output (LFVBORE/LRVBORE present, JCS_ShelfStd_* attributes correct, zero dado/visual
+;               created). Moved the block back inside OBJECT == 17, matching the raw paste exactly.
+;       Revision 22 (CV2025-PATCH, this repo, not Jonah Coleman's)
+;               Fix for the Revision 10 "Centerline Route" option (ucs_Operation_Type == 2), confirmed still
+;               broken against real CV2025 output: a line/route did appear in the assembly view, but nothing
+;               nested to CNC (TESTING.md #5). Root cause was TWO layered bugs, not the one Revision 10's
+;               own comment blamed CV for: (1) the operation was dim'd `as new line` -- a non-cutting
+;               visual/dimension object with no cutter data, not a machinable operation type at all --
+;               instead of `as new route` (the object type this shop's own casework-wall scripts use for a
+;               real machined slot, e.g. WireChaseRectangle / REMOVABLEPANEL), and (2) even the line's own
+;               width was hardcoded to 0 (`ShelfStandardDAdo.DX := 0`, also a case typo), so it had no
+;               cutting geometry either way. Fixed by switching the route branch to `dim ... as new route`
+;               with `_RCUT := 1`, giving it the same real DX width as the dado branch, and extending the
+;               centerline-to-corner X/Y offset (previously dado-only) to both branches so the wider route
+;               stays centered on the shelf-standard line instead of shifting a half-width off it.
+;               Confirmed against real CV2025 output: Centerline Route now nests correctly. See TESTING.md #5.

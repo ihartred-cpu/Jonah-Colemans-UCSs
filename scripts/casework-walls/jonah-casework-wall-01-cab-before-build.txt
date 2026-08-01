@@ -1,0 +1,373 @@
+;Single for each cab BEFORE BUILD
+
+ For Each CAB Assembly
+ 	
+	;millwork walls
+	;store/face info to handle shaped stuff - for use in later UCS
+	AA_Max_Face<int> := 0
+
+	AA_FaceName<text> = 'FACE'
+	AA_InteriorName<text> = 'INTERIOR'
+				
+	TEMP_Instance<int> := 1
+	TEMP_Found<int> := 0
+	while TEMP_Instance <= 30 do
+		if this.FACE{TEMP_Instance}.X != null then
+			if TEMP_Found == 0 then
+				AA_FaceName<text> = 'FACE{TEMP_Instance}'
+				AA_InteriorName<text> = 'INTERIOR{TEMP_Instance}'
+				TEMP_Found<int> := 1
+			end if
+			AA_Max_Face<int> := TEMP_Instance
+		end if 
+		TEMP_Instance<int> += 1
+	end while
+	delete TEMP_Instance
+	delete TEMP_Found	
+	
+	if this.Is_Casework_Wall == null then
+		Is_Casework_Wall<int> := 0
+	end if
+	if Cab.ConstID == 20 or Cab.ConstID == 28 or Cab.ConstID == 36 or this.Is_Casework_Wall == 1 then
+ 		Is_Casework_Wall<int> := 1
+ 		
+ 		AA_CaseworkWall_FrameIsInside<int> := 1
+ 		if Cab._CB:622 == 1 then
+ 			AA_CaseworkWall_FrameIsInside<int> := 0
+ 		end if
+ 		
+ 		if this.CABNO == null and :OBJECT != 10 and :OBJECT != 37 then 
+ 			;just pulled from library
+ 			delete AA_CaseworkWall_Version
+ 			delete AA_CaseworkWall_VersionLast
+ 			delete AA_CaseworkWall_VersionCreated
+ 			_CleanedHouse<int> := 1
+ 		end if
+ 		
+ 		;version
+ 		AA_CaseworkWall_VersionLast<dec> := 0
+		if this.AA_CaseworkWall_Version != null then
+			AA_CaseworkWall_VersionLast<dec> := AA_CaseworkWall_Version
+		end if
+		
+		AA_CaseworkWall_Version<dec> := 2.8
+		
+		if this.AA_CaseworkWall_VersionCreated == null then
+			TEMP_Loop1<int> := 1
+			while this.FACE{TEMP_Loop1}.DX == null and TEMP_Loop1 < 50 do
+				TEMP_Loop1<int> += 1
+			end while
+			
+			if this.FACE{TEMP_Loop1}.TR.AA_CaseworkWall_VersionCreated != null then
+				AA_CaseworkWall_VersionCreated_FROM_FACE<int> := TEMP_Loop1
+				AA_CaseworkWall_VersionCreated<dec> := this.FACE{TEMP_Loop1}.TR.AA_CaseworkWall_VersionCreated
+			else
+				if this.FACE{TEMP_Loop1}.TR.AA_FaceCallout != null then
+					AA_CaseworkWall_VersionCreated<dec> := 1.7
+				end if
+			end if
+
+			delete TEMP_Loop1
+			
+			if this.AA_CaseworkWall_VersionCreated == null then
+				AA_CaseworkWall_VersionCreated<dec> := AA_CaseworkWall_Version
+			end if	
+		end if
+ 		
+ 		;auto adjust for doors
+ 		if AA_CaseworkWall_VersionCreated >= 2.8 then
+ 			if this.AA_CaseworkWall_AdjustForDoor == null then
+ 				AA_CaseworkWall_AdjustForDoor<int> = '<lst>1) Adjust for door slab=1|2) Use schedules=2'
+ 			end if
+ 			AA_CaseworkWall_AdjustForDoor<style> = 0
+ 			AA_CaseworkWall_AdjustForDoor<desc> = 'Casework Wall: 01) IGNORE ****';Adjust for doors'
+ 		end if
+ 		;color code
+ 		if this.AA_CaseworkWall_MichaelLikesColorCoding == null then
+ 			AA_CaseworkWall_MichaelLikesColorCoding<bool> = 1
+ 			AA_CaseworkWall_MichaelLikesColorCoding<style> = 1
+ 		end if
+ 		AA_CaseworkWall_MichaelLikesColorCoding<desc> = 'Casework Wall: 02) Color Code'
+ 		;hide panels
+ 		if this.AA_CaseworkWall_HidePanelsNew == null then
+ 			AA_CaseworkWall_HidePanelsNew<int> := 1
+ 			AA_CaseworkWall_HidePanelsNew<style> = 1
+ 		else
+ 			TEMP_HidePanelsNew<int> := AA_CaseworkWall_HidePanelsNew
+ 		end if
+ 		AA_CaseworkWall_HidePanelsNew<desc> = 'Casework Wall: 03) Hide Panels'
+ 		AA_CaseworkWall_HidePanelsNew<int> = '<lst>1) Show Panels=0|2) Hide Panels=1|3) Transparent Panels=2|4) Hide Door Laminate=3'
+ 		if this.TEMP_HidePanelsNew != null then
+ 			AA_CaseworkWall_HidePanelsNew<int> := TEMP_HidePanelsNew
+ 			delete TEMP_HidePanelsNew
+ 		end if
+ 		delete AA_CaseworkWall_HidePanels	
+ 		;show annotations
+ 		if this.AA_CaseworkWall_ShowAnnotations == null then
+ 			AA_CaseworkWall_ShowAnnotations<bool> = false
+ 			AA_CaseworkWall_ShowAnnotations<style> = 1
+ 		end if
+ 		AA_CaseworkWall_ShowAnnotations<desc> = 'Casework Wall: 04) Display Annotations'
+ 		;studs at layout
+ 		if this.AA_CaseworkWall_ShowStuds == null then
+ 			AA_CaseworkWall_ShowStuds<bool> = false
+ 			AA_CaseworkWall_ShowStuds<style> = 1
+ 		end if
+ 		AA_CaseworkWall_ShowStuds<desc> = 'Casework Wall: 05) Display Studs At Layout Views'
+ 		;stud annotations
+ 		if this.AA_CaseworkWall_StupidStudsShowing == null then
+ 			AA_CaseworkWall_StupidStudsShowing<bool> = false
+ 			AA_CaseworkWall_StupidStudsShowing<style> = 1
+ 		end if
+ 		AA_CaseworkWall_StupidStudsShowing<desc> = 'Casework Wall: 06) Hide Stud Annotations'
+ 		if AA_CaseworkWall_StupidStudsShowing == 1 then
+ 			EM_CaseworkWall_Error_HiddenStuds<text> = 'Studs are hidden and will cause errors in manufacturing.'
+ 			EM_CaseworkWall_Error_HiddenStuds<style> = 2
+ 			EM_CaseworkWall_Error_HiddenStuds<desc> = 'ERROR'
+ 		else
+ 			delete EM_CaseworkWall_Error_HiddenStuds
+ 		end if
+		;manual bottom scribe
+ 		if this.AA_CaseworkWall_ManualSCB == null then
+ 			AA_CaseworkWall_ManualSCB<bool> = false
+ 			AA_CaseworkWall_ManualSCB<style> = 1
+ 			AA_CaseworkWall_ManualSCB<desc> = 'Casework Wall: 07) Manual Bottom Scribe'
+ 		end if
+ 		;edge naming
+ 		if this.AA_CaseworkWall_DisableEdgeNameOverrides == null then
+ 			AA_CaseworkWall_DisableEdgeNameOverrides<bool> = false
+ 			AA_CaseworkWall_DisableEdgeNameOverrides<style> = 1
+ 			AA_CaseworkWall_DisableEdgeNameOverrides<desc> = 'Casework Wall: 08) Disable Part Edge Naming'
+ 		end if
+ 		
+ 		if AA_CaseworkWall_HidePanels == 1 then
+ 			EM_CaseworkWall_Error_HidePanels<text> = 'Panels are hidden and removed from manufacturing.'
+ 			EM_CaseworkWall_Error_HidePanels<style> = 2
+ 			EM_CaseworkWall_Error_HidePanels<desc> = 'ERROR'
+ 		else
+ 			delete EM_CaseworkWall_Error_HidePanels
+ 		end if
+ 			
+ 		if this.AA_CaseworkWall_Default == null then
+ 			AA_CaseworkWall_Default<int> = '<lst>1) Nope=0|2) Still Nope=0|3) Still Nope=0|4) Still Nope=0|5) I really mean it, not an accident=1'
+ 			AA_CaseworkWall_Default<style> = 1
+ 			AA_CaseworkWall_Default<desc> = 'Casework Wall: 09) Default Assembly'
+ 		end if
+ 		AA_CaseWorkWall_Default_Use<bool> := AA_CaseworkWall_Default
+ 		AA_CaseworkWall_Default<bool> = false 
+ 		
+ 		if AA_CaseworkWall_ManualSCB == 0 then
+	 		dim LAMH as new part
+	 		if Cab.Case.DE.OBJID == null then
+		 		if Cab.Case.LAMH.QTY == null or Cab.Case.LAMH.QTY != 0 then
+			 		if this.LAMH._M:DZ > 0 then
+			 			SCB := this.LAMH._M:DZ
+			 		end if
+			 	else
+			 		SCB := 0
+			 	end if
+			 end if
+		end if
+		if this.AA_CaseworkWall_PilotHoleSize == null then
+ 			AA_CaseworkWall_PilotHoleSize<meas> = -1
+ 			AA_CaseworkWall_PilotHoleSize<style> = 1
+ 			AA_CaseworkWall_PilotHoleSize<desc> = 'Casework Wall: 10) Pilot Hole Size (-1=default)'
+ 		end if
+ 		AA_CaseworkWall_PilotHoleSize_Use := AA_CaseworkWall_PilotHoleSize
+ 		if AA_CaseworkWall_PilotHoleSize_Use == -1 then
+ 			AA_CaseworkWall_PilotHoleSize_Use := imp(5)
+ 		end if
+ 		AA_CaseworkWall_PilotHoleSize_UseToolID<int> := 0
+ 		if AA_CaseworkWall_PilotHoleSize_Use == imp(5) then
+ 			AA_CaseworkWall_PilotHoleSize_UseToolID<int> := 3
+ 		end if
+ 		if AA_CaseworkWall_PilotHoleSize_Use == 3/16 then
+ 			AA_CaseworkWall_PilotHoleSize_UseToolID<int> := 117
+ 		end if
+ 		
+ 		if this.AA_CaseworkWall_SendRadiusCleatsToCNC == null then
+ 			AA_CaseworkWall_SendRadiusCleatsToCNC<bool> = false
+ 			AA_CaseworkWall_SendRadiusCleatsToCNC<style> = 1
+ 			AA_CaseworkWall_SendRadiusCleatsToCNC<desc> = 'Casework Wall: 11) Send Radius Cleats to CNC'
+ 		end if
+ 		
+		
+		;identify faces for top/bottom orientation
+		TEMP_Loop1<int> := 0
+		AA_CaseworkWall_FaceOrientation_EdgeFront<Text> = ''
+		AA_CaseworkWall_FaceOrientation_EdgeRight<Text> = ''
+		AA_CaseworkWall_FaceOrientation_EdgeBack<Text> = ''
+		AA_CaseworkWall_FaceOrientation_EdgeLeft<Text> = ''
+		
+		while TEMP_Loop1 <= 20 do
+			if TEMP_Loop1 == 0 then
+				TEMP_FaceName<text> = 'Face'
+			else
+				TEMP_FaceName<text> = 'Face{TEMP_Loop1}'
+			end if
+			
+			if Cab.{TEMP_FaceName}.JONAH_Face_AY != null then
+				if Cab.{TEMP_FaceName}.JONAH_Face_AY == 0 then
+					AA_CaseworkWall_FaceOrientation_EdgeFront<text> = {TEMP_FaceName}
+				else
+					if Cab.{TEMP_FaceName}.JONAH_Face_AY == 90 then
+						AA_CaseworkWall_FaceOrientation_EdgeRight<text> = {TEMP_FaceName}
+					else
+						if Cab.{TEMP_FaceName}.JONAH_Face_AY == 180 then
+							AA_CaseworkWall_FaceOrientation_EdgeBack<text> = {TEMP_FaceName}
+						else
+							if Cab.{TEMP_FaceName}.JONAH_Face_AY == 270 then
+								AA_CaseworkWall_FaceOrientation_EdgeLeft<text> = {TEMP_FaceName}
+							end if
+						end if
+					end if
+				end if
+			end if
+			
+			TEMP_Loop1<int> += 1
+		end while
+		delete TEMP_Loop1
+		delete TEMP_FaceName
+		
+		;first place on wall
+		dim WALLCLEAT AS NEW PART
+		WALLCLEAT_DZ := this.WALLCLEAT._M:DZ
+
+		dim S_DSLAB as new part
+		S_DSLAB_DZ := this.S_DSLAB._M:DZ
+		S_DSLAB_MATID<int> := this.S_DSLAB._M:MatID
+		_MS11 = _MS1011 ;ucs dimmed door parts take base door schedules, we want upper
+		
+			
+		if AA_CaseworkWall_VersionCreated >= 2.1 then			
+			if this.ADJBOT == null or this.ADJBOT == this.AA_CaseworkWall_SetADJBOT then	
+				ADJBOT := -1*this.WALLCLEAT._M:DZ
+				AA_CaseworkWall_SetADJBOT := ADJBOT
+			end if
+			if this.ADJTOP == null or this.ADJTOP == this.AA_CaseworkWall_SetADJTOP then	
+				ADJTOP := -1*this.WALLCLEAT._M:DZ
+				AA_CaseworkWall_SetADJTOP := ADJTOP
+			end if
+		end if
+		
+		;auto horizontal reveals
+		if this.AA_CaseworkWall_HorzReveals_Number == null then
+			AA_CaseworkWall_HorzReveals_Number<int> := 0
+			AA_CaseworkWall_HorzReveals_Number<style> = 1
+		end if
+		AA_CaseworkWall_HorzReveals_Number<desc> = 'Horz Reveals 01) Qty'
+		
+		if this.AA_CaseworkWall_HorzReveals_Number > 0 then
+			if this.AA_CaseworkWall_HorzReveals_OptionState == null then
+				AA_CaseworkWall_HorzReveals_OptionState<int> = '<lst>1) Show=1|2) Hide=2'
+				AA_CaseworkWall_HorzReveals_OptionState<style> = 1
+			end if
+			AA_CaseworkWall_HorzReveals_OptionState<desc> = 'Horz Reveals 02) Options'
+		else
+			delete AA_CaseworkWall_HorzReveals_OptionState
+		end if
+			
+		TEMP_Loop1<int> := 1
+		while TEMP_Loop1 <= AA_CaseworkWall_HorzReveals_Number or this.AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_AFF != null do
+			if TEMP_Loop1 > AA_CaseworkWall_HorzReveals_Number then
+				;clean up
+				delete AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_AFF
+				delete AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width
+				delete AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Depth
+				delete AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Reference
+			else
+				;aff
+				if AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_AFF == null then
+					AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_AFF<meas> := 0
+				end if
+				AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_AFF<desc> = 'Horz Reveals 03) #{TEMP_Loop1} 1) C/L AFF'
+				AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_AFF<style> = AA_CaseworkWall_HorzReveals_OptionState
+				
+				;Reference
+				if AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Reference == null then
+					AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Reference<int> = '<lst>1) Center=1|2) Bottom=2|3) Top=3'
+				end if
+				AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Reference<desc> = 'Horz Reveals 03) #{TEMP_Loop1} 2) Reference'
+				AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Reference<style> = AA_CaseworkWall_HorzReveals_OptionState
+				
+				;width
+				if AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width == null then
+					AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width<meas> := 0
+				end if
+				AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width<desc> = 'Horz Reveals 03) #{TEMP_Loop1} 3) Width'
+				AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width<style> = AA_CaseworkWall_HorzReveals_OptionState
+				
+				;Depth
+				if AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Depth == null then
+					AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Depth<meas> := 0
+				end if
+				AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Depth<desc> = 'Horz Reveals 03) #{TEMP_Loop1} 4) Depth'
+				AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Depth<style> = AA_CaseworkWall_HorzReveals_OptionState
+				
+			end if
+			TEMP_Loop1<int> += 1
+		end while
+		delete TEMP_Loop1
+ 	end if
+ 	
+	;construction method changing monitoring
+	CAB_CONST_CHANGED<int> := 0
+	CAB_CS1_LAST := this.CAB_CS1
+	CAB_CS1 := _CS1
+	
+	if CAB_CS1 != CAB_CS1_LAST then 
+		CAB_CONST_CHANGED<int> := 1
+	end if
+	
+	;calculate various effective values for use in later UCS
+	if this.SCB != null then
+		AA_Effective_SCB := this.SCB
+	else
+		AA_Effective_SCB := Cab._CV:586
+	end if
+	
+	if this.SCT != null then
+		AA_Effective_SCT := this.SCT
+	else
+		AA_Effective_SCT := 0
+	end if
+	
+	FWP_TOEH_ACTUAL := 0
+	
+	if Cab.CLASS = ASM_CLASS_BASE or Cab.CLASS = ASM_CLASS_TALL or Cab.CLASS == ASM_CLASS_VANITY then
+		;deduct for
+		if TOEH = null then
+			FWP_TOEH_ACTUAL := Cab._CV:238
+		else
+			FWP_TOEH_ACTUAL := TOEH
+		end if
+	end if
+	AA_Effective_TOEH := FWP_TOEH_ACTUAL
+	if TOER == null then 
+		AA_Effective_TOER := Cab._CV:240
+	else
+		AA_Effective_TOER := TOER
+	end if
+	
+	if this.REVL != null then
+		AA_Effective_REVL := this.REVL
+	else
+		AA_Effective_REVL := _CV:349
+	end if
+	if this.REVR != null then
+		AA_Effective_REVR := this.REVR
+	else
+		AA_Effective_REVR := _CV:349
+	end if
+	if this.REVT != null then
+		AA_Effective_REVT := this.REVT
+	else
+		AA_Effective_REVT := _CV:346
+	end if
+	if this.REVB != null then
+		AA_Effective_REVB := this.REVB
+	else
+		AA_Effective_REVB := _CV:348
+	end if
+	
+	

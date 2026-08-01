@@ -1,0 +1,1340 @@
+ ;CV2025-PATCH (this repo, not Jonah Coleman's): two fixes below for a CV 2025.3 regression reported and
+ ;confirmed (Verified Answer) on the Hexagon Nexus forum -- "_EDGWP now used instead of _FACEWP on
+ ;non-shaped parts - intentional?" (Wes Shimwell / Toby Richards). See docs/casework-walls-jonah.md.
+ ;  1) line ~30: the "is this part shaped" test read _EDGWP == 0, which CV 2025.3 can now report
+ ;     non-zero on a part that was never shaped (a side effect of per-edge connection dimming).
+ ;     Swapped to _SHPEDGCNT > 0, the shape-count parameter Toby Richards gives as the correct test.
+ ;  2) line ~366 (was ~365): DY -= TEMP_TopAdjust could silently shave ~0.012mm off DY from residual
+ ;     floating-point error even when TEMP_TopAdjust "reads" as 0, which stopped downstream top-plate
+ ;     dado operations from firing (they weren't in real geometric contact anymore). Wrapped the
+ ;     subtracted value in rprec() so a near-zero adjustment rounds to exactly zero before it's applied.
+ ;These are sourced from a corroborated forum report, not run against a real CV2025 install by this repo --
+ ;see TESTING.md before trusting them on a production job.
+
+ For Each PANEL|PT|PTDADO part
+ 	if Cab.Is_Casework_Wall == 0 then
+ 		exit
+ 	end if	
+ 	
+ 	if name == 'PTDADO' then
+ 		if this.QTY != null and this.QTY == 0 then
+ 			exit
+ 		end if
+ 		
+ 		;resize for notches at top/bottom
+ 		;if :name == 'Interior' or :name == 'Interior*' then
+	 		if desc = 'Face - Partit Dado' then
+	 			QTY := 0
+	 			exit
+	 		end if
+	 		
+	 		;TOOLID := 141 ;roughing - assign a tool if you want a specific tool used here
+	 		
+	 		if desc = 'Top - *' then
+	 			TEMP_Mod<text> = 'Top'
+	 		else
+	 			TEMP_Mod<text> = 'Bottom'
+	 		end if
+	 		
+	 		_AUTO_SIZED_DADO<int> := 0
+	 		if :AA_DisableDadoSizing == 0 then
+	 			_AUTO_SIZED_DADO<int> := 1
+	 			if this._SHPEDGCNT == 0 then ;not shaped (CV2025-PATCH: was _EDGWP == 0, unreliable on CV 2025.3+)
+	 				DY := :DX - (PT.AA_PTDADO_{TEMP_Mod}_AttachFaceRecess + PT.AA_PTDADO_{TEMP_Mod}_OppFaceRecess)
+	 			end if
+	 			
+	 			if desc = 'Bottom*' then
+	 				Y := (AA_PTDADO_{TEMP_Mod}_OppFaceRecess + AA_AdjustPosition_Origin)
+	 			else
+	 				Y := (AA_PTDADO_{TEMP_Mod}_AttachFaceRecess + AA_AdjustPosition_Opposite)
+	 			end if
+	 		end if
+	 		
+	 		
+	 		delete TEMP_Mod 		
+	 			
+	 		if Cab.ConstID == 28 then
+	 			;hy-vee bar walls must have this
+	 			;S_EXTND := 1
+	 		else
+		 		if :PID > 0 and this.S_EXTND == null and :AA_EnableDadoExtension_Use != 0 then ;-1 = automatic which is yes
+		 			S_EXTND := 1
+		 		else
+		 			delete S_EXTND
+		 		end if
+		 	end if
+		 	
+		 	if :name == 'PT' and desc = 'Bottom*' then
+		 		if PT.AA_StudNo > 0 then
+		 			;maybe do a matching linebore between stud and plate?
+		 		end if
+		 	end if
+ 		;end if
+ 		
+ 		if Cab.ConstID == 28 then
+			if :STYPE == 10 then
+				;double stud - at the end we want an enlarged Dado.
+				if :Double_Is_Left == 1 and :X > 0.75 and :X <= 1 then
+					DX := 0.51
+					X := 0.51 - (:X - 0.75)
+					QTY := 1
+				end if
+				if :Double_Is_Right == 1 and :X >= ::DX - 0.25 then
+					DX := 0.51
+					X := (::DX - :X) + :DZ
+					QTY := 1
+				end if 
+			end if 			
+ 		end if
+ 		
+ 		if this._FACEWP > 0 and this._EDGWP == 0 then
+ 			_EDGWP<int> := 0
+ 		end if
+ 		
+ 		if desc == 'Top - Partition Dado'  then
+ 			;don't want to mess with this when there are top stretchers
+ 			if cab.case.TS@1.OBJID != null then
+ 				_LEAVE_ALONE_TS := 1
+ 				exit
+ 			end if
+ 		end if
+ 		
+ 		if :AA_DisableDadoSizing == 0 then
+ 			_AUTO_SIZED_DADO<int> := 2
+ 			if this._EDGWP > 0 then
+ 				if Y > _EDG{_EDGWP}DY/2 then
+ 					Y := _EDG{_EDGWP}DY
+ 				end if
+ 				DY := _EDG{_EDGWP}DY
+ 			end if
+ 		end if
+ 		_NORM := 0.4
+ 		
+ 		;for slightly less than 3/4 studs we want a 3/4 bit and for 3/4 studs we want a 20mm bit.  Lets just make that happen.
+ 		;make sure this matches the top/bottom dado code
+ 		TEMP_SET_EXACT_WIDTH<int> := 0
+ 		if :DZ >= 0.75 and :DZ <= (0.75 + 1/64) then
+ 			S_MORTR := :DZ - (25/32)
+ 			S_MORTL := 0
+ 			;TOOLID<int> := 72 ;25/32 bit
+ 			TEMP_SET_EXACT_WIDTH<int> := 1
+ 		else
+ 			if :DZ >= (0.75 - 1/16) and :DZ < 0.75 then
+ 				S_MORTR := :DZ - 0.75
+ 				S_MORTL := 0
+ 				;TOOLID<int> := 92
+ 				TEMP_SET_EXACT_WIDTH<int> := 1
+ 			end if
+ 		end if
+ 		
+ 		;split the difference on oversizing
+ 		if this.S_MORTL != 0 and this.S_MORTR == 0 then
+ 			S_MORTR := S_MORTL/2
+ 			S_MORTL /= 2
+ 		else
+ 			if this.S_MORTR != 0 and this.S_MORTL == 0 then
+	 			S_MORTL := S_MORTR/2
+	 			S_MORTR /= 2
+	 		end if
+ 		end if
+ 		
+ 		if TEMP_SET_EXACT_WIDTH == 0 then
+	 		if this.S_MORTL > -1/64 then
+	 			S_MORTL := -1/64
+	 		end if
+	 		if this.S_MORTR > -1/64 then
+	 			S_MORTR := -1/64
+	 		end if
+	 	end if
+	 	delete TEMP_SET_EXACT_WIDTH
+ 		
+ 		if DY < 0.875 then
+ 			QTY := 0
+ 			QTY_SET_TO_ZERO_DUE_TO_DY<meas> := DY
+ 		end if
+ 		
+ 		;if this.PID > 0 then
+	 		if this.QTY == null or this.QTY > 0 then
+	 			;add screw holes
+	 			dim PlateBore as new mlinebore
+	 			PlateBore.desc = 'Stud to Plate Line Bore'
+	 			;PlateBore.TOOLID := Cab.AA_CaseworkWall_PilotHoleSize_UseToolID
+	 			PlateBore._EDGWP := this._EDGWP
+	 			PlateBore._FACEWP<int> := this._FACEWP
+	 			PlateBore.REPT := 1
+	 			PlateBore.SPCNG := 0
+	 			PlateBore.X := :DZ/2
+	 			PlateBore.Y := Y + DY/2
+	 			PlateBore.Z := -1*DZ
+	 			PlateBore.AX := 0
+	 			PlateBore.AY := 0
+	 			PlateBore.AZ := 0
+	 			PlateBore.DX := Cab.AA_CaseworkWall_PilotHoleSize_Use
+	 			PlateBore.DY := Cab.AA_CaseworkWall_PilotHoleSize_Use
+	 			PlateBore.DZ := DZ
+	 			PlateBore.S_DZ = :DZ
+	 			
+ 				
+ 				if DY >= 4 then
+	 				if DY >= 8 then
+	 					PlateBore.Y := Y + DY/5
+	 					PlateBore.REPT := 4
+	 					PlateBore.SPCNG := DY/5
+	 				else
+		 				PlateBore.Y := Y + DY/3
+		 				PlateBore.REPT := 2
+		 				PlateBore.SPCNG := DY/3
+		 			end if
+	 			end if 
+	 			
+	 			PlateBore.OWNER = OWNER
+	 		end if
+	 	;end if
+	 	
+ 		exit
+ 	end if
+
+  		    
+	Is_A_Stud<int> := 0
+	if name == 'PT' then
+		Is_A_Stud<int> := 1
+	end if
+	if desc == '*stud*' then
+		Is_A_Stud<int> := 1
+	end if
+	
+	if Is_A_Stud == 0 then
+		exit
+	end if
+	
+	if DX <= 3 then
+		_EDG1NPC := 0.5
+		_EDG2NPC := 0.5
+		_EDG3NPC := 0.5
+		_EDG4NPC := 0.5
+	end if
+	
+	if Cab.AA_CaseworkWall_StupidStudsShowing == 1 then
+		Y := 10000
+		exit
+	end if
+	
+	if this.FINIT == 0 and CAb.AA_CaseworkWall_MichaelLikesColorCoding == 1 then
+    	_COLOR := 46+139*256+87*65536
+    else
+    	delete _COLOR
+    end if
+	
+	if this.AA_Stud_OptionState == null then
+		AA_Stud_OptionState<int> = '<lst>1) Hide Options=2|2) Show Options=1'
+		AA_Stud_OptionState<style> = 1
+		AA_Stud_OptionState<desc> = 'Wall: 01) Options'
+	end if
+	if this.AA_OverrideOppFace == null then
+		AA_OverrideOppFace<text> = 'AUTO'
+	end if
+	AA_OverrideOppFace<style> = AA_Stud_OptionState
+	AA_OverrideOppFace<desc> = 'Wall: 02) Override Opp Face (AUTO)'
+	if this.AA_OverrideFaceName == null then
+		AA_OverrideFaceName<text> = 'AUTO'
+	end if
+	AA_OverrideFaceName<style> = AA_Stud_OptionState
+	AA_OverrideFaceName<desc> = 'Wall: 03) Override Face (AUTO)'
+	
+	if this.AA_DisableCleats == null then
+		AA_DisableCleats<bool> = false
+	end if
+	AA_DisableCleats<style> = AA_Stud_OptionState
+	AA_DisableCleats<desc> = 'Wall: 05) Disable Cleats'
+	if this.AA_DisableWireChase == null then
+		AA_DisableWireChase<bool> = false
+	end if
+	AA_DisableWireChase<style> = AA_Stud_OptionState
+	AA_DisableWireChase<desc> = 'Wall: 06) Disable Wire Chase'
+	if this.AA_DisableToeNotch == null then
+		AA_DisableToeNotch<bool> = false
+	end if
+	AA_DisableToeNotch<style> = AA_Stud_OptionState
+	AA_DisableToeNotch<desc> = 'Wall: 07) Disable Toe Notch'
+	if this.AA_DisableCounterNotch == null then
+		AA_DisableCounterNotch<bool> = false
+	end if
+	AA_DisableCounterNotch<style> = AA_Stud_OptionState
+	AA_DisableCounterNotch<desc> = 'Wall: 08) Disable Counter Notch'
+	if this.AA_DisablePanelScrews == null then
+		AA_DisablePanelScrews<bool> = false
+	end if
+	AA_DisablePanelScrews<style> = AA_Stud_OptionState
+	AA_DisablePanelScrews<desc> = 'Wall: 09) Disable Panel Screws'
+	if this.AA_DisableHiding == null then
+		AA_DisableHiding<bool> = false
+	end if
+	AA_DisableHiding<style> = AA_Stud_OptionState
+	AA_DisableHiding<desc> = 'Wall: 10) Disable Hiding This Stud'
+	if this.AA_AdjustPosition_Origin == null then
+		AA_AdjustPosition_Origin<meas> = 0
+	end if
+	AA_AdjustPosition_Origin<style> = AA_Stud_OptionState
+	AA_AdjustPosition_Origin<desc> = 'Wall: 04) Adjust Position: 1) Origin'
+	if this.AA_AdjustPosition_Opposite == null then
+		AA_AdjustPosition_Opposite<meas> = 0
+	end if
+	AA_AdjustPosition_Opposite<style> = AA_Stud_OptionState
+	AA_AdjustPosition_Opposite<desc> = 'Wall: 04) Adjust Position: 2) Opposite'
+	
+	if AA_DisableHiding == 0 and Cab.AA_CaseworkWall_ShowStuds == 0 then
+		_hide<int> := 7
+	else
+		delete _HIDE
+	end if
+	
+	if this.PCTR == 1 or this.PCTR == 3 then
+		if this.AA_PT_Scribe == null then
+			AA_PT_Scribe<meas> := 0
+			AA_PT_Scribe<style> = 1
+			AA_PT_Scribe<desc> = 'Scribe'
+		end if
+		
+		if AA_PT_Scribe != 0 then
+			if this.PCTR == 1 then
+				_PSCL := AA_PT_Scribe
+			else
+				_PSCR := AA_PT_Scribe
+			end if
+		end if
+	else
+		delete AA_PT_Scribe
+	end if
+	
+	if this.AA_EnableDadoExtension == null then
+		AA_EnableDadoExtension<int> = '<lst>Automatic=-1|False=0|True=1'
+	end if
+	AA_EnableDadoExtension<style> = AA_Stud_OptionState
+	AA_EnableDadoExtension<desc> = 'Wall: 11) Extend dado to edge of part'
+	AA_EnableDadoExtension_Use<int> := AA_EnableDadoExtension
+	
+	if this.AA_DisableDadoSizing == null then
+		AA_DisableDadoSizing<bool> := 0
+	end if
+	AA_DisableDadoSizing<style> = AA_Stud_OptionState
+	AA_DisableDadoSizing<desc> = 'Wall: 12) Disable Dado Length Sizing'
+	
+	AA_PTDADO_Bottom_AttachFaceRecess<meas> := 0
+	AA_PTDADO_Bottom_OppFaceRecess<meas> := 0
+	
+	AA_PTDADO_Top_AttachFaceRecess<meas> := 0
+	AA_PTDADO_Top_OppFaceRecess<meas> := 0
+		
+	if :name == 'Interior' or :name == 'Interior*' or this.AA_OverrideFaceName != 'AUTO' or this.AA_OverrideOppFace != 'AUTO' then
+		if name == 'PT' and STYPE == 10 then
+			;double
+			if AY == -90 then
+				Double_Is_Left<int> := 1
+				Double_Is_Right<int> := 0
+			else
+				Double_Is_Left<int> := 0
+				Double_Is_Right<int> := 1
+				
+				;flip this bad boy around
+				AY := -90
+				X += DZ
+				Z -= DX
+			end if
+		end if
+	
+		delete TEMP_FaceName
+		if this.AA_OverrideFaceName != 'AUTO' then
+			TEMP_FaceName<text> = '{AA_OverrideFaceName}'
+		else
+			if :JONAH_FaceName != null then
+				TEMP_FaceName<text> = '{JONAH_FaceName}'
+			end if
+		end if
+		
+		if this.TEMP_FaceName != null then
+			if Cab.{TEMP_FaceName}.JONAH_FACE_Opposite != null then
+				TEMP<int> = Cab.{TEMP_FaceName}.JONAH_FACE_Opposite
+				TEMP_OppFaceName<text> = '{TEMP}'
+				delete TEMP
+			else
+				TEMP_OppFaceName<text> = 'NONE'
+			end if
+			
+			AA_CaseworkWall_Signature<text> = ''
+			
+			;record edge names for EM
+			if Cab.AA_CaseworkWall_DisableEdgeNameOverrides == 0 then
+				EM_EdgeName_2<int> = 'Cab.{TEMP_FaceName}.TR.AA_FaceCallout_Use'
+				EM_EdgeName_2<text> = '{EM_EdgeName_2}'
+				EM_EdgeName_4<int> = 'Cab.{TEMP_FaceName}.TR.AA_FaceCallout_Use_Opp'
+				EM_EdgeName_4<text> = '{EM_EdgeName_4}'
+			end if
+					
+			;adjust height down for lowered faces
+			TEMP_TopAdjust := Cab.{TEMP_FaceName}.TR.AA_Face_TopAdjust
+			if Cab.{TEMP_OppFaceName}.TR.AA_Face_TopAdjust > TEMP_TopAdjust then
+				TEMP_TopAdjust := Cab.{TEMP_OppFaceName}.TR.AA_Face_TopAdjust
+			end if
+			DY -= rprec(TEMP_TopAdjust) ;CV2025-PATCH: was DY -= TEMP_TopAdjust, rprec() guards against near-zero float error
+			delete TEMP_TopAdjust 
+			
+			TEMP_EndLoop<int> := 2
+			if TEMP_OppFaceName == 'NONE' then
+				TEMP_EndLoop<int> := 1
+			end if
+			
+			TEMP_Loop_Face<int> := 1
+			if TEMP_FaceName == 'NONE' then
+				TEMP_Loop_Face<int> := 1
+			end if
+			
+			HAS_CANT<int> := 0
+			if Cab.{TEMP_FaceName}.TR.AA_Face_Cant != 90 and Cab.{TEMP_FaceName}.TR.AA_Face_Cant != 0 then
+				HAS_CANT<int> := 1
+			end if
+			if Cab.{TEMP_OppFaceName}.TR.AA_Face_Cant != 90 and Cab.{TEMP_OppFaceName}.TR.AA_Face_Cant != 0 then
+				HAS_CANT<int> := 1
+			end if
+			if HAS_CANT == 1 then 
+				if this._APPLIED_CANT == null then
+					libpart = 'Jonah Rocks\Casework Walls\Canted Stud'
+					BACK_CANT<deg> := Cab.{TEMP_OppFaceName}.TR.AA_Face_Cant
+					FACE_CANT<deg> := Cab.{TEMP_FaceName}.TR.AA_Face_Cant
+					
+					if BACK_CANT == 0 then
+						BACK_CANT<deg> := 90
+					end if
+					if FACE_CANT == 0 then
+						FACE_CANT<deg> := 90
+					end if
+					
+					AA_PTDADO_Bottom_AttachFaceRecess += tan(90-FACE_CANT)*DY
+					AA_PTDADO_Bottom_OppFaceRecess += tan(90-BACK_CANT)*DY
+					_APPLIED_CANT<int> := 1
+				end if
+			end if
+			
+			while TEMP_Loop_Face <= TEMP_EndLoop do
+				if TEMP_Loop_Face == 1 then
+					Use_FaceName<Text> = '{TEMP_FaceName}'
+				else
+					if AA_OverrideOppFace == 'AUTO' then
+						Use_FaceName<text> = '{TEMP_OppFaceName}'
+					else
+						Use_FaceName<text> = '{AA_OverrideOppFace}'
+					end if
+				end if
+				
+				NonFollow_FaceName<text> = '{Use_FaceName}'
+				
+				Follow_FaceName<int> = Cab.{Use_FaceName}.TR.AA_FollowFace_Studs
+				Follow_FaceName<text> = '{Follow_FaceName}'
+				
+				Cleats_Use_FaceName<text> = '{Follow_FaceName}'
+				if Cab.{Use_FaceName}.JONAH_LEFTMOST_INLINE_FACE != null then
+					Cleats_Use_FaceName<int> = Cab.{Use_FaceName}.JONAH_LEFTMOST_INLINE_FACE
+					Cleats_Use_FaceName<text> = '{Cleats_Use_FaceName}'
+				end if
+
+				if Follow_FaceName != 'NONE' then
+					Use_FaceName<text> = '{Follow_FaceName}'
+				end if
+				delete Follow_FaceName
+				
+				if AA_EnableDadoExtension_Use == -1 then
+					if Cab.{Use_FaceName}.TR.AA_Studs_Extend == 0 then
+						AA_EnableDadoExtension_Use<int> := 0
+						AA_CaseworkWall_Signature<text> = '{AA_CaseworkWall_Signature}NO_EXTEND;'
+					end if
+				end if
+				
+				;face screws
+				if Cab.{NonFollow_FaceName}.TR.AA_Studs_Screws == 1 and this.AA_DisablePanelScrews == 0 then
+					dim FACEBORE as new mlinebore
+					;FACEBORE.TOOLID := Cab.AA_CaseworkWall_PilotHoleSize_UseToolID
+					FACEBORE.REPT := 1
+					FACEBORE.SPCNG := 1
+					if TEMP_Loop_Face == 1 then
+						FACEBORE._FACEWP<int> := 4
+					else
+						FACEBORE._FACEWP<int> := 6
+					end if
+					FACEBORE.desc = 'Stud to Face Linebore'
+					
+					FACEBORE_DY := DY - 6 + Cab.{NonFollow_FaceName}.TR.AA_Studs_Screws_ADJTOP
+					FACEBORE_Y := 3 + Cab.{NonFollow_FaceName}.TR.AA_Studs_Screws_ADJBOT
+					if Cab.{Use_FaceName}.TR.AA_OutsideToe_Recess > 0 and Cab.{Use_FaceName}.TR.AA_OutsideToe_Height > 0 then
+						FACEBORE_DY -= Cab.{Use_FaceName}.TR.AA_OutsideToe_Height
+						FACEBORE_Y += Cab.{Use_FaceName}.TR.AA_OutsideToe_Height
+					end if
+					 
+					FACEBORE.DX := Cab.AA_CaseworkWall_PilotHoleSize_Use
+					FACEBORE.DY := FACEBORE_DY
+					FACEBORE.DZ = :DZ
+					FACEBORE.S_DZ = :DZ
+					
+					FACEBORE.X := DZ/2
+					FACEBORE.Y := FACEBORE_Y
+					FACEBORE.Z := CAb.{NonFollow_FaceName}.TR.AA_Studs_Screws_ADJZ
+					
+					FACEBORE.AX := 0
+					FACEBORE.AY := 0
+					FACEBORE.AZ := 0
+					
+					FACEBORE.REPT := 3
+					FACEBORE.SPCNG := FACEBORE_DY/2
+					
+					FACEBORE._NORM := 0.125
+					
+					if TEMP_Loop_Face == 2 then
+						;face is referenced from top
+						FACEBORE.Y := DY - FACEBORE_Y 
+						FACEBORE.AZ := -180
+					end if
+					
+					delete FACEBORE_DY
+					delete FACEBORE_Y
+				end if
+
+
+				TEMP_LAST_NOTCH_TOP_AFF<meas> := -1	
+				TEMP_Loop1<int> := -2
+				while TEMP_Loop1 <= Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_Number do
+	                TEMP_Notch_Closure<int> := 1 ;none
+	                TEMP_Notch_Closure_Slot_Above<meas> := 0
+	                TEMP_Notch_Closure_Slot_Below<meas> := 0
+	                
+	                TEMP_Loop_Notches_Inner_End<int> := 1
+					if Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 2 or Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 3 then
+						;radius items need a sub-strut
+						TEMP_Loop_Notches_Inner_End<int> := 2
+	            	end if
+	                
+	                if TEMP_Loop1 == -2 then
+	                	;toe recess
+	                	if AA_DisableToeNotch == 1 or CAb.{Cleats_Use_FaceName}.TR.AA_Cleats_0_Width_USE > 0 then
+	                		;cancelled per stud OR there's a toe cleat
+	                		TEMP_Notch_DY := 0
+	                	else
+		                	TEMP_Notch_DX<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_OutsideToe_Recess
+	                		TEMP_Notch_AFF<meas> := 0 
+	                		TEMP_Notch_DY<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_OutsideToe_Height
+	                		TEMP_Notch_Inset<meas> := 0
+	                		TEMP_Notch_Desc<text> = 'Toe Recess'
+	                		TEMP_Notch_Plow<meas> := 0
+	                		if CAb.{Cleats_Use_FaceName}.TR.AA_OutsideToe_Cleat > 0 then
+	                			TEMP_Notch_Screw<int> := 1
+	                		else
+	                			TEMP_Notch_Screw<int> := 0
+	                		end if
+	                		TEMP_Notch_Closure<int> :=  Cab.{Cleats_Use_FaceName}.TR.AA_OutsideToe_Closure
+	                		TEMP_Notch_Closure_Slot_Above<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_OutsideToe_Closure_Slot_Above
+	                	end if
+	                else
+	                	if TEMP_Loop1 == -1 then
+	                		;counter recess
+	                		if AA_DisableCounterNotch == 1 then
+	                			TEMP_Notch_DX := 0
+	                		else
+		                		TEMP_Notch_DX<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Counter_Recess - Cab.WALLCLEAT_DZ
+		                		TEMP_Notch_AFF<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Counter_AFF_USE
+		                		TEMP_Notch_DY<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Counter_Height_Use 
+		                		TEMP_Notch_Inset<meas> := 0
+		                		TEMP_Notch_Desc<text> = 'Counter Notch' 
+		                		TEMP_Notch_Plow<meas> := 0
+		                		TEMP_Notch_Screw<int> := 0
+		                		if Cab.{Cleats_Use_FaceName}.TR.AA_Counter_Closure == 2 then
+		                			TEMP_Notch_Closure<int> := 4
+		                			TEMP_Notch_Closure_Slot_Below<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Counter_Closure_Slot_Below
+		                		end if
+		                		if TEMP_Notch_AFF > PABSY + DY - 0.25 then
+		                			;we need to kill this with fire, its probably a lower top in a wall with a counter recess.
+		                			TEMP_Notch_DY<meas> := 0
+		                		end if
+		                	end if
+	                	else
+	                		;cleat
+	                		if AA_DisableCleats == 1 then
+	                			TEMP_Notch_DX := 0
+	                		else
+		                		if TEMP_Loop1 > 0 then
+			                		;don't add this for the toe cleat, too confusing.
+			                		if this.AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1} == null then
+			                			AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1}<bool> = false
+			                		end if
+			                		AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1}<style> = AA_Stud_OptionState
+			                		if TEMP_Loop_Face == 1 then
+			                			AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1}<desc> = 'Wall: 05) Disable Cleats: Attach Face #{TEMP_Loop1}'
+			                		else
+			                			AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1}<desc> = 'Wall: 05) Disable Cleats: Opp Face #{TEMP_Loop1}'
+			                		end if
+			                	end if
+		                		
+		                		if this.AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1} == 1 then
+		                			TEMP_Notch_DX := 0
+		                		else
+			                		TEMP_Notch_DX<meas> := Cab.WALLCLEAT_DZ
+			                		TEMP_Notch_AFF<meas> := CAb.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_AFF_USE
+			                		TEMP_Notch_DY<meas> := CAb.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Width_USE
+			                		TEMP_Notch_Inset<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Inset_USE
+			                		
+			                		TEMP_Notch_Desc<text> = 'Cleat {TEMP_Loop1} Recess'
+			                		TEMP_Notch_Plow<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_PLOW
+			                		if TEMP_Notch_Plow == -1 then
+			                			TEMP_Notch_Plow<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_PLOW		                			
+			                		end if
+			                		if TEMP_Notch_Plow == -1 then
+			                			TEMP_Notch_Plow<meas> := 0.125
+			                			;except if the there is a top plate within this cleat's space - can't do that!  Think like a desk with a raised and a lower section.
+			                			;problem here is there could be a cleat on the outside... hmmm....
+			                			if Cab.TO@2.OBJID != null then
+			                				;multiple top plates
+				                			TEMP_Top_Instance<int> := 1
+				                			while Cab.TO@{TEMP_Top_Instance}.OBJID != null and TEMP_Notch_PLOW > 0 do
+					                			if Cab.TO@{TEMP_Top_Instance}.PABSY >= Temp_Notch_AFF and Cab.TO@{TEMP_Top_Instance}.PABSY < TEMP_Notch_AFF + TEMP_Notch_DY then
+					                				TEMP_Notch_Plow<meas> := 0
+					                			end if
+					                			
+					                			TEMP_Top_Instance<int> += 1
+					                		end while
+				                			delete TEMP_Top_Instance
+				                		end if
+			                		end if
+			                			
+			                		if TEMP_Notch_AFF < (Cab.SCB + Cab.Case.BO.DZ) or TEMP_Notch_AFF + TEMP_Notch_DY > (Cab.DY - 1 - Cab.SCT) or Cab.{Cleats_Use_FaceName}.TR.RADIUS != null then
+			                			;we don't want to notch the top/bottoms or radii
+			                			TEMP_Notch_Plow<meas> := 0
+			                		end if
+			                		TEMP_Notch_Screw<int> := Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_ScrewHoles
+			                		if TEMP_Loop1 > 0 then
+			                			TEMP_Notch_Closure<int> := Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Closure
+			                			TEMP_Notch_Closure_Slot_Above<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above 
+			                			TEMP_Notch_Closure_Slot_Below<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below
+			                		else
+			                			;toe kick
+			                			TEMP_Notch_Closure<int> := Cab.{Cleats_Use_FaceName}.TR.AA_OutsideToe_Closure
+	                					TEMP_Notch_Closure_Slot_Above<meas> := Cab.{Cleats_Use_FaceName}.TR.AA_OutsideToe_Closure_Slot_Above
+	                				end if
+			                	end if
+		                	end if
+	                	end if
+	                end if
+	                if TEMP_Notch_DX > 0 and TEMP_Notch_DY > 0 and TEMP_Notch_AFF < PABSY + DY and (TEMP_Notch_AFF + TEMP_Notch_DY) > PABSY then
+						if this.SDJ != null and TEMP_Loop_Face == 1 then
+							TEMP_Notch_Inset += this.SDJ
+						end if
+						TEMP_Loop_Notches_Inner<int> := 1
+						while TEMP_Loop_Notches_Inner <= TEMP_Loop_Notches_Inner_End do
+			                if TEMP_Loop_Notches_Inner == 2 then
+			                	;strut for radius face
+			                	if TEMP_Loop1 < 0 then
+			                		;counter recess, toe notch
+			                		TEMP_Notch_DY := 0
+			                	else
+			                	    ;struts
+				                	if Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 2 or Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 3 then
+					                	TEMP_Notch_DX := Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_Width
+					                	if TEMP_Notch_DX <= 0 then
+					                		TEMP_Notch_DX := 1.5
+					                	end if
+					                	
+					                	if Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 3 then
+					                		;no cleat to inset against
+					                	else
+					                	 	TEMP_Notch_Inset += Cab.WALLCLEAT_DZ
+						                	if Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_Position_USE > 0 then 
+						                		TEMP_Notch_AFF += Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_Position_USE
+						                	else
+						                		if Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_Position_USE == -1 then 
+						                			;center
+						                			TEMP_Notch_AFF += TEMP_Notch_DY/2 - Cab.WALLCLEAT_DZ/2
+						                		else
+						                			if Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_Position_USE == -2 then
+						                				;bottom - do nothing already there
+						                			else
+						                				if Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_Position_USE == -3 then
+						                					;top
+						                					TEMP_Notch_AFF += TEMP_Notch_DY - Cab.WALLCLEAT_DZ - .0625
+						                				end if
+						                			end if
+						                		end if
+						                	end if
+						                end if
+				                					
+					                	TEMP_Notch_DY := Cab.WALLCLEAT_DZ + 1/16
+					                	TEMP_Notch_Plow := 0
+					                	TEMP_Notch_Screw<int> := 0
+					                	TEMP_Notch_Desc<text> = '{TEMP_Notch_Desc} Strut'
+					                end if
+				                end if
+			                else
+			                	;first pass
+			                	if TEMP_Loop1 >= 0 and Cab.{Cleats_Use_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 3 then
+			                		;radius cleat - strut only
+			                		TEMP_Notch_DY := 0
+			                	end if
+			                end if
+			                
+			                if TEMP_Notch_DY > 0 then
+				                ;closures above and below
+				                if TEMP_Loop_Notches_Inner == 1 then
+				                	;we don't do this on struts
+				                	if TEMP_Notch_Closure == 2 or TEMP_Notch_Closure == 3 or TEMP_Notch_Closure == 6 or TEMP_Notch_Closure == 7 then
+				                		;above
+				                		TEMP_Notch_DY += Cab.WALLCLEAT_DZ
+				                		if TEMP_Notch_Closure_Slot_Above == -1 then
+				                			TEMP_Notch_Closure_Slot_Above := 0.125
+				                		end if
+				                		TEMP_Notch_DY -= TEMP_Notch_Closure_Slot_Above
+				                	end if
+				                	if TEMP_Notch_Closure == 4 or TEMP_Notch_Closure == 5 or TEMP_Notch_Closure == 6 or TEMP_Notch_Closure == 7 then
+				                		;below
+				                		TEMP_Notch_DY += Cab.WALLCLEAT_DZ
+				                		TEMP_NOTCH_AFF -= Cab.WALLCLEAT_DZ
+				                		if TEMP_Notch_Closure_Slot_Below == -1 then
+				                			TEMP_Notch_Closure_Slot_Below := 0.125
+				                		end if
+				                		TEMP_Notch_DY -= TEMP_Notch_Closure_Slot_Below
+				                		TEMP_NOTCH_AFF += TEMP_Notch_Closure_Slot_Below 
+				                	end if 
+				                end if
+				                
+				                dim CLEATDADO as new DADOEX
+								CLEATDADO._TRNSP<dec> := 1
+								CLEATDADO.DESC = {TEMP_Notch_Desc} 
+								CLEATDADO._FACEWP<int> := 1
+								CLEATDADO.DX := TEMP_Notch_Inset + TEMP_Notch_DX - TEMP_Notch_Plow
+								if TEMP_Loop_Face == 1 then
+									CLEATDADO.DX += AA_AdjustPosition_Opposite
+								else
+								 	CLEATDADO.DX += AA_AdjustPosition_Origin
+								 end if
+								TEMP_CLEATDADO_DY := TEMP_Notch_DY
+								if TEMP_Notch_AFF - PABSY + TEMP_Notch_DY > DY then
+								 	CLEATDADO._DEBUG_DADO_GOES_OFF_THE_TOP<int> := 1
+								 	;goes off the top
+								 	TEMP_CLEATDADO_DY -= (TEMP_Notch_AFF - PABSY + TEMP_Notch_DY - DY)
+					 				
+					 				if TEMP_Loop_Face == 1 then
+										AA_PTDADO_Top_AttachFaceRecess<meas> := TEMP_Notch_DX + TEMP_Notch_Inset - TEMP_Notch_Plow
+									else 	
+										AA_PTDADO_Top_OppFaceRecess<meas> := TEMP_Notch_DX + TEMP_Notch_Inset - TEMP_Notch_Plow
+									end if
+								end if
+								if TEMP_Notch_AFF < PABSY then
+									;goes off the bottom
+									CLEATDADO._DEBUG_DADO_GOES_OFF_THE_BOTTOM<int> := 1
+									TEMP_CLEATDADO_DY -= (PABSY - TEMP_Notch_AFF)
+									
+									if TEMP_Loop_Face == 1 then
+										AA_PTDADO_Bottom_AttachFaceRecess<meas> := TEMP_Notch_DX + TEMP_Notch_Inset - TEMP_Notch_Plow
+									else 	
+										AA_PTDADO_Bottom_OppFaceRecess<meas> := TEMP_Notch_DX + TEMP_Notch_Inset - TEMP_Notch_Plow
+									end if 
+								end if
+
+								CLEATDADO.REF_FACE<int> := TEMP_Loop_Face
+								CLEATDADO.DZ := DZ
+								CLEATDADO.AX := 0
+								CLEATDADO.AY := 0
+								CLEATDADO.AZ := 0
+								
+								
+								if TEMP_Loop_Face == 1 then
+									CLEATDADO.X := DX - TEMP_Notch_DX - TEMP_Notch_Inset + TEMP_Notch_Plow - AA_AdjustPosition_Opposite
+								else
+									CLEATDADO.X := 0
+								end if
+								if TEMP_Notch_AFF < PABSY then
+								 	;goes off the bottom
+								 	TEMP_CLEATDADO_Y := 0
+								else
+									TEMP_CLEATDADO_Y := TEMP_Notch_AFF - PABSY
+								end if
+								
+								if TEMP_LAST_NOTCH_TOP_AFF < TEMP_CLEATDADO_Y and TEMP_LAST_NOTCH_TOP_AFF > TEMP_CLEATDADO_Y - 0.375 then
+				                	TEMP_CLEATDADO_DY += (TEMP_CLEATDADO_Y - TEMP_LAST_NOTCH_TOP_AFF)
+				                	TEMP_CLEATDADO_Y -= (TEMP_CLEATDADO_Y - TEMP_LAST_NOTCH_TOP_AFF)
+				                end if
+				                
+								CLEATDADO.DY := TEMP_CLEATDADO_DY
+								CLEATDADO.Y := TEMP_CLEATDADO_Y 
+								
+								CLEATDADO.Z := 0
+								
+
+				                
+								
+								TEMP_LAST_NOTCH_TOP_AFF := TEMP_CLEATDADO_DY + TEMP_CLEATDADO_Y
+								
+								
+								;aim for exact widths for special tools - make sure this matches the top/bottom dado code
+								if DZ >= 0.75 and DZ <= (0.75 + 1/64) then
+						 			TEMP_CLEATPLOW_WIDTH := 25/32
+						 			;TEMP_CLEATPLOW_TOOLID<int> := 72 ;25/32 bit
+						 		else
+						 			if DZ >= (0.75 - 1/16) and DZ < 0.75 then
+						 				TEMP_CLEATPLOW_WIDTH := 0.75
+						 				;TEMP_CLEATPLOW_TOOLID<int> := 92
+						 			else
+						 				TEMP_CLEATPLOW_WIDTH := DZ + 1/32
+						 			end if
+						 		end if
+							 		
+								if TEMP_Notch_Plow > 0 then
+									dim CLEATPLOWDADO as new MDADOEX
+									;CLEATPLOWDADO.TOOLID := 141 ;roughing tool
+									CLEATPLOWDADO._NORM := 0.2
+									CLEATPLOWDADO.desc = '{TEMP_Notch_Desc} PLOW'
+									if TEMP_Loop_Face == 1 then
+										CLEATPLOWDADO._FACEWP<int> := 4
+									else
+										CLEATPLOWDADO._FACEWP<int> := 6
+									end if								
+									
+									CLEATPLOWDADO.DX := TEMP_CLEATPLOW_WIDTH
+									CLEATPLOWDADO.DY := TEMP_CLEATDADO_DY
+									CLEATPLOWDADO.DZ := TEMP_Notch_Plow
+									
+									;CLEATPLOWDADO.TOOLID := TEMP_CLEATPLOW_TOOLID
+									
+									CLEATPLOWDADO.AX := 0
+									CLEATPLOWDADO.AY := 0
+									CLEATPLOWDADO.AZ := 0
+									CLEATPLOWDADO.S_EXTND<int> := 1
+									
+									CLEATPLOWDADO.X := -1*(TEMP_CLEATPLOW_WIDTH - DZ)/2
+									CLEATPLOWDADO.Y := TEMP_CLEATDADO_Y
+									if TEMP_Loop_Face == 2 then
+										CLEATPLOWDADO.Y := DY - TEMP_CLEATDADO_Y - TEMP_CLEATDADO_DY
+									end if
+									CLEATPLOWDADO.Z := -1*TEMP_Notch_Inset - TEMP_Notch_DX + TEMP_Notch_Plow
+									if TEMP_Loop_Face == 1 then
+										CLEATPLOWDADO.Z -= AA_AdjustPosition_Opposite
+									else
+										CLEATPLOWDADO.Z -= AA_AdjustPosition_Origin
+									end if
+									CLEATPLOWDADO.S_MORTDEP := 1/64
+								end if
+								
+								if TEMP_Notch_Closure_Slot_Above then
+									dim CLEATSLOTABOVE as new MDADOEX
+									;CLEATSLOTABOVE.TOOLID := 141 ;roughing tool
+									CLEATSLOTABOVE._NORM := 0.2
+									CLEATSLOTABOVE.desc = '{TEMP_Notch_Desc} PLOW ABOVE'
+									if TEMP_Loop_Face == 1 then
+										CLEATSLOTABOVE_FACEWP<int> := 4
+									else
+										CLEATSLOTABOVE_FACEWP<int> := 6
+									end if
+									
+									CLEATSLOTABOVE_DX := TEMP_CLEATPLOW_WIDTH
+									CLEATSLOTABOVE_DY := TEMP_Notch_Inset + TEMP_Notch_DX - TEMP_Notch_Plow
+									CLEATSLOTABOVE_DZ := TEMP_Notch_Closure_Slot_Above
+									
+									;CLEATSLOTABOVE.TOOLID := TEMP_CLEATPLOW_TOOLID
+									
+									CLEATSLOTABOVE_AX<deg> := 90
+									CLEATSLOTABOVE_AY<deg> := 0
+									CLEATSLOTABOVE_AZ<deg> := 0
+									CLEATSLOTABOVE.S_EXTND<int> := 1
+									
+									CLEATSLOTABOVE_X := -1*(TEMP_CLEATPLOW_WIDTH - DZ)/2; + TEMP_CLEATPLOW_WIDTH
+									CLEATSLOTABOVE_Y := TEMP_CLEATDADO_Y + TEMP_CLEATDADO_DY 
+									if TEMP_Loop_Face == 2 then
+										CLEATSLOTABOVE_AZ<deg> := 180
+										CLEATSLOTABOVE_Y := DY - TEMP_CLEATDADO_Y - TEMP_CLEATDADO_DY
+										CLEATSLOTABOVE_X += TEMP_CLEATPLOW_WIDTH
+									end if
+									CLEATSLOTABOVE_Z := -1*TEMP_Notch_Inset - TEMP_Notch_DX + TEMP_Notch_Plow
+									if TEMP_Loop_Face == 1 then
+										CLEATSLOTABOVE_Z -= AA_AdjustPosition_Opposite
+									else
+										CLEATSLOTABOVE_Z -= AA_AdjustPosition_Origin
+									end if
+									CLEATSLOTABOVE.S_MORTDEP := 1/64
+									CLEATSLOTABOVE.X := CLEATSLOTABOVE_X
+									CLEATSLOTABOVE.Y := CLEATSLOTABOVE_Y
+									CLEATSLOTABOVE.Z := CLEATSLOTABOVE_Z
+									CLEATSLOTABOVE.AX := CLEATSLOTABOVE_AX
+									CLEATSLOTABOVE.AY := CLEATSLOTABOVE_AY
+									CLEATSLOTABOVE.AZ := CLEATSLOTABOVE_AZ
+									CLEATSLOTABOVE.DX := CLEATSLOTABOVE_DX
+									CLEATSLOTABOVE.DY := CLEATSLOTABOVE_DY
+									CLEATSLOTABOVE.DZ := CLEATSLOTABOVE_DZ
+									CLEATSLOTABOVE._FACEWP := CLEATSLOTABOVE_FACEWP
+									
+									
+									dim CLEATSCREWABOVE as new mlinebore
+									;CLEATSCREWABOVE.TOOLID := Cab.AA_CaseworkWall_PilotHoleSize_UseToolID
+									CLEATSCREWABOVE.REPT := 1
+									CLEATSCREWABOVE.SPCNG := 1
+									CLEATSCREWABOVE.desc = '{TEMP_Notch_Desc} Screw ABOVE'
+									CLEATSCREWABOVE._FACEWP := CLEATSLOTABOVE_FACEWP
+									CLEATSCREWABOVE.X := DZ/2
+									CLEATSCREWABOVE.Y := CLEATSLOTABOVE_Y
+									CLEATSCREWABOVE.Z := -1*CLEATSLOTABOVE_DY/2
+									CLEATSCREWABOVE.AX := CLEATSLOTABOVE_AX
+									CLEATSCREWABOVE.AY := CLEATSLOTABOVE_AY
+									CLEATSCREWABOVE.AZ := CLEATSLOTABOVE_AZ
+									CLEATSCREWABOVE.DX := Cab.AA_CaseworkWall_PilotHoleSize_Use
+									CLEATSCREWABOVE.DY := Cab.AA_CaseworkWall_PilotHoleSize_Use
+									CLEATSCREWABOVE.DZ := 0
+									CLEATSCREWABOVE.S_DZ = :DZ
+									CLEATSCREWABOVE._NORM := 0.125
+									CLEATSCREWABOVE.S_CL := -1*CLEATSLOTABOVE_DZ - .0625
+									
+									delete CLEATSLOTABOVE_X
+									delete CLEATSLOTABOVE_Y
+									delete CLEATSLOTABOVE_z
+									delete CLEATSLOTABOVE_AX
+									delete CLEATSLOTABOVE_AY
+									delete CLEATSLOTABOVE_AZ
+									delete CLEATSLOTABOVE_DX
+									delete CLEATSLOTABOVE_DY
+									delete CLEATSLOTABOVE_DZ
+									delete CLEATSLOTABOVE_FACEWP
+								end if
+								
+								if TEMP_Notch_Closure_Slot_Below then
+									dim CLEATSLOTBELOW as new MDADOEX
+									;CLEATSLOTBELOW.TOOLID := 141 ;roughing tool
+									CLEATSLOTBELOW._NORM := 0.2
+									CLEATSLOTBELOW.desc = '{TEMP_Notch_Desc} PLOW BELOW'
+									if TEMP_Loop_Face == 1 then
+										CLEATSLOTBELOW_FACEWP<int> := 4
+									else
+										CLEATSLOTBELOW_FACEWP<int> := 6
+									end if
+									
+									CLEATSLOTBELOW_DX := TEMP_CLEATPLOW_WIDTH
+									CLEATSLOTBELOW_DY := TEMP_Notch_Inset + TEMP_Notch_DX - TEMP_Notch_Plow
+									CLEATSLOTBELOW_DZ := TEMP_Notch_Closure_Slot_Below
+									
+									;CLEATSLOTBELOW.TOOLID := TEMP_CLEATPLOW_TOOLID
+									
+									CLEATSLOTBELOW_AX<deg> := 270
+									CLEATSLOTBELOW_AY<deg> := 0
+									CLEATSLOTBELOW_AZ<deg> := 0
+									CLEATSLOTBELOW.S_EXTND<int> := 1
+									
+									CLEATSLOTBELOW_X := -1*(TEMP_CLEATPLOW_WIDTH - DZ)/2
+									CLEATSLOTBELOW_Y := TEMP_CLEATDADO_Y
+									if TEMP_Loop_Face == 2 then
+										CLEATSLOTBELOW_AZ<deg> := 180
+										CLEATSLOTBELOW_Y := DY - TEMP_CLEATDADO_Y
+										CLEATSLOTBELOW_X += TEMP_CLEATPLOW_WIDTH
+									end if
+									CLEATSLOTBELOW_Z := 0
+									if TEMP_Loop_Face == 1 then
+										CLEATSLOTBELOW_Z -= AA_AdjustPosition_Opposite
+									else
+										CLEATSLOTBELOW_Z -= AA_AdjustPosition_Origin
+									end if
+									CLEATSLOTBELOW.S_MORTDEP := 1/64
+									CLEATSLOTBELOW.X := CLEATSLOTBELOW_X
+									CLEATSLOTBELOW.Y := CLEATSLOTBELOW_Y
+									CLEATSLOTBELOW.Z := CLEATSLOTBELOW_Z
+									CLEATSLOTBELOW.DX := CLEATSLOTBELOW_DX
+									CLEATSLOTBELOW.DY := CLEATSLOTBELOW_DY
+									CLEATSLOTBELOW.DZ := CLEATSLOTBELOW_DZ
+									CLEATSLOTBELOW.AX := CLEATSLOTBELOW_AX
+									CLEATSLOTBELOW.AY := CLEATSLOTBELOW_AY
+									CLEATSLOTBELOW.AZ := CLEATSLOTBELOW_AZ
+									CLEATSLOTBELOW._FACEWP := CLEATSLOTBELOW_FACEWP
+									
+									dim CLEATSCREWBELOW as new mlinebore
+									;CLEATSCREWBELOW.TOOLID := Cab.AA_CaseworkWall_PilotHoleSize_UseToolID
+									CLEATSCREWBELOW.REPT := 1
+									CLEATSCREWBELOW.SPCNG := 1
+									CLEATSCREWBELOW.desc = '{TEMP_Notch_Desc} Screw BELOW'
+									CLEATSCREWBELOW._FACEWP := CLEATSLOTBELOW_FACEWP
+									CLEATSCREWBELOW.X := DZ/2
+									CLEATSCREWBELOW.Y := CLEATSLOTBELOW_Y
+									CLEATSCREWBELOW.Z := -1*CLEATSLOTBELOW_DY/2
+									CLEATSCREWBELOW.AX := CLEATSLOTBELOW_AX
+									CLEATSCREWBELOW.AY := CLEATSLOTBELOW_AY
+									CLEATSCREWBELOW.AZ := CLEATSLOTBELOW_AZ
+									CLEATSCREWBELOW.DX := Cab.AA_CaseworkWall_PilotHoleSize_Use
+									CLEATSCREWBELOW.DY := Cab.AA_CaseworkWall_PilotHoleSize_Use
+									CLEATSCREWBELOW.DZ := 0
+									CLEATSCREWBELOW.S_DZ = :DZ
+									CLEATSCREWBELOW._NORM := 0.125
+									CLEATSCREWBELOW.S_CL := -1*CLEATSLOTBELOW_DZ - .0625
+									
+									delete CLEATSLOTBELOW_X
+									delete CLEATSLOTBELOW_Y
+									delete CLEATSLOTBELOW_Z
+									delete CLEATSLOTBELOW_AX
+									delete CLEATSLOTBELOW_AY
+									delete CLEATSLOTBELOW_AZ
+									delete CLEATSLOTBELOW_DX
+									delete CLEATSLOTBELOW_DY
+									delete CLEATSLOTBELOW_DZ
+									delete CLEATSLOTBELOW_FACEWP
+								end if
+								
+								delete TEMP_CLEATPLOW_WIDTH
+								
+								if TEMP_Notch_Screw > 0 then
+									if Cab.{Cleats_Use_FaceName}.TR.RADIUS != null then
+										;don't do this for radii
+									else
+										dim CLEATSCREW as new mlinebore
+										;CLEATSCREW.TOOLID := Cab.AA_CaseworkWall_PilotHoleSize_UseToolID
+										CLEATSCREW.REPT := 1
+										CLEATSCREW.SPCNG := 1
+										CLEATSCREW.desc = '{TEMP_Notch_Desc} Screw'
+										if TEMP_Loop_Face == 1 then
+											CLEATSCREW._FACEWP<int> := 4
+										else
+											CLEATSCREW._FACEWP<int> := 6
+										end if
+										CLEATSCREW.DX := Cab.AA_CaseworkWall_PilotHoleSize_Use
+										CLEATSCREW.DY := Cab.AA_CaseworkWall_PilotHoleSize_Use
+										CLEATSCREW.DZ = :DZ
+										CLEATSCREW.S_DZ = :DZ
+										
+										
+										CLEATSCREW.AX := 0
+										CLEATSCREW.AY := 0
+										CLEATSCREW.AZ := 0
+										
+										CLEATSCREW.X := DZ/2
+										if TEMP_Loop_Face == 1 then
+											CLEATSCREW.Y := TEMP_CLEATDADO_Y + TEMP_CLEATDADO_DY/2 
+											
+											if TEMP_CLEATDADO_DY > 4 then
+												CLEATSCREW.Y := TEMP_CLEATDADO_Y + TEMP_CLEATDADO_DY/3
+												CLEATSCREW.REPT := 2
+												CLEATSCREW.SPCNG := TEMP_CLEATDADO_DY/3
+											else
+												if TEMP_CLEATDADO_DY > 8 then
+													CLEATSCREW.Y := TEMP_CLEATDADO_Y + TEMP_CLEATDADO_DY/4
+													CLEATSCREW.REPT := 3
+													CLEATSCREW.SPCNG := TEMP_CLEATDADO_DY/4
+												end if
+											end if
+													
+											
+											;need to adjust top/bottom holes so they don't interfere with top/bottom screws
+											if TEMP_CLEATDADO_Y + TEMP_CLEATDADO_DY > DY - 1 then
+												;at the top
+												 CLEATSCREW.Y := TEMP_CLEATDADO_Y + 0.5
+												 CLEATSCREW.REPT := 1
+											else
+												if TEMP_CLEATDADO_Y < 1 then
+													;at the bottom
+													CLEATSCREW.Y := TEMP_CLEATDADO_Y + TEMP_CLEATDADO_DY - 1.25
+													CLEATSCREW.REPT := 1
+												end if
+											end if
+										else
+											CLEATSCREW.AZ := 180
+											CLEATSCREW.Y := DY - TEMP_CLEATDADO_Y - TEMP_CLEATDADO_DY/2
+											
+											if TEMP_CLEATDADO_DY > 4 then
+												CLEATSCREW.Y := DY - TEMP_CLEATDADO_Y - TEMP_CLEATDADO_DY/3
+												CLEATSCREW.REPT := 2
+												CLEATSCREW.SPCNG := TEMP_CLEATDADO_DY/3
+											else
+												if TEMP_CLEATDADO_DY > 8 then
+													CLEATSCREW.Y := DY - TEMP_CLEATDADO_Y - TEMP_CLEATDADO_DY/4
+													CLEATSCREW.REPT := 3
+													CLEATSCREW.SPCNG := TEMP_CLEATDADO_DY/4
+												end if
+											end if
+											
+											;need to adjust top/bottom holes so they don't interfere with top/bottom screws
+											if TEMP_CLEATDADO_Y + TEMP_CLEATDADO_DY > DY - 1 then
+												;at the top
+												CLEATSCREW.Y := TEMP_CLEATDADO_DY - 0.5
+												CLEATSCREW.REPT := 1
+											else
+												if TEMP_CLEATDADO_Y < 1 then
+													;at the bottom
+													CLEATSCREW.Y := DY - TEMP_CLEATDADO_Y - TEMP_CLEATDADO_DY + 1.25
+													CLEATSCREW.REPT := 1
+												end if
+											end if
+										end if
+										
+										CLEATSCREW.Z := -1*TEMP_Notch_Inset - TEMP_Notch_DX
+										if TEMP_Loop_Face == 1 then
+											CLEATSCREW.Z -= AA_AdjustPosition_Opposite
+										else
+											CLEATSCREW.Z -= AA_AdjustPosition_Origin
+										end if
+										CLEATSCREW.S_CL := -0.25
+										CLEATSCREW._NORM := 0.5
+									end if
+								end if
+							
+							
+								delete TEMP_CLEATDADO_DY
+								delete TEMP_CLEATDADO_Y
+							end if
+							
+							;AA_CaseworkWall_Signature<text> = '{AA_CaseworkWall_Signature}NOTCH{TEMP_Loop_Notches_Inner}-{TEMP_Loop1}:DY={TEMP_CLEATDADO_DY},Y={TEMP_CLEATDADO_Y},DX={TEMP_Notch_DX},PLOW={TEMP_Notch_PLOW},FACE={TEMP_Loop_Face},INSET={TEMP_Notch_INSET};'
+							
+							TEMP_Loop_Notches_Inner<int> += 1
+						end while
+					end if
+					
+					TEMP_Loop1<int> += 1
+				end while
+				if this.AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1} != null then
+					;clean up old cleat kill parameters when the quantity is reduced
+					while this.AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1} != null do
+						delete AA_DisableCleats_{TEMP_Loop_Face}_{TEMP_Loop1}
+						TEMP_Loop1<int> += 1
+					end while
+				end if
+				delete TEMP_Loop1
+				
+				delete TEMP_Notch_DX
+				delete TEMP_Notch_AFF
+				delete TEMP_Notch_DY
+				delete TEMP_Notch_Inset
+				delete TEMP_Notch_Desc
+				delete TEMP_Notch_PLOW
+				delete TEMP_Notch_Screw
+				
+				delete TEMP_Loop_Notches_Inner
+				delete TEMP_Loop_Notches_Inner_End
+				
+				delete Cleats_Use_FaceName
+				delete TEMP_LAST_NOTCH_TOP_AFF
+				
+				;wire chases
+				if AA_DisableWireChase == 0 then
+					TEMP_Loop1<int> := 1
+					while TEMP_Loop1 <= Cab.{Use_FaceName}.TR.AA_WireChase_Number or this.AA_WireChase_{TEMP_Loop1}_Ignore != null do
+						if TEMP_Loop1 > Cab.{Use_FaceName}.TR.AA_WireChase_Number then
+							delete AA_WireChase_{TEMP_Loop_Face}_{TEMP_Loop1}_Ignore  
+						else
+							if this.AA_WireChase_{TEMP_Loop_Face}_{TEMP_Loop1}_Ignore   == null then
+								AA_WireChase_{TEMP_Loop_Face}_{TEMP_Loop1}_Ignore<bool> = false
+							end if
+							AA_WireChase_{TEMP_Loop_Face}_{TEMP_Loop1}_Ignore<style> = AA_Stud_OptionState
+							if TEMP_Loop1_Face == 1 then
+								AA_WireChase_{TEMP_Loop_Face}_{TEMP_Loop1}_Ignore<desc> = 'Wall: 06) Disable Wire Chase: Attach Face #{TEMP_Loop1}'
+							else
+								AA_WireChase_{TEMP_Loop_Face}_{TEMP_Loop1}_Ignore<desc> = 'Wall: 06) Disable Wire Chase: Opp Face #{TEMP_Loop1}'
+							end if
+							
+							if AA_WireChase_{TEMP_Loop_Face}_{TEMP_Loop1}_Ignore == 0 then
+								TEMP_WireChase_Width := Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_Width
+								if TEMP_WireChase_Width == -1 then
+									if DX > 2 then
+										if DX > 5 then
+											TEMP_WireChase_Width :=  DX - 3
+										else
+											TEMP_WireChase_Width :=  DX - 1.5
+										end if
+										if TEMP_WireChase_Width > 4 then
+											TEMP_WireChase_Width := 4
+										end if
+									else
+										TEMP_WireChase_Width := 0
+									end if 
+								end if
+								
+								if TEMP_WireChase_Width > 0 then
+									if Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_AFF + Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_Height/2 < DY + PABSY then  
+										if Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_AFF - Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_Height/2 > PABSY then  
+											if Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_Type == 1 then
+												dim WireChaseRectangle as new route
+												WireChaseRectangle._RCUT := 1 
+												;WireChaseRectangle.TOOLID := 141 ;roughing tool
+												WireChaseRectangle._FACEWP<int> := 1
+												WireChaseRectangle.desc = 'Wire Chase #{TEMP_Loop1}'
+												
+												if Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_PosX <= 0 then
+													WireChaseRectangle.X := DX/2 - TEMP_WireChase_Width/2
+												else
+													if TEMP_Loop_Face == 1 then
+														WireChaseRectangle.X := Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_PosX
+													else
+														WireChaseRectangle.X := DX - Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_PosX - TEMP_WireChase_Width
+													end if
+												end if
+												
+												WireChaseRectangle.Y := Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_AFF - PABSY - Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_Height/2
+												WireChaseRectangle.Z := 0
+												
+												WireChaseRectangle.DX := TEMP_WireChase_Width
+												WireChaseRectangle.DY := Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_Height
+												WireChaseRectangle.DZ := DZ
+												
+												WireChaseRectangle.AX := 0
+												WireChaseRectangle.AY := 0
+												WireChaseRectangle.AZ := 0
+												
+												TEMP_OUTSIDERADIUS := 1
+												if TEMP_WireChase_Width < 2.25 then
+													TEMP_OUTSIDERADIUS := TEMP_WireChase_Width/2 - 0.25
+												end if
+												WireChaseRectangle.OUTSIDERADIUS := TEMP_OUTSIDERADIUS
+												delete TEMP_OUTSIDERADIUS
+												
+												WireChaseRectangle.LibPart = 'Jonah Rocks\Generic Shapes\Rectangle With Radius Corners'
+											end if
+											
+											if Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_Type == 2 then
+												dim WireChaseCircle as new HOLE
+												WireChaseCircle._FACEWP<int> := 1
+												;WireChaseCircle.TOOLID := 141 ;roughing tool
+												;WireChaseCircle._POCKET := 1
+												WireChaseCircle.desc = 'Wire Chase #{TEMP_Loop1}'
+												
+												if Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_PosX <= 0 then
+													WireChaseCircle.X := DX/2
+												else
+													if TEMP_Loop_Face == 1 then
+														WireChaseCircle.X := Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_PosX
+													else
+														WireChaseCircle.X := DX - Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_PosX
+													end if
+												end if 
+												
+												WireChaseCircle.Y := Cab.{Use_FaceName}.TR.AA_WireChase_{TEMP_Loop1}_AFF - PABSY 
+												WireChaseCircle.Z := 0
+												
+												WireChaseCircle.DX := TEMP_WireChase_Width
+												WireChaseCircle.DY := TEMP_WireChase_Width
+												WireChaseCircle.DZ := DZ
+												
+												WireChaseCircle.AX := 0
+												WireChaseCircle.AY := 0
+												WireChaseCircle.AZ := 0
+											end if
+										end if
+									end if
+								end if
+								delete TEMP_WireChase_Width
+							end if
+						end if
+							
+						TEMP_Loop1<int> += 1
+					end while
+					delete TEMP_Loop1
+				end if
+					
+				TEMP_Loop_Face<int> += 1
+			end while
+			delete Use_FaceName
+			delete TEMP_Loop_Face
+			delete TEMP_EndLoop
+			
+			
+			;add square outs
+			if this.CLEATDADO.DX != null then
+				TEMP_Loop_Instance<int> := 1
+				while this.CLEATDADO@{TEMP_Loop_Instance}.DX != null do
+					TEMP_Top_Is_Contained<int> := 0
+					TEMP_Bottom_Is_Contained<int> := 0
+					
+					;check to see if this dado is contained by another, so we don't drill square outs then
+					if :.{name}@1.OBJID == OBJID or DY != :.{name}@1.DY or AA_DisableCleats + AA_DisableToeNotch + AA_DisableCounterNotch > 0 then
+						;first one in the section, we'll do the math here - this is extremely bad for performance so we want to keep ourselves from doing it on each stud
+						TEMP_Loop_Check<int> := 1
+						while TEMP_Loop_Check < TEMP_Loop_Instance do ;this.CLEATDADO@{TEMP_Loop_Check}.DX != null do
+							if TEMP_Loop_Check != TEMP_Loop_Instance then
+								if this.CLEATDADO@{TEMP_Loop_Instance}.REF_FACE == this.CLEATDADO@{TEMP_Loop_Check}.REF_FACE then
+									;same face reference
+									if this.CLEATDADO@{TEMP_Loop_Instance}.DX <= this.CLEATDADO@{TEMP_Loop_Check}.DX then
+										;the dado we're thinking about squaring out is less deep or equal to the one we're comparing
+										if this.CLEATDADO@{TEMP_Loop_Instance}.Y >= this.CLEATDADO@{TEMP_Loop_Check}.Y then
+											if this.CLEATDADO@{TEMP_Loop_Instance}.Y <= this.CLEATDADO@{TEMP_Loop_Check}.Y + this.CLEATDADO@{TEMP_Loop_Check}.DY then
+												TEMP_Bottom_Is_Contained<int> := 1
+											end if
+										 end if
+										if this.CLEATDADO@{TEMP_Loop_Instance}.Y + this.CLEATDADO@{TEMP_Loop_Instance}.DY >= this.CLEATDADO@{TEMP_Loop_Check}.Y  then
+											if this.CLEATDADO@{TEMP_Loop_Instance}.Y + this.CLEATDADO@{TEMP_Loop_Instance}.DY <= this.CLEATDADO@{TEMP_Loop_Check}.Y + this.CLEATDADO@{TEMP_Loop_Check}.DY then									
+												TEMP_Top_Is_Contained<int> := 1
+											end if
+										end if
+									end if
+								end if
+							end if
+							
+							TEMP_Loop_Check<int> += 1
+						end while
+						delete TEMP_Loop_Check
+						AA_CaseworkWall_CleatSquareOut_{TEMP_Loop_Instance}_Top_Is_Contained<int> := TEMP_Top_Is_Contained
+						AA_CaseworkWall_CleatSquareOut_{TEMP_Loop_Instance}_Bottom_Is_Contained<int> := TEMP_Bottom_Is_Contained
+					else
+						;get it from the first one
+						TEMP_Top_Is_Contained<int> := :.{Name}@1.AA_CaseworkWall_CleatSquareOut_{TEMP_Loop_Instance}_Top_Is_Contained
+						TEMP_Bottom_Is_Contained<int> := :.{Name}@1.AA_CaseworkWall_CleatSquareOut_{TEMP_Loop_Instance}_Bottom_Is_Contained
+					end if
+					
+					if TEMP_Top_Is_Contained == 0 or TEMP_Bottom_Is_Contained == 0 then
+						dim SQUARELINEBORE as new linebore
+						SQUARELINEBORE._FACEWP<int> := 1
+						SQUARELINEBORE.desc = 'Square Out Line Bore'
+						
+						if this.CLEATDADO@{TEMP_Loop_Instance}.REF_FACE == 1 then
+							;remember op is already placed where it goes, don't need to add its width/etc
+							SQUARELINEBORE.X := this.CLEATDADO@{TEMP_Loop_Instance}.X + sin(135)*Imp(4) 
+						else
+							SQUARELINEBORE.X := this.CLEATDADO@{TEMP_Loop_Instance}.X + this.CLEATDADO@{TEMP_Loop_Instance}.DX - sin(135)*Imp(4)
+						end if
+						SQUARELINEBORE.Y := this.CLEATDADO@{TEMP_Loop_Instance}.Y - cos(135)*Imp(4)
+						SQUARELINEBORE.Z := 0
+						
+						SQUARELINEBORE.DX := Imp(8)
+						SQUARELINEBORE.DY := this.CLEATDADO@{TEMP_Loop_Instance}.DY + 2*cos(135)*Imp(4)
+						SQUARELINEBORE.DZ := DZ
+						
+						SQUARELINEBORE.AX := 0
+						SQUARELINEBORE.AY := 0
+						SQUARELINEBORE.AZ := 0
+						
+						SQUARELINEBORE.REPT := 2
+						TEMP_SPCNG := this.CLEATDADO@{TEMP_Loop_Instance}.DY + 2*cos(135)*Imp(4) 
+						SQUARELINEBORE.SPCNG := TEMP_SPCNG 
+						
+						;we should check to see if there is a >= depth notch immediately below
+						if this.CLEATDADO@{TEMP_Loop_Instance}.Y == 0 or TEMP_Bottom_Is_Contained == 1 then
+							;at bottom
+							SQUARELINEBORE.Y += TEMP_SPCNG
+							SQUARELINEBORE.REPT := 1
+						end if
+						;we should check to see if there is a >= depth notch immediately above
+						if this.CLEATDADO@{TEMP_Loop_Instance}.Y + this.CLEATDADO@{TEMP_Loop_Instance}.DY >= DY or TEMP_Top_Is_Contained == 1 then
+							;at top
+							SQUARELINEBORE.REPT := 1
+						end if
+						delete TEMP_SPCNG
+					end if
+					
+					delete TEMP_Top_Is_Contained
+					delete TEMP_Bottom_Is_Contained
+					
+					TEMP_Loop_Instance<int> += 1
+				end while
+				delete TEMP_Loop_Instance
+			end if
+		end if
+	
+		if desc == 'Partition' or desc == 'Stud' then
+			desc = 'Stud'
+			if Cab.{TEMP_FaceName}.TR.AA_Studs_Number == 1 or Cab.{TEMP_OppFaceName}.TR.AA_Studs_Number == 1 then
+				TEMP_Instance<int> := 1
+				AA_StudNo<int> := 1 
+				while :.PT@{TEMP_Instance}.X != null do
+					if :.PT@{TEMP_Instance}.X < X then
+						AA_StudNo<int> := AA_StudNo + 1
+					end if
+					TEMP_Instance<int> += 1
+				end while
+				delete TEMP_Instance
+				desc = 'Stud {TEMP_FaceName} - {AA_StudNo}'
+			end if
+		end if
+		
+		delete TEMP_OppFaceName
+		;delete TEMP_FaceName
+	end if

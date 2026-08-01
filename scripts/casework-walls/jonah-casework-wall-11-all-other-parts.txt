@@ -1,0 +1,552 @@
+
+ For Each to|de|BO|PANEL|S_dslab|DLAMF|MS|MR|LU|RU|LAMH|S_BNDF|S_DIV|LS|RS Part
+ 	if Cab.Is_Casework_Wall == 0 then
+ 		exit
+ 	end if
+ 	
+	if name == 'S_BNDF' then
+		QTY := 0
+	end if
+	
+ 	if object == 17 or OBJECT == 12 then
+ 		;part
+ 		if name == 'MS' or name == 'MR' or name == 'LS' or name == 'RS' then
+ 			QTY := 0
+ 			exit
+ 		end if
+ 		
+ 		if name == 'S_DIV' then
+ 			if this.PID > 0 then
+ 				DZ := 0
+ 				QTY := 0
+ 			end if
+ 			exit
+ 		end if
+
+ 		if name == 'TO' or name == 'DE' or name == 'BO' or name == 'LAMH' then
+ 			if Cab.AA_CaseworkWall_DisableEdgeNameOverrides == 0 then
+	 			if name == 'TO' then
+	 				EM_EdgeName_1<int> = Cab.AA_CaseworkWall_FaceOrientation_EdgeRight
+					EM_EdgeName_1<text> = '{EM_EdgeName_1}'
+	 				EM_EdgeName_2<int> = Cab.AA_CaseworkWall_FaceOrientation_EdgeFront
+					EM_EdgeName_2<text> = '{EM_EdgeName_2}'
+					EM_EdgeName_3<int> = Cab.AA_CaseworkWall_FaceOrientation_EdgeLeft
+					EM_EdgeName_3<text> = '{EM_EdgeName_3}'
+					EM_EdgeName_4<int> = Cab.AA_CaseworkWall_FaceOrientation_EdgeBack
+					EM_EdgeName_4<text> = '{EM_EdgeName_4}'
+				else
+					EM_EdgeName_1<int> = Cab.AA_CaseworkWall_FaceOrientation_EdgeRight
+					EM_EdgeName_1<text> = '{EM_EdgeName_1}'
+	 				EM_EdgeName_2<int> = Cab.AA_CaseworkWall_FaceOrientation_EdgeBack
+					EM_EdgeName_2<text> = '{EM_EdgeName_2}'
+					EM_EdgeName_3<int> = Cab.AA_CaseworkWall_FaceOrientation_EdgeLeft
+					EM_EdgeName_3<text> = '{EM_EdgeName_3}'
+					EM_EdgeName_4<int> = Cab.AA_CaseworkWall_FaceOrientation_EdgeFront
+					EM_EdgeName_4<text> = '{EM_EdgeName_4}'
+				end if
+			end if
+		end if
+ 		if name == 'TO' or name == 'DE' or name == 'BO' or name == 'LAMH' then
+ 			if this.FININT == 0 and CAb.AA_CaseworkWall_MichaelLikesColorCoding == 1 then
+	        	if this._MS1 == 0 and this._MS1001 == 0 and this._MS8001 == 0 and this._MS9001 == 0 then
+	        		;no material override
+	        		if name == 'LAMH' then
+	        	 		_COLOR := 128+0*256+128*65536
+	        		else
+	        			_COLOR := 30+144*256+255*65536
+	        		end if
+	        	else
+	        		delete _COLOR
+	        	end if
+	        else
+				delete _COLOR
+			end if
+ 			
+ 			if this.PID > 0 then
+ 				_NESTSIZE<int> := 3
+ 			else
+ 				delete _NESTSIZE
+ 			end if
+ 			
+ 			TEMP_Loop1<int> := 1
+ 			while TEMP_Loop1 <= _SHPEDGCNT do
+ 				if this.PID > 0 then
+ 					_EDG{TEMP_Loop1}NPC := 1
+ 				else
+ 					delete _EDG{TEMP_Loop1}NPC
+ 				end if
+ 				 
+ 				TEMP_Loop1<int> += 1
+ 			end while
+ 			delete TEMP_Loop1
+				
+ 			if desc == 'Horizontal Laminate' then
+ 				desc = 'Floor Plate'
+ 			else
+	 			if desc = 'Top' then
+	 				desc = 'Top Plate'
+	 			end if
+	 			
+	 			if desc = 'Bottom - Base' or desc = 'Deck' or desc = 'Bottom' then
+	 				desc = 'Bottom Plate'
+	 			end if 				
+	 		end if
+ 			
+ 			exit
+ 		end if
+ 		
+ 		
+ 		if name == 'S_DSLAB' or name == 'PANEL' or name == 'DLAMF' then
+ 			;hide panels
+ 			if OBJECT == 17 then
+ 				;part
+ 				if Cab.AA_CaseworkWall_HidePanelsNew == 0 then
+ 					delete _TRNSP
+ 					QTY := 1
+ 				else
+ 					if Cab.AA_CaseworkWall_HidePanelsNew == 2 then
+ 						_TRNSP<dec> := 0.35
+ 						QTY := 1
+ 					else
+ 						if Cab.AA_CaseworkWall_HidePanelsNew == 1 then
+ 							QTY := 0
+ 							exit
+ 						end if
+ 					end if
+ 				end if
+ 			end if
+ 			
+ 			if name == 'DLAMF' then
+ 				if Cab.AA_CaseworkWall_HidePanelsNew == 3 then
+ 					QTY := 0
+ 				else
+ 					delete QTY
+ 				end if
+ 				exit
+ 			end if
+ 		end if
+ 		
+ 		if name == 'S_DSLAB' or name == 'PANEL' then
+ 			;face control
+ 			if name == 'PANEL' then
+ 				;on frame inside construction everything needs inset.  On frame not inset, non-blank panels need to be corrected for hinge inset.
+ 				if AA_CaseworkWall_FrameIsInside == 0 then
+ 					Z := 0
+ 					Z -= DOR_OPEN.SDJ
+ 					if ::.TR.RADIUS != 0 then
+ 						Z += DZ
+ 					end if 
+ 				else
+ 					if OBJECT == 12 then
+ 						;no blank panels
+ 						;Z := 0
+ 						;Z -= DOR_OPEN.SDJ
+ 					end if
+ 				end if
+ 			end if
+
+ 			if OBJECT == 17 then
+ 				;part - gets blank panels
+ 			else
+ 				if OBJECT == 12 and name == 'PANEL' then
+ 					;panel assembly
+ 					if this.AA_CaseworkWall_HorzReveals_Ignore == null then
+ 						AA_CaseworkWall_HorzReveals_Ignore<bool> = false
+ 						AA_CaseworkWall_HorzReveals_Ignore<style> = 1
+ 						AA_CaseworkWall_HorzReveals_Ignore<desc> = 'Casework Wall: Ignore Horz Reveals'
+ 					end if
+ 					
+ 					if Cab.AA_CaseworkWall_VersionCreated >= 2.3 and ::.TR.RADIUS == null then
+						;auto inset for toe kick
+	 					TEMP_FollowFace<int> = ::.TR.AA_FollowFace_Studs
+	 					TEMP_FollowFace<text> = '{TEMP_FollowFace}'
+	 					if Cab.{TEMP_FollowFace}.TR.AA_OutsideToe_Recess > 0 and Y + DY == CAB.{TEMP_FollowFace}.TR.AA_OutsideToe_Height then
+	 						Z -= CAB.{TEMP_FollowFace}.TR.AA_OutsideToe_Recess
+	 					end if
+	 					delete TEMP_FollowFace
+						
+						;auto length/pos adjustments for inset
+						if this.AA_CaseworkWall_DisableAutoSize == null then
+							AA_CaseworkWall_DisableAutoSize<bool> = false
+							AA_CaseworkWall_DisableAutoSize<style> = 1
+							AA_CaseworkWall_DisableAutoSize<desc> = 'Casework Wall: Disable Sizing For Inset'
+						end if
+						
+						TEMP_Effective_SDJ := -1*(this.Z + this.DZ)
+						TEMP_BORDER := DZ
+						if Cab.AA_CaseworkWall_FrameIsInside == 0 then
+							TEMP_Effective_SDJ -= this.DZ
+						end if
+						if TEMP_Effective_SDJ != 0 then
+							;inset
+							if ::JONAH_Has_FACE_To_Left == 1 and :X < TEMP_BORDER then
+								TEMP_LEFT_AY_DIFF<dec> := ::JONAH_FACE_AY - ::JONAH_FACE_TO_LEFT_AY
+								TEMP_LEFT_DEDUCTION := tan(TEMP_LEFT_AY_DIFF/2)*(TEMP_Effective_SDJ)
+								X += TEMP_LEFT_DEDUCTION
+								DX -= TEMP_LEFT_DEDUCTION
+								DELETE TEMP_LEFT_DEDUCTION
+							end if
+							if ::JONAH_Has_FACE_To_Right == 1 and :X + :DX > ::DX - TEMP_BORDER then
+								TEMP_RIGHT_AY_DIFF<dec> := ::JONAH_FACE_AY - ::JONAH_FACE_TO_RIGHT_AY
+								TEMP_RIGHT_DEDUCTION := tan(TEMP_RIGHT_AY_DIFF/2)*(TEMP_Effective_SDJ)
+								DX += TEMP_RIGHT_DEDUCTION
+								delete TEMP_RIGHT_DEDUCTION
+							end if
+						end if
+						delete TEMP_Effective_SDJ
+						delete TEMP_BORDER
+					end if
+ 					
+ 					;horizontal reveals
+ 					if AA_CaseworkWall_HorzReveals_Ignore == 0 and Cab.AA_CaseworkWall_HorzReveals_Number > 0 then
+ 						TEMP_Loop1<int> := 1
+ 						while TEMP_Loop1 <= Cab.AA_CaseworkWall_HorzReveals_Number do
+ 							TEMP_Use_Y := Cab.AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_AFF 
+ 							if AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Reference == 1 then
+ 							 	TEMP_Use_Y += Cab.AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width/2
+ 							else
+ 								if Cab.AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Reference == 2 then
+ 									TEMP_Use_Y += Cab.AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width
+ 								end if
+ 							end if
+ 							if TEMP_Use_Y - Cab.AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width >= PABSY and TEMP_Use_Y <= PABSY + DY then
+	 							dim DADOEX as new DADOEX
+	 							DADOEX.desc = 'Horizontal Reveal'
+	 							DADOEX._FACEWP<int> := 1
+	 							DADOEX.X := 0
+	 							DADOEX.Y := TEMP_Use_Y - PABSY
+	 							
+	 							 
+	 							DADOEX.Z := 0
+	 							
+	 							DADOEX.DX := Cab.AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Width
+	 							DADOEX.DY := DX
+	 							DADOEX.DZ := Cab.AA_CaseworkWall_HorzReveals_{TEMP_Loop1}_Depth
+	 							
+	 							DADOEX.AX := 0
+	 							DADOEX.AY := 0
+	 							DADOEX.AZ := -90
+	 						end if
+	 						delete TEMP_Use_Y
+ 							
+ 							TEMP_Loop1<int> += 1
+ 						end while
+ 						delete TEMP_Loop1
+ 					end if
+ 				end if
+ 			
+ 			end if
+ 			
+ 			if :::OBJECT == 15 or ::OBJECT == 15 then
+ 				if ::OBJECT == 15 then
+ 					AA_Colons_To_Face<text> = '::'
+ 					AA_Colons_To_Below_Face<text> = ':'
+ 				else
+ 					AA_Colons_To_Face<text> = ':::'
+ 					AA_Colons_To_Below_Face<text> = '::'
+ 				end if 
+ 				TEMP_DefaultDescription<int> := 0
+ 				if name == 'PANEL' and OBJECT == 17 then
+ 					;blank panel
+ 					if desc == 'Blank Panel' then
+ 						TEMP_DefaultDescription<int> := 1
+ 					end if
+ 				else
+ 					if AA_DescOverride == 'NONE' then
+ 						TEMP_DefaultDescription<int> := 1
+ 					end if 
+ 				end if
+ 				
+ 				if TEMP_DefaultDescription == 1 then
+	 				if this.AA_WallPanelName == null then
+	 					AA_WallPanelName<text> = 'AUTO'
+	 					AA_WallPanelName<style> = 1
+	 					AA_WallPanelName<desc> = 'Wall: Panel Name (AUTO)'
+	 				end if
+	 				if this.AA_Annotations_Outset == null then
+	 					AA_Annotations_Outset<meas> := 0
+	 					AA_Annotations_Outset<style> = 1
+	 					AA_Annotations_Outset<desc> = 'Wall: Outset Annotations'
+	 				end if
+	 				
+	 				TEMP<int> = {AA_Colons_To_Face}.TR.AA_FaceCallout_Use
+	 				desc = '{TEMP}'
+	 				delete TEMP
+	 				
+	 				if AA_WallPanelName != 'AUTO' then
+	 					desc = '{desc} {AA_WallPanelName}'
+	 				else
+	 					TEMP_Count<int> := 1
+	 					while  {AA_Colons_To_Face}.DOR_OPEN@{TEMP_Count}.OBJID != null and {AA_Colons_To_Face}.DOR_OPEN@{TEMP_Count}.OBJID != DOR_OPEN.OBJID do
+	 						
+	 						TEMP_Count<int> += 1
+	 					end while
+	 					
+	 					desc = '{desc} #{TEMP_Count}'
+	 					                 
+	 					if Cab.AA_CaseworkWall_ShowAnnotations == 1 and name != 'S_DSLAB' and Cab.AA_CaseworkWall_HidePanelsNew != 1 then
+		 					;not on the actual parts
+		 					TEMP_Loop_Char<int> := 0
+		 					while TEMP_Loop_Char <= 1 do
+		 						TEMP_Add<int> := 1
+		 						if TEMP_Loop_Char == 0 and :DX < 10 then
+		 							TEMP_Add<int> := 0
+		 						end if
+		 						
+		 						if TEMP_Add == 1 then
+			 						dim CHROME as new hardware
+			 						CHROME.desc = 'Number'
+		
+			 						CHROME.X := DX/2 - 2 + (TEMP_Loop_Char*2)
+			 						CHROME.Y := DY/2 - 2
+			 						CHROME.Z := DZ + AA_Annotations_Outset
+			 						if :.DLAMF.DX != null then
+			 							CHROME.Z := DZ + :.DLAMF.DZ
+			 						end if
+			 						CHROME.AX := -1*AX;0
+			 						CHROME.AY := 0
+			 						CHROME.AZ := -1*AZ;0
+			 						CHROME.DX := 0
+			 						CHROME.DY := 0
+			 						CHROME.DZ := 0
+			 						
+			 						if AX == -180 and AZ == -180 then ;rotated panel
+			 							CHROME.Z := 0
+			 						end if
+			 						
+			 						CHROME._COLOR<int> := 256
+			 						
+			 						if TEMP_Loop_Char == 0 then
+			 							if {AA_Colons_To_Face}.TR.Face_Callout_MatID > 0 then
+			 								TEMP_MatID<int> := {AA_Colons_To_Face}.TR.Face_Callout_MatID 
+			 								CHROME.MATID := TEMP_MatID
+			 								delete TEMP_MatID
+			 								CHROME.X := DX/2
+			 								CHROME.Y := DY/2 + 2
+			 							else
+			 								CHROME.QTY := 0
+			 							end if
+			 						else
+				 						if TEMP_Loop_Char == 1 then
+				 							CHROME.MATID = MaterialID('TEXT {TEMP_Count}')
+										end if
+				 					end if
+				 				end if
+				 				delete TEMP_Add
+		 						
+		 						TEMP_Loop_Char<int> += 1
+		 					end while
+		 					delete TEMP_Loop_Char
+		 				end if
+	 					
+	 					delete TEMP_Count
+	 				end if
+	 				delete TEMP_DefaultDescription
+	 			end if
+ 				if name == 'PANEL' then;:DY > 8 and PABSY < 12 and name == 'PANEL' then
+	 				;panels only - no S_DSLAB
+	 				if AA_CaseworkWall_HidePanelsNew == 1 then
+	 					exit
+	 				end if
+	 				
+	 				TEMP<int> = {AA_Colons_To_Face}.TR.AA_FollowFace_Panels
+	 				Use_Face<text> = '{TEMP}'
+	 				delete TEMP
+	 				if Cab.{Use_Face}.TR.AA_RemovablePanels_Number > 0 then
+						if ::OBJECT == 15 then
+	 						TEMP_S_DSLAB_Effective_X := X + :X
+	 					else
+	 						TEMP_S_DSLAB_Effective_X := X + :X + ::X
+	 					end if
+						
+						TEMP_Loop1<int> := 1
+						while TEMP_Loop1 <= Cab.{Use_Face}.TR.AA_RemovablePanels_Number do
+			                TEMP_Within_Boundaries<int> := 0
+			                TEMP_PANEL_DX := Cab.{Use_Face}.TR.AA_RemovablePanels_{TEMP_Loop1}_Width
+			                TEMP_PANEL_DY := Cab.{Use_Face}.TR.AA_REMOVABLEPANELs_{TEMP_Loop1}_Height
+			                if TEMP_PANEL_DY <= 0 then
+			                	TEMP_PANEL_DY := Cab.{Use_Face}.TR.AA_RemovablePanels_DefaultHeight
+			                end if
+			                
+			                TEMP_PANEL_AFF := Cab.{Use_Face}.TR.AA_REMOVABLEPANELS_{TEMP_Loop1}_AFF 
+			                if TEMP_PANEL_AFF <= 0 then
+			                	TEMP_PANEL_AFF := Cab.{Use_Face}.TR.AA_RemovablePanels_DefaultAFF
+			                end if
+			                if TEMP_PANEL_DX <= 0 then
+			                	TEMP_Panel_DX := Cab.{Use_Face}.TR.AA_RemovablePanels_DefaultWidth_Use
+			                end if
+			                
+			                if Cab.{Use_Face}.TR.AA_RemovablePanels_{TEMP_Loop1}_PosX_Effective >= TEMP_S_DSLAB_Effective_X and Cab.{Use_Face}.TR.AA_RemovablePanels_{TEMP_Loop1}_PosX_Effective <= TEMP_S_DSLAB_Effective_X + DX then
+			                	TEMP_Within_Boundaries<int> := 1
+			                end if
+			                if Cab.{Use_Face}.TR.AA_RemovablePanels_{TEMP_Loop1}_PosX_Effective + TEMP_PANEL_DX >= TEMP_S_DSLAB_Effective_X then 
+			                	;too long to combine
+			                	if Cab.{Use_Face}.TR.AA_RemovablePanels_{TEMP_Loop1}_PosX_Effective + TEMP_PANEL_DX <= TEMP_S_DSLAB_Effective_X + DX then
+			                		TEMP_Within_Boundaries<int> := 1
+			                	end if
+			                end if
+			                
+			                ;check to see that it is vertically within this panel
+			                if TEMP_PANEL_AFF + TEMP_PANEL_DY < :PABSY THEN
+			                	;completely below
+			                	TEMP_Within_Boundaries<int> := 0
+			                end if
+			                if TEMP_PANEL_AFF > :PABSY + :DY then
+			                	;completely above
+			                	TEMP_Within_Boundaries<int> := 0
+			                end if
+			                ;to do- split the operation when it passes over two panels vertically, like we do horizontally.
+			                	
+			                if TEMP_Within_Boundaries == 1 then
+			                	TEMP_Op_X := Cab.{Use_Face}.TR.AA_RemovablePanels_{TEMP_Loop1}_PosX_Effective - TEMP_S_DSLAB_Effective_X
+			                	if TEMP_Op_X < 0 then
+			                		TEMP_Op_X := 0  
+			                	end if
+			                	
+			                	if TEMP_PANEL_DX >= 0 then
+				                	TEMP_Op_EndX := (Cab.{Use_Face}.TR.AA_RemovablePanels_{TEMP_Loop1}_PosX_EFfective + TEMP_PANEL_DX) - TEMP_S_DSLAB_Effective_X 
+				                	if TEMP_Op_EndX > DX then
+				                		TEMP_Op_EndX := DX
+				                	end if
+				                else
+				                	;negative numbers imply clearance from next op
+				                	if TEMP_Loop1 == Cab.{Use_Face}.TR.AA_RemovablePanels_Number then
+				                		;last one
+				                		TEMP_Op_EndX := DX - (-1*TEMP_PANEL_DX) - TEMP_Op_X
+				                	else
+				                		;yeah not really sure what to do here.
+				                	end if  
+				                end if
+			                	
+			                	if TEMP_Op_EndX - Temp_Op_X > 0 then
+				                	DIM USETHISSIDE as new linebore
+				                	USETHISSIDE.desc = 'IGNORE THIS ERROR'
+				                	USETHISSIDE._FACEWP<int> := 2
+				                	USETHISSIDE.DX := 0.001
+				                	USETHISSIDE.DY := 0.001
+				                	USETHISSIDE.DZ := 0.001
+				                	USETHISSIDE._FUDI<int> := 10000
+				                	USETHISSIDE._hide<int> := 7
+
+				                	if this.RADIUS == null or this.RADIUS == 0 then
+					                	TEMP_Loop_Screws<int> := 1
+					                	while TEMP_Loop_Screws <= 2 do
+					                		dim REMOVABLEPANELBORE as new LineBore
+					                		REMOVABLEPANELBORE.desc = 'Removable Panel #{TEMP_Loop1} Bore'
+					                		REMOVABLEPANELBORE._FACEWP<int> := 1
+					                		REMOVABLEPANELBORE.X := TEMP_OP_X + 1.25
+					                		
+					                		if TEMP_Loop_Screws == 1 then
+					                			REMOVABLEPANELBORE.Y := TEMP_PANEL_DY + (TEMP_PANEL_AFF - PABSY) - 1.25
+					                		else
+					                			REMOVABLEPANELBORE.Y := (TEMP_PANEL_AFF - PABSY) + 1.25
+					                		end if
+					                		
+					                		REMOVABLEPANELBORE.Z := 0
+					                		
+					                		REMOVABLEPANELBORE.DX := Imp(5)
+					                		REMOVABLEPANELBORE.DY := TEMP_Op_EndX - TEMP_Op_X - 3
+					                		REMOVABLEPANELBORE.DZ := DZ
+					                		
+					                		REMOVABLEPANELBORE.AX := 0
+					                		REMOVABLEPANELBORE.AY := 0
+					                		REMOVABLEPANELBORE.AZ := -90
+					                		
+					                		REMOVABLEPANELBORE.REPT := 2
+					                		REMOVABLEPANELBORE.SPCNG = DY
+					                	
+					                		TEMP_Loop_Screws<int> += 1
+					                	end while
+					                	delete TEMP_Loop_Screws
+					                end if
+				                	
+				                	Dim REMOVABLEPANEL as new ROUTE
+				                	REMOVABLEPANEL.desc = 'Removable Panel #{TEMP_Loop1} Cutout'
+				                	REMOVABLEPANEL._FACEWP<int> := 2
+				                	REMOVABLEPANEL.GROUP<int> := 1000 ;AFTER THE OUTLINE.
+				                	REMOVABLEPANEL._RCUT<int> := 1
+				                	REMOVABLEPANEL.DX := TEMP_Op_EndX - TEMP_Op_X
+				                	REMOVABLEPANEL.DY := TEMP_PANEL_DY
+				                	REMOVABLEPANEL.DZ = :DZ + 0.001
+				                	
+				                	REMOVABLEPANEL.X := DX - TEMP_Op_X - (TEMP_Op_EndX - TEMP_Op_X)
+				                	REMOVABLEPANEL.Y := (TEMP_PANEL_AFF - PABSY)
+				                	REMOVABLEPANEL.Z := 0
+				                	
+				                	REMOVABLEPANEL.AX := 0
+				                	REMOVABLEPANEL.AY := 0
+				                	REMOVABLEPANEL.AZ := 0
+				                	
+				                	;REMOVABLEPANEL.TOOLID<int> := 146 ;WS TOOLSET 74 ;3/16 up shear
+				                	REMOVABLEPANEL.LIBPART = 'JONAH ROCKS\GENERIC SHAPES\RECTANGLE'
+				              
+				                	dim BLACK as new part
+				                	BLACK.X := TEMP_Op_X
+				                	BLACK.Y := TEMP_PANEL_AFF - PABSY 
+									BLACK.Z := -0.01
+									
+									BLACK.DX := TEMP_Op_EndX - TEMP_Op_X
+									BLACK.DY := TEMP_PANEL_DY
+									BLACK.DZ = :DZ + 0.02
+									
+									BLACK.AX := 0
+									BLACK.AY := 0
+									BLACK.AZ := 0
+									
+									BLACK.LibPArt = 'Jonah Rocks\Casework Wall Removable Panel Visual'
+								end if
+								
+			                	delete TEMP_PANEL_DX
+			                	delete TEMP_PANEL_DY
+			                	delete TEMP_PANEL_AFF
+			                	delete TEMP_Op_X
+			                	delete TEMP_Op_EndX
+			                end if
+			                
+							
+							TEMP_Loop1<int> += 1
+						end while
+						delete TEMP_Loop1
+						delete TEMP_S_DSLAB_Effective_X
+						delete TEMP_Within_Boundaries
+					end if
+					delete Use_Face
+				end if
+			end if
+ 		end if
+ 		
+ 		if name == 'PANEL' or name == 'S_DSLAB' then
+ 			TEMP_Loop1<int> := 1
+ 			while TEMP_Loop1 <= 4 do 				
+	 			if TEMP_Loop1 == 1 then
+	 				TEMP_Char<text> = 'L'
+	 			else
+	 				if TEMP_Loop1 == 2 then
+		 				TEMP_Char<text> = 'R'
+		 			else
+		 				if TEMP_Loop1 == 1 then
+			 				TEMP_Char<text> = 'T'
+			 			else
+			 				if TEMP_Loop1 == 1 then
+				 				TEMP_Char<text> = 'B'
+				 			end if
+				 		end if
+				 	end if
+				 end if
+				 			
+	 			if this.MIT{TEMP_Char} != null then
+	 				_EDG{TEMP_Char}EXT := 1/4
+	 			end if
+	 		
+	 			TEMP_Loop1<int> += 1
+	 		end while
+	 		delete TEMP_Loop1
+	 		delete TEMP_Char
+ 		end if
+ 		exit
+ 	end if
+
+	if name == 'LU' or name == 'RU' then
+		QTY := 0
+		exit
+	end if

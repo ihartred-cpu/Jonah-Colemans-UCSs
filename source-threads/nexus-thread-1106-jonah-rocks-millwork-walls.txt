@@ -1,0 +1,455 @@
+@"/root/.claude/uploads/dea3b01f-a4a6-57f9-9e75-04bf6607e9ec/a0df651c-1106.JONAH_Rocks_Millwork_Walls_Revision_3.pkg" <uploaded_files>
+<file><file_path>1106.JONAH Rocks Millwork Walls Revision 3.pkg</file_path></file>
+</uploaded_files>
+
+Installation Instructions:
+Open your UCS list and delete any of the listed UCS.  Doesn't seem like they properly overwrite.
+CAB Before Build
+Faces and Interiors (1/2)
+Faces and Interiors (2/2)
+FWP: DOR/DWR Overlays
+FWP: Door/Drawer Fronts
+Casework Walls ANYTHING (there may be up to 7 of these)
+FIX FOR RADIUS BLANK PANELS NOT INSETTING
+Import the package, selecting to overwrite existing.
+Edit the new assembly material schedule called "CASEWORK WALL - PARTICLE BOARD".
+Set all bandings to none.
+Change all 3/4 particle boards to your 3/4 particle board material (you could use another size here).
+Under interior parts, set "Casework Wall Cleat" to your 3/4 particle board (again you could use another size here).
+Start a new job.
+Place the "Casework Wall" object from the "Jonah Rocks" catalog.
+Click through any error messages that pop up.  Don't worry about selecting schedules here, just accept the default.
+Take the "Casework Wall" object to the assembly editor's section editor.
+Edit the assembly's properties.
+Set the Upper Standard Material Schedule to "CASEWORK WALL - PARTICLE BOARD".
+Set the Hinge Schedule to the "CASEWORK WALL .75 DOORS" schedule.
+Set Assembly Construction to CASEWORK WALL.
+Save the assembly back into the catalog.  Do not change any check boxes for preserves.
+Done.
+ 
+You will edit the shape of the assembly from the plan view *ONLY*.  Anywhere you want panels is a face.  Anywhere you want a joint to another wall will be a "None", and anywhere you touch a wall and want a scribe is also a "None".
+The most manual thing you will need to do is manually adjust the shape of your bottom plates for toe recess.
+Suggested customizations: assign toolids for operations- search the UCS for TOOLID and you'll find commented out lines, along with a description of what kind of tool we use.  As packaged up I don't think there are any tool assignments.
+
+* We use a 5mm *BRAD* point bit for the plate/cleat screw holes- as opposed to a v-point which results in a LOT of holes in your table.
+* We use a 3/4" bit for slots when the material is close to but less than 3/4 (i.e. plywood).
+* We use a 25/32" bit for slots when the material is 3/4" (i.e. particle board).
+* We use a 3/16" up shear bit for the removable panel cutouts - the UCS is designed to force those parts face down to allow for this.  We have also used a toolset with a 1/2" bit to create a rabbet to make room for an 1/8" bit.
+
+You can copy/paste face information from one face or assembly to another.  Take the control point to the part editor's report view and copy the single operation there to the clipboard.  Paste it onto another control point's part editor report view.  Then return to the assembly and cause a rebuild.  Pretty freaking cool, huh?
+I'll try to come back later and make some more videos showing the more advanced items.
+This UCS integrates tightly with my KEKU clips UCS and my miterfolding UCS, if you use those as well.
+NOTE: On a radius wall, the radius shaped struts will not go to S2M with a shape.  I use another program to auto shape those, but you'll want to double click the part (you can select UCS added parts in v10 now), take it to the part editor, then copy its shape to the clipboard for use in S2M.  Or you can use that shape to create your own manual parts.
+[1106.JONAH Rocks Millwork Walls Revision 3.pkg](https://nexus.hexagon.com/community/cfs-file/__key/communityserver-discussions-components-files/10/1106.JONAH-Rocks-Millwork-Walls-Revision-3.pkg)
+ 
+Some videos showing this in use:
+https://www.screencast.com/t/06e6jODzEW
+https://www.screencast.com/t/mRS6cP3M
+https://www.screencast.com/t/pkh7t6QRDGy
+https://www.screencast.com/t/FI7diCAJn
+https://www.screencast.com/t/G11VBfmDHv
+
+* [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+* 
+* [Like](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#) 8
+* [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+
+Top Replies
+
+* Offline [Bill Northrup ](https://nexus.hexagon.com/community/members/billn)[over 6 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/364015)+3
+[Does anyone know where can I find readable material on how to operate the UCS? The videos go a bit too fast right off the start, with no audio. Gonna be a very uphill road, starting at video one.](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/364015)
+* Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 4 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/411271)in reply to [Cory Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/411231) +2
+[There's not a built in way to double the top plate. You could adjust a UCS to add a DOR over the top of the cutout, but it isn't built in. If you're in CV 12+, set your divider to a material that is…](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/411271)
+* Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282868)+1 verified
+[This file was sent to me by someone running into some common pitfalls in CV with radius items. 1) If the inside/outside faces are not truly, really, exactly concentric you get studs that aren't tangent…](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282868)
+
+* [All Replies](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc?ReplySortBy=CreatedDate&ReplySortOrder=Ascending)
+* [Answers](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc?ReplyFilter=Answers&ReplySortBy=Answers&ReplySortOrder=Descending)
+
+* [Oldest](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc?ReplySortBy=CreatedDate&ReplySortOrder=Ascending)
+* [Votes](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc?ReplySortBy=Votes&ReplySortOrder=Descending)
+* [Newest](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc?ReplySortBy=CreatedDate&ReplySortOrder=Descending)
+
+* [+2](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282868)
+This file was sent to me by someone running into some common pitfalls in CV with radius items.
+1) If the inside/outside faces are not truly, really, exactly concentric you get studs that aren't tangent to the arc.
+To avoid this, never trust CAD for snapping.  Draw one face and use the offset tool to get the other one.  Then you KNOW they're concentric.
+This applies to non-radius edges as well- if the inside/outside faces are not PRECISELY the same angle you get some funky behavior (infinitely long interiors, etc).
+2) When placing studs inside radius faces, you get 1 shot.  After the first sectioning the new studs don't show up.
+To avoid this, place all the studs you need on your first sectioning and then move them around.
+3) Sometimes with radius faces, the inside or the outside are just terrible to work with.
+Nothing to do here but use the other face.  It doesn't matter which face you put the studs in from.
+4) With odd shapes, sometimes it doesn't identify the opposite face properly to get the machining from both faces on the studs.
+You can override each face and specify which is the opposite face.
+5) With odd shapes, sometimes studs run through multiple sections (not shown in this video)
+Set the face priority of the section in between to 1 (or higher than both other ends).  This will stop it from running through once you add studs into it.
+ 
+https://www.screencast.com/t/x73r60gQB8WZ
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)+1[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * Offline [Custom Engineered Millwork ](https://nexus.hexagon.com/community/members/jonathan_4000_ce_2d00_millwork.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282911)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282868)
+Questions:
+1. V11 only?
+2. Did you write the revision in a hour?
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * 
+   * Offline [Weston Peters ](https://nexus.hexagon.com/community/members/weston_4000_peterscabinetry.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282912)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282868)
+Thanks Jonah, much appreciated!  I followed your install instructions, haven't had time to watch the videos yet, but two things i noticed
+1. "casework wall cleat" was not an option of me in the material schedule
+2. I selected floor cleat and "edit shape" in plan view to change the width.  I was able to change it, but it won't save at the size.  reverts back to the original width of 5"
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282929)in reply to [Weston Peters](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282912)
+Jonathan,
+1. Yes, I'm packaging what I use so it will always be the current version.
+2. No, it is simply the packaging up of what I use. The writing has taken place over time.
+
+Weston,
+1. If true then the part did not properly import. I did test importing in a fresh install and verified the part imported there, so I'm not sure why yours did not. You would need to create that part then. WALLCLEAT under Case->Interior.
+
+2. Do you mean floor plate? There's a bottom plate and a floor plate. You should be able to edit the shape.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+   * Offline [Mark Burton ](https://nexus.hexagon.com/community/members/mark_4000_chateauindustries.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283404)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/282868)
+Jonah sir, you are a scholar and a legend!
+
+One of the biggest pitfalls for me, in Cabinet Vision, is doing anything with a radius- building, machining etc., have all been difficult. With this millwork package, you have inadvertently taken our business to the next level.
+
+With out this, it is hard to compete with other companies, and it's hard for us to continue to push the threshold in achieving the architects vision.
+
+Complete life-changer buddy. Thank you so very much!!!
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * Offline [Mark Burton ](https://nexus.hexagon.com/community/members/mark_4000_chateauindustries.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284164)in reply to [Mark Burton](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283404)
+Hey Jonah,
+
+The guys here want to build only using the studs, top and bottom plate, as well as the floor plate.
+
+Is there any way (intelligent dimension/ucs) to only utilize those pieces, without the use of the cleats and studs?
+
+Thank you for your time.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284168)in reply to [Mark Burton](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284164)
+Just don't add the cleats, right?
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Mark Burton ](https://nexus.hexagon.com/community/members/mark_4000_chateauindustries.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284175)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284168)
+I misspoke. I meant to say "without the use of cleats and struts".
+
+It looks like the top, bottom and floor plate are a standard size, and meant to stay on the inside of the cleats. Without cleats, I was hoping the plates would fill in the gap, without having to go into "Edit Shape". Is there another way around it?
+
+Thanks!
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284181)in reply to [Mark Burton](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284175)
+You'll have to go to adjust parts and change the top/bottom adjustment to 0. you can modify the "apply before build" UCS to not apply those modifications.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Mark Burton ](https://nexus.hexagon.com/community/members/mark_4000_chateauindustries.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284331)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284181)
+I am sorry, I am an idiot when it comes to UCS's.
+
+First, when you say "go to adjust parts" are you referring somewhere in 'Edit'?
+
+Then, within the "CAB Before Build", there's a line item in there that needs to modified, to reflect the changes?
+
+Thank you sir for your time
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284434)in reply to [Mark Burton](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284331)
+Adjust parts is in the section editor.
+
+Yes, there are lines within that UCS that applies the ADJT, ADJB parameters. They need to be removed or commented out.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Mark Burton ](https://nexus.hexagon.com/community/members/mark_4000_chateauindustries.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/285849)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284434)
+[7610.ERNST & YOUNG.cvj](https://nexus.hexagon.com/community/cfs-file/__key/communityserver-discussions-components-files/451/7610.ERNST-_2600_-YOUNG.cvj)
+ 
+What's the best way to utilize the Millwork Wall with Cabinets, in regards to drawings- showing elevation views?
+I am trying to show elevation views with the cabinet in front of the die wall but it doesn't seem to come in correctly.
+I will attach the file, perhaps there is something I am missing?
+Thank you sir for your time.
+There's a lot of rooms, but it is the only one labeled "Reception"
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/285951)in reply to [Mark Burton](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/285849)
+You've either got to draw the die wall/cabinet on the same side of the same wall (outsetting the cabinet)- in which case you end up fighting the object overlap stuff, or you have to use the room cross section function to get your drawings.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [sevillewood@gmail.com ](https://nexus.hexagon.com/community/members/sevillewood_4000_gmail.com)[over 7 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/320399)in reply to [Mark Burton](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/284331)
+Quote:
+"On a radius wall, the radius shaped struts will not go to S2M with a shape.  I use another program to auto shape those, but you'll want to double click the part (you can select UCS added parts in v10 now), take it to the part editor, then copy its shape to the clipboard for use in S2M......."
+ 
+Jonah, are you suggesting that we can manually shape parts in S2M Center? Care to share the details without going overboard? This could come in handy for me.
+ 
+Thanks
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)-1[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 7 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/320480)in reply to [sevillewood@gmail.com](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/320399)
+Right click a part in S2M and select Edit. You can edit the shape and operations.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)-1[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * [View More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283404?ReplyOffsetId=320480&ReplyOffsetDirection=Next&ReplySortBy=CreatedDate&ReplySortOrder=Ascending)
+* Offline [Tammy Westfall ](https://nexus.hexagon.com/community/members/tammy_4000_arizonacustom.com)[over 8 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283219)
+I am currently running CV 9, I do not have any of your UCS's, and wondered do I need to install the previous versions of your walls, before adding this one ?
+
+I'm very new to UCS's, so I was trying to use your step by step instructions, but when it said to delete previous items, etc... I was not sure if I could install this. Don't want to screw anything up, so any suggestions from anyone on exactly how to install this would be greatly appreciated.
+
+Thank You
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283247)in reply to [Tammy Westfall](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283219)
+You do not need anything else, you can simply install. I expect this will only work in version 11.
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * 
+* [lingering lead ](https://nexus.hexagon.com/community/members/chris.rothan_4000_rothanman.com)[over 8 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283301)
+Jonah,
+Thanks as always for your generosity and expertise. I am sure I can speak for us all when I say we all appreciate it.
+I have a question on the "SQUARELINEBORE" on the cleat notches. It appears our SQUARELINEBORE for wall cleats that are NOT top or bottom are being offset 1/2" (0.51916) from the front edge of the part to the center of the hole. The holes for the top and bottom cleat appear correct with a set back of 5/8"+ (0.644"). I believe the SQUARELINEBORE should be set back the thickness of the wall cleat part correct? I did check UCS 6/7 and found the SQUARELINEBOERE and CLEATDADO but i cannot quickly tell exactly where the setback of the hole is derived from. And I don't want to mess with code.
+Here are a couple pics of what we are seeing. Any suggestions?
+
+
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283371)in reply to [lingering lead](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283301)
+They appear to be where they should be. Remember, the slot for the cleat on the stud is smaller than the cleat's thickness by the slot amount (default 1/8"). The stud is let into the cleat. They shouldn't be in the same place as at the top and bottom.
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [lingering lead ](https://nexus.hexagon.com/community/members/chris.rothan_4000_rothanman.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283373)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/283371)
+Thank you sir. I guess i never noticed that or we had modified that somehow.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+* Offline [mryan@mjrwoodworks.com ](https://nexus.hexagon.com/community/members/mryan_4000_mjrwoodworks.com)[over 8 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/285978)
+I just imported this package into CV 10 yesterday and have been playing around with it. One thing i noticed is that i do not have the attribute to put a wire chase in my studs. Is this just because it only works on CV 11 or is that a separate UCS that is used?
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/286024)in reply to [mryan@mjrwoodworks.com](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/285978)
+If you have any of the attributes you should have that one.
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * Offline [Mark Burton ](https://nexus.hexagon.com/community/members/mark_4000_chateauindustries.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/287800)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/286024)
+Hey Jonah, started sending things to S2M, to see how it does with radius top, bottom, plates (does well)
+
+However, some of my studs show wire chases, in S2M, even though I didn't set any, they don't show in 3D, and the Wire Chase quantities show zero.
+
+Any thoughts?
+
+Thank you kindly for your time.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/287802)in reply to [Mark Burton](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/287800)
+No, that makes 0 sense. Are you sure they're on the stud and not coming off some other part?
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Mark Burton ](https://nexus.hexagon.com/community/members/mark_4000_chateauindustries.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/289849)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/286024)
+Jonah, where can I find the tooling that is used to cut out the removable panels?
+
+Looking on the CAM for the specific "panel", I can't select the removable panel to see what was used.
+
+Thanks
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/289904)in reply to [Mark Burton](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/289849)
+If you're using the most recent UCS you should be able to select it.
+
+It is assigned inside the UCS, you'll have to edit it.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Andy Haden ](https://nexus.hexagon.com/community/members/andy_4000_chateauindustries.com)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290090)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/289904)
+Thank you for the quick response. One last question for a while - haha..
+
+Is it possible to do a "sloped top" die wall with this package?
+
+For instance - Top plate, and all studs angled at a 45 degree angle from back face to front face.
+
+I can adjust the studs easily enough, but not quite sure there is a way to slant the top plate at the 45 degree angle.
+
+Thanks again for your time! I certainly appreciate it.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290135)in reply to [Andy Haden](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290090)
+No, there's not.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Matt ](https://nexus.hexagon.com/community/members/msyring)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290575)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290135)
+I place a wall like in your video. I select the casework wall from the Jonah Rocks catalog, cancel out of 3 construction error messages, place the wall and continue to get error messages which then crashes the program. Any suggestions Jonah??
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290588)in reply to [Matt](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290575)
+Maybe edit the object in the library, remove all preserves, then place it. See if you avoid the crash. If so you'll have to re-apply all the overrides to it- construction method and hinge.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Matt ](https://nexus.hexagon.com/community/members/msyring)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290611)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290588)
+[6011.Desk Model.pdf](https://nexus.hexagon.com/community/cfs-file/__key/communityserver-discussions-components-files/451/6011.Desk-Model.pdf)
+Can a wall like the one in the picture be built with this Jonah??
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290616)in reply to [Matt](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/290611)
+Anything can, some just require more manual work than others. Sometimes CV's section editor doesn't like funky shapes like that and you end up having to manually place studs.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+* Offline [Mike Westerhoud ](https://nexus.hexagon.com/community/members/mike_4000_bowwood.net)[over 8 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/287342)
+Hey Jonah, after installing this package I was working with a cabinet that had a partition. I went to change the partition to a divider and it removed it. The connecting drawers still recognized it was there but it was no longer visible or shown in the reports tab.
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * 
+* Offline [Mike Westerhoud ](https://nexus.hexagon.com/community/members/mike_4000_bowwood.net)[over 8 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/287363)
+Also, has anyone had trouble with the UCS applying to all cabinets, not just walls? All cabinets now have the wall attributes and parts are CNCing with new names like "top plate" for all cabinet tops and "#1" instead of "Left Hinge Door". We deleted all the UCS before importing.
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * Offline [UniqueWoodProducts ](https://nexus.hexagon.com/community/members/uniquewoodproducts)[over 6 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/364227)in reply to [Mike Westerhoud](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/287363)
+I'm having the same type of issue.  Just brought in this package (You rock, Jonah!) and the only issue I'm seeing with it is that I can't really pull in any other cabinets unless I want these "additional" pieces with it.  Did I just miss something in the setup?  Other than this one tick, it seems like it could be a pretty big time/money saver for us.
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * Offline [Wes Shimwell ](https://nexus.hexagon.com/community/members/wes.s_4000_bowwood.net)[over 6 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/364282)in reply to [UniqueWoodProducts](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/364227)
+
+We had this too. You'll need to change this ID number to whatever yours is. UCS 7/7 renames the parts if Cab.Is_Casework_Wall is true.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [UniqueWoodProducts ](https://nexus.hexagon.com/community/members/uniquewoodproducts)[over 6 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/364288)in reply to [Wes Shimwell](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/364282)
+Perfect.  Thanks, Wes!
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+* Offline [Chris Woodham ](https://nexus.hexagon.com/community/members/chris_4000_cbwcabinetry.com)[over 8 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/298289)
+When I give Cleats a Material such as particle board or any material it shrinks the top plate, bottom plate, and floor plate. What ever the material thickness of the cleat is it shrinks by that much any suggestions on how to fix this?
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/298322)in reply to [Chris Woodham](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/298289)
+It isn't something to be fixed, that is intentionally how it works. If you want it to work differently then you'll have to modify the ucs.
+
+Add cleats and you'll see the intended construction.
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * 
+* Offline [Charles Magalhaes ](https://nexus.hexagon.com/community/members/charles_4000_mccdental.com)[over 8 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/298881)
+Jonah
+Very interesting, what you did, i was surprise with details... i have a couple questions for you:
+1)the object you brought from your library, is that any object you created regardless of material, construction method or shape? or was specific one with all particular setup?(assuming you made just an object to make you able to edit shape, then trace the lines in the imported drawing..dxf?)
+
+2)would you share the entire attributes engineering?
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 8 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/298980)in reply to [Charles Magalhaes](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/298881)
+1 - nothing special about this object. Just make sure it is an upper (to get the double bottom), and assign the correct construction method/inset hinge and you can make your own.
+
+2 - I don't understand the question.
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * 
+* Offline [Bret ](https://nexus.hexagon.com/community/members/bret_4000_wooddesigninc.com)[over 7 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/300734)
+Jonah.Coleman, I found that your FWP: Door/Drawer Fronts UCS is messing with my view in the section editor for regular cabinets, it is not a big deal (see [link](https://nexus.hexagon.com/community/cabinet_vision/f/cv-10/61877/show-simple-doors-in-section-view-issue) for more info) but I am hoping to eliminate this.  I assume that this UCS is needed to make your Casework Wall work properly (because why else would you include it in that package?) but I do not completely understand what it does or what other UCS's it might work with or effect.  
+ 
+Changing the 4th line from
+if :OBJECT == 10 then
+to
+if constid != 117 then
+effectively keeps this UCS from running on my other cabinets.  You obviously want it to effect all cabinets and not just your 'Casework Wall' cabinets but I do not know why, presumably because you have other UCS's that effect it?  
+ 
+I would appreciate any insight if you have time.  Thanks
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [+1](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 7 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/301463)in reply to [Bret](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/300734)
+The UCS sets the banding code on the door, so that when you edit the door's banding it isn't all blank to begin with. You could remove just that section of the UCS.
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * Offline [Bret ](https://nexus.hexagon.com/community/members/bret_4000_wooddesigninc.com)[over 7 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/301677)in reply to [Jonah.Coleman](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/301463)
+Thanks Jonah, that did it.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Wes Shimwell ](https://nexus.hexagon.com/community/members/wes.s_4000_bowwood.net)[over 7 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/315178)in reply to [Bret](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/301677)
+When you enable the counter recess closure, is it supposed to dim a part where the arrow is or just do the operations and you add the part yourself? I get the operations so just confirming if that's all that should happen.
+
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+      * Offline [Jonah.Coleman ](https://nexus.hexagon.com/community/members/jonah.coleman)[over 7 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/315712)in reply to [Wes Shimwell](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/315178)
+You have to add it, I can't add shaped parts.
+         * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+         * 
+* [krepco15@gmail.com ](https://nexus.hexagon.com/community/members/krepco15_4000_gmail.com)[over 7 years ago](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/323777)
+
+ 
+Thanks for the great UCS.  I played with it this weekend and have this wall to cut.  Everything will optimize but the top, bottom and floor plate, saying that the size it too big to cut.  It is less than a 4x8 sheet of plywood so I thought it would optimize with all the studs and cleats but I cant get it to nest.  
+Keith
+   * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+   * [krepco15@gmail.com ](https://nexus.hexagon.com/community/members/krepco15_4000_gmail.com)[over 7 years ago ](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/323782)in reply to [krepco15@gmail.com](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/323777)
+Got it, I had the top and bottom cleat larger than the sheet.
+      * [Vote Up](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)0[Vote Down](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [Reply](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)
+      * [More](https://nexus.hexagon.com/community/cabinet_vision/f/cv-legacy-versions/57765/jonah-s-millwork-walls-revision-3-reception-walls-die-walls-etc/915359#)

@@ -1,0 +1,101 @@
+for each face|face* part
+	if name == 'FACE' or name == 'FACE*' then     
+        JONAH_Has_FACE_To_Left<int> := 0
+        JONAH_Has_FACE_To_Right<int> := 0
+        JONAH_FACE_To_Right_DX := 0
+        JONAH_FACE_To_Left_DX := 0
+        JONAH_FACE_To_Right_Name<text> = 'NONE'
+        JONAH_FACE_To_Left_Name<text> = 'NONE'
+        JONAH_Face_To_Left_AY<dec> := 0
+        JONAH_Face_To_Right_AY<dec> := 0
+        JONAH_FACE_Opposite<text> = 'NONE'
+        JONAH_FACE_Opposite_Distance<meas> := 1000
+        JONAH_FACE_To_Right_Is_Inside_Corner<int> := 0
+        JONAH_FACE_To_Left_Is_Inside_Corner<int> := 0
+        TEMP_Loop1<int> := 0
+        while TEMP_Loop1 <= Cab.AA_Max_Face do
+            if TEMP_Loop1 == 0 then
+                TEMP_FaceName<text> = 'FACE'
+            else   
+                TEMP_FaceName<text> = 'FACE{TEMP_Loop1}'
+            end if
+             
+            if TEMP_FaceName != name then
+                if Cab.{TEMP_FaceName}.OBJID != null then
+                    TEMP_Instance_DX := Cab.{TEMP_FaceName}.DX
+                    
+                    ;we already calculated this on that face, use the stored value
+                    TEMP_Instance_EndX := Cab.{TEMP_FaceName}.JONAH_EndX
+                    TEMP_Instance_EndZ := Cab.{TEMP_FaceName}.JONAH_EndZ
+                    TEMP_Instance_MidX := Cab.{TEMP_FaceName}.JONAH_MidX
+                    TEMP_Instance_MidZ := Cab.{TEMP_FaceName}.JONAH_MidZ
+                    TEMP_Instance_AY<dec> := Cab.{TEMP_FaceName}.JONAH_Face_AY
+				
+                    if rprec(Cab.{TEMP_FaceName}.X) == rprec(JONAH_EndX) and rprec(Cab.{TEMP_FaceName}.Z) == rprec(JONAH_EndZ) then
+                        JONAH_Has_FACE_To_Right<int> := 1
+                        JONAH_FACE_To_Right_DX := TEMP_Instance_DX 
+                        JONAH_FACE_To_Right_Name<text> = '{TEMP_FaceName}'
+                        JONAH_Face_To_Right_AY<dec> := TEMP_Instance_AY
+                        
+						if JONAH_FACE_AY == 0 then
+							if JONAH_Face_To_Right_AY >= 180 then
+								JONAH_Face_To_Right_Is_Inside_Corner<int> := 1
+							end if
+						else
+							if JONAH_FACE_TO_RIGHT_AY == 0 and JONAH_FACE_AY < 180 then
+							 	JONAH_Face_To_Right_Is_Inside_Corner<int> := 1
+							else
+								if JONAH_FACE_TO_RIGHT_AY < JONAH_FACE_AY and JONAH_FACE_TO_RIGHT_AY > 0 then
+									JONAH_Face_To_Right_Is_Inside_Corner<int> := 1
+								end if
+							end if
+						end if
+						
+                    end if
+                    if rprec(TEMP_Instance_EndX) == rprec(X) and rprec(TEMP_Instance_EndZ) == rprec(Z) then
+                        JONAH_Has_FACE_To_Left<int> := 1
+                        JONAH_FACE_To_Left_DX := TEMP_Instance_DX
+                        JONAH_FACE_To_Left_Name<text> = '{TEMP_FaceName}'
+                        JONAH_Face_To_Left_AY<dec> := TEMP_Instance_AY
+
+						if JONAH_Face_To_Left_AY == 0 then
+							if JONAH_Face_AY >= 180 then
+								JONAH_Face_To_Left_Is_Inside_Corner<int> := 1
+							end if
+						else
+							if JONAH_FACE_AY == 0 and JONAH_Face_To_Left_AY <= 180 then
+							 	JONAH_Face_To_Left_Is_Inside_Corner<int> := 1
+							 else
+								if JONAH_Face_To_LEFT_AY > JONAH_FACE_AY and JONAH_Face_AY > 0 then
+									JONAH_Face_To_Left_Is_Inside_Corner<int> := 1
+								end if
+							end if
+						end if
+                    end if
+                    
+					delete TEMP_Instance_AY_Less_Than_Zero
+                    if TEMP_Instance_AY == JONAH_Face_AY - 180 or TEMP_Instance_AY == JONAH_FACE_AY + 180 then
+                    	TEMP_Distance<meas> := Sqrt(sqr(TEMP_Instance_MidX - JONAH_MidX) + sqr(TEMP_Instance_MidZ - JONAH_MidZ))
+                    	if TEMP_Distance < JONAH_Face_Opposite_Distance then
+                    		JONAH_Face_Opposite_Distance<meas> := TEMP_Distance
+                    		JONAH_Face_Opposite<text> = '{TEMP_FaceName}'
+                    	end if
+                    end if
+                end if
+            end if
+             
+            TEMP_Loop1<int> += 1
+        end while
+        delete TEMP_Loop1
+        
+        delete TEMP_FaceName
+		delete TEMP_Face_AY_Less_Than_Zero         
+        delete TEMP_Distance
+        
+        delete TEMP_Instance_AY
+        delete TEMP_Instance_EndX
+        delete TEMP_Instance_EndZ
+        delete TEMP_Instance_MidX
+        delete TEMP_Instance_MidZ
+        delete TEMP_Instance_DX
+    end if

@@ -1,0 +1,83 @@
+for each TR part
+	;inserting/deleting cleats
+	if this.AA_Cleats_Modify_Insert == null or this.AA_Cleats_Modify_Insert == -1 then
+		exit
+	end if
+	if Cab.Is_Casework_Wall == 0 then
+ 		exit
+ 	end if
+
+	;move every item forward one down to the inserted item+1
+	TEMP_Loop1<int> := AA_Cleats_Number
+	while TEMP_Loop1 > AA_Cleats_Modify_Insert do 
+		TEMP_Prev<int> := TEMP_Loop1 - 1
+	
+		AA_Cleats_{TEMP_Loop1}_Width := AA_Cleats_{TEMP_Prev}_Width
+		AA_Cleats_{TEMP_Loop1}_AFF := AA_Cleats_{TEMP_Prev}_AFF
+		AA_Cleats_{TEMP_Loop1}_Inset := AA_Cleats_{TEMP_Prev}_Inset
+		AA_Cleats_{TEMP_Loop1}_PLOW := AA_Cleats_{TEMP_Prev}_PLOW
+		AA_Cleats_{TEMP_Loop1}_ADJL := AA_Cleats_{TEMP_Prev}_ADJL
+		AA_Cleats_{TEMP_Loop1}_ADJR := AA_Cleats_{TEMP_Prev}_ADJR
+		AA_Cleats_{TEMP_Loop1}_NoPart<bool> := AA_Cleats_{TEMP_Prev}_NoPart
+		AA_Cleats_{TEMP_Loop1}_Breaks_Count<int> := AA_Cleats_{TEMP_Prev}_Breaks_Count
+		
+		if this.AA_Cleats_{TEMP_Loop1}_Breaks_Count > 0 then
+			TEMP_Loop_Breaks<int> := 1
+			while TEMP_Loop_Breaks <= AA_Cleats_{TEMP_Loop1}_Breaks_Count do
+				AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks} := AA_Cleats_{TEMP_Prev}_Breaks_From_{TEMP_Loop_Breaks}
+				AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks} := AA_Cleats_{TEMP_Prev}_Breaks_Width_{TEMP_Loop_Breaks}
+				
+				TEMP_Loop_Breaks<int> += 1
+			end while
+			delete TEMP_Loop_Breaks
+		end if
+		
+		if this.AA_Cleats_{TEMP_Loop1}_Strut_State != null then
+			AA_Cleats_{TEMP_Loop1}_Strut_State<int> := AA_Cleats_{TEMP_Prev}_Strut_State
+			AA_Cleats_{TEMP_Loop1}_Strut_Position<int> := AA_Cleats_{TEMP_Prev}_Strut_Position
+			AA_Cleats_{TEMP_Loop1}_Strut_Width := AA_Cleats_{TEMP_Prev}_Strut_Width
+		end if
+	
+		AA_Cleats_{TEMP_Loop1}_Rabbet<int> := AA_Cleats_{TEMP_Prev}_Rabbet
+		AA_Cleats_{TEMP_Loop1}_Rabbet_Depth := AA_Cleats_{TEMP_Prev}_Rabbet_Depth
+		AA_Cleats_{TEMP_Loop1}_Rabbet_Width := AA_Cleats_{TEMP_Prev}_Rabbet_Width
+		AA_Cleats_{TEMP_Loop1}_ADJT := AA_Cleats_{TEMP_Prev}_ADJT
+		AA_Cleats_{TEMP_Loop1}_ADJB := AA_Cleats_{TEMP_Prev}_ADJB
+		AA_Cleats_{TEMP_Loop1}_Closure<int> := AA_Cleats_{TEMP_Prev}_Closure
+		AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<int> := AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above
+		AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<int> := AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below
+		
+		TEMP_Loop1<int> -= 1
+	end while
+	delete TEMP_Loop1
+
+	;empty the contents of the inserted item
+	TEMP_Next<int> := AA_Cleats_Modify_Insert + 1 
+	delete AA_Cleats_{TEMP_Next}_Width
+	delete AA_Cleats_{TEMP_Next}_AFF
+	delete AA_Cleats_{TEMP_Next}_Inset
+	delete AA_Cleats_{TEMP_Next}_PLOW
+	delete AA_Cleats_{TEMP_Next}_ADJL
+	delete AA_Cleats_{TEMP_Next}_ADJR
+	delete AA_Cleats_{TEMP_Next}_NoPart
+	delete AA_Cleats_{TEMP_Next}_Breaks_Count
+	
+	if this.AA_Cleats_{TEMP_Next}_Strut_State != null then
+		delete AA_Cleats_{TEMP_Next}_Strut_State
+		delete AA_Cleats_{TEMP_Next}_Strut_Position
+		delete AA_Cleats_{TEMP_Next}_Strut_Width
+	end if
+
+	delete AA_Cleats_{TEMP_Next}_Rabbet
+	delete AA_Cleats_{TEMP_Next}_Rabbet_Depth
+	delete AA_Cleats_{TEMP_Next}_Rabbet_Width
+	
+	delete AA_Cleats_{TEMP_Next}_ADJT
+	delete AA_Cleats_{TEMP_Next}_ADJB
+	delete AA_Cleats_{TEMP_Next}_Closure
+	delete AA_Cleats_{TEMP_Next}_Closure_Slot_Above
+	delete AA_Cleats_{TEMP_Next}_Closure_Slot_Below
+	
+	delete TEMP_Next					
+	
+	AA_Cleats_Modify_Insert<int> := -1

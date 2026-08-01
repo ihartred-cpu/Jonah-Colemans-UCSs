@@ -1,0 +1,592 @@
+;Jonah Coleman (JonahC@ArchitecturalArts.com)
+
+ For Each * Part
+ 	if OBJECT != 17 AND OBJECT != 12 then
+ 		exit
+ 	end if
+ 	
+ 	if this.QTY == 0 and this.QTY != null then
+ 		exit
+ 	end if
+ 	
+ 	 	AA_ParmPrefix<text> = 'this.'
+ 	if :OBJECT == 12 then
+ 		AA_ParmPrefix<text> = ':'
+ 	end if
+ 	
+ 	
+ 	if :OBJECT != 12 then
+	 	if this.AA_MiterFold_Enable == null then
+	 		AA_MiterFold_Enable<bool> = false
+	 		AA_MiterFold_Enable<style> = 1
+	 		AA_MiterFold_Enable<desc> = 'Miterfold: 1) Enable'
+	 	end if
+	 	
+	 	if this.AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE == 1 then
+	 		AA_MiterFold_Enable<bool> = true
+	 	end if
+	 end if
+ 	
+ 	if {AA_ParmPrefix}AA_MiterFold_Enable = 0 and {AA_ParmPrefix}AA_MiterFold_Edge1_Angle == null and {AA_ParmPrefix}AA_MiterFold_Edge1_Size == null then
+ 		;bail for performance - clean up is below
+ 		
+ 		exit
+ 	end if
+ 	
+ 	TEMP_Number_Edges<int> := _SHPEDGCNT
+ 	if TEMP_Number_Edges == 0 then
+ 	 	TEMP_Number_Edges<int> := 4
+	end if
+ 	if {AA_ParmPrefix}AA_MiterFold_Enable == 1 then
+ 		if this.AA_MiterFold_ShowOptions == null then
+ 			AA_MiterFold_ShowOptions<int> = '<lst>1) Show Basic=1|2) Hide All=2{TEMP}'
+ 			AA_MiterFold_ShowOptions<int> := 1
+ 			AA_MiterFold_ShowOptions<style> = 1
+ 		end if
+ 		AA_MiterFold_ShowOptions<desc> = 'Miterfold: 2) Show Options'
+ 		
+ 		;separate part
+ 		if this.AA_MiterFold_SeparatePart == null then
+ 			AA_MiterFold_SeparatePart<int> = '<lst>1) Automatic=-1|2) Extend Edges=0|3) Separate Part=1'
+ 			AA_MiterFold_SeparatePart<desc> = 'Miterfold: 3) Separate Part'
+ 		end if
+ 		if AA_MiterFold_ShowOptions != 2 then 
+ 			AA_MiterFold_SeparatePart<style> = 1
+ 		else
+ 			AA_MiterFold_SeparatePart<style> = 2
+ 		end if
+ 		AA_MiterFold_SeparatePart_Use<int> := AA_MiterFold_SeparatePart
+ 		if AA_MiterFold_SeparatePart_Use == -1 then
+ 			AA_MiterFold_SeparatePart_Use<int> := 0
+ 			if AA_IsStone == 1 or {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_SeparatePart == 1 then
+ 				AA_MiterFold_SeparatePart_Use<int> := 1
+ 			end if
+ 		end if
+ 		
+ 		;extra extension at miters
+ 		if this.AA_MiterFold_ExtraExtensionAtMiter == null then
+ 			AA_MiterFold_ExtraExtensionAtMiter<meas> = 0
+ 			AA_MiterFold_ExtraExtensionAtMiter<desc> = 'Miterfold: 4) Extra Extension At Miters (0=auto)'
+ 		end if
+ 		if AA_MiterFold_ShowOptions != 2 then 
+ 			AA_MiterFold_ExtraExtensionAtMiter<style> = 1
+ 		else
+ 			AA_MiterFold_ExtraExtensionAtMiter<style> = 2
+ 		end if
+ 		AA_MiterFold_ExtraExtensionAtMiter_Use := AA_MiterFold_ExtraExtensionAtMiter
+ 		if AA_MiterFold_ExtraExtensionAtMiter_Use == -1 then
+ 			AA_MiterFold_ExtraExtensionAtMiter_Use := 0
+ 			if {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_ExtraWidth != null then
+ 				AA_MiterFold_ExtraExtensionAtMiter_Use := {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_ExtraWidth
+ 			else
+ 				if AA_MiterFold_SeparatePart_Use == 1 then
+ 					AA_MiterFold_ExtraExtensionAtMiter_Use := 0.25
+ 					if AA_IsStone == 1 then
+ 						AA_MiterFold_ExtraExtensionAtMiter_Use := 0;0.125
+ 					end if
+ 				end if
+ 			end if
+ 		end if
+ 		
+ 		if AA_MiterFold_SeparatePart_Use == 1 then
+ 			if this.AA_MiterFold_SepPart_ExtraLength == null then
+ 				AA_MiterFold_SepPart_ExtraLength<meas> = -1
+ 				AA_MiterFold_SepPart_ExtraLength<desc> = 'Miterfold: 5) Extra Length At Miter Parts (-1=auto)'
+ 			end if
+ 			if AA_MiterFold_ShowOptions != 2 then 
+ 				AA_MiterFold_SepPart_ExtraLength<style> = 1
+ 			else
+ 				AA_MiterFold_SepPart_ExtraLength<style> = 2
+ 			end if
+ 			AA_MiterFold_SepPart_ExtraLength_Use := AA_MiterFold_SepPart_ExtraLength
+ 			if AA_MiterFold_SepPart_ExtraLength_Use == -1 then
+ 				AA_MiterFold_SepPart_ExtraLength_Use := 0
+ 				if {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_ExtraWidth != null then
+ 					AA_MiterFold_SepPart_ExtraLength_Use := {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_SeparatePart_ExtraLength
+ 				else
+ 					if AA_MiterFold_SeparatePart_Use == 1 then
+ 						if AA_IsStone == 1 then
+ 							AA_MiterFold_SepPart_ExtraLength_Use := 0;0.5
+ 						end if
+ 					end if
+ 				end if
+ 			end if
+ 		else
+ 			delete AA_MiterFold_SepPart_ExtraLength
+ 		end if
+		
+		START_ShowOptions<int> := AA_MiterFold_ShowOptions 			
+ 		TEMP<text> = ''
+ 		TEMP_Edge<int> := 1
+ 		while TEMP_Edge <= TEMP_Number_Edges do
+ 			TEMP_Option<int> := TEMP_Edge+6
+ 			TEMP<text> = '{TEMP}|{TEMP_Option}) Show Edge #{TEMP_Edge}={TEMP_Option}'
+ 			TEMP_Edge<int> += 1
+ 		end while
+ 		delete TEMP_Edge
+ 		delete TEMP_Option
+ 		
+ 		AA_MiterFold_ShowOptions<int> = '<lst>1) Show Basic=1|2) Hide All=2{TEMP}'
+ 		AA_MiterFold_ShowOptions<int> := START_ShowOptions
+ 		delete TEMP
+ 		delete START_ShowOptions
+ 			
+ 		TEMP_Comment<text> = ''
+ 		TEMP_Edge<int> := 1
+ 		while TEMP_Edge <= TEMP_Number_Edges do
+ 			TEMP_Edge_Extension_Final := 0
+ 			TEMP_ShowBasic<int> := 2
+ 			TEMP_ShowDetails<int> := 2
+ 			if AA_MiterFold_ShowOptions == 1 then
+ 				TEMP_ShowBasic<int> := 1
+ 			end if
+ 			if TEMP_Edge == AA_MiterFold_ShowOptions - 6 then
+ 				TEMP_ShowDetails<int> := 1
+ 				TEMP_ShowBasic<int> := 1
+ 			end if
+ 			
+ 			if :OBJECT != 12 then
+	 			if this.AA_MiterFold_Edge{TEMP_Edge}_Angle == null then
+	 				AA_MiterFold_Edge{TEMP_Edge}_Angle<deg> = 0
+	 				AA_MiterFold_Edge{TEMP_Edge}_Angle<desc> = 'Miterfold: Edge {TEMP_Edge} - 1) Angle'
+	 			end if
+	 			AA_MiterFold_Edge{TEMP_Edge}_Angle<style> = TEMP_ShowBasic
+	 			
+	 			if this.AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_Angle != null then
+	 				AA_MiterFold_Edge{TEMP_Edge}_Angle<deg> := AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_Angle
+	 			end if 
+	 		end if
+ 			
+ 			if {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_Angle != 0 then
+ 				TEMP_Edge_Extension_Final := AA_MiterFold_ExtraExtensionAtMiter_Use
+ 				if :OBJECT != 12 then
+	 				;size
+	 				if this.AA_MiterFold_Edge{TEMP_Edge}_Size == null then
+		 				AA_MiterFold_Edge{TEMP_Edge}_Size<meas> := DZ * 2
+		 			end if
+		 			AA_MiterFold_Edge{TEMP_Edge}_Size<style> = TEMP_ShowBasic
+		 			AA_MiterFold_Edge{TEMP_Edge}_Size<desc> = 'Miterfold: Edge {TEMP_Edge} - 2) Size'
+		 			if this.AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_Size != null then 
+		 				AA_MiterFold_Edge{TEMP_Edge}_Size<meas> := AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_Size
+		 			end if
+		 			
+		 			;miter again
+		 			if this.AA_MiterFold_Edge{TEMP_Edge}_Miter == null then
+		 				AA_MiterFold_Edge{TEMP_Edge}_Miter<deg> := 0
+		 			end if
+		 			AA_MiterFold_Edge{TEMP_Edge}_Miter<style> = TEMP_ShowDetails
+		 			AA_MiterFold_Edge{TEMP_Edge}_Miter<desc> = 'Miterfold: Edge {TEMP_Edge} - 3) Miter Again Angle'
+		 			
+		 			;extra extension
+		 			if this.AA_MiterFold_Edge{TEMP_Edge}_ExtraExt == null then
+		 				AA_MiterFold_Edge{TEMP_Edge}_ExtraExt<meas> := 0
+		 			end if
+		 			AA_MiterFold_Edge{TEMP_Edge}_ExtraExt<style> = TEMP_ShowDetails
+		 			AA_MiterFold_Edge{TEMP_Edge}_ExtraExt<desc> = 'Miterfold: Edge {TEMP_Edge} - 4) Extra Size'
+		 			
+		 			;separate part
+		 			delete AA_MiterFold_Edge{TEMP_Edge}_SeparatePart
+		 			if this.AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew == null then
+						AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew<int> = '<lst>1) Automatic=-1|2) Extend Edges=0|3) Separate Part=1'
+		 			end if
+		 			AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew<style> = TEMP_ShowDetails
+		 			AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew<desc> = 'Miterfold: Edge {TEMP_Edge} - 5) Separate Part'
+		 			
+		 			AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew_Use<int> := AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew
+		 			if AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew_Use == -1 then
+		 				AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew_Use<int> := AA_MiterFold_SeparatePart_Use
+		 				if this.AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_SeparatePart != null then 
+		 					AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew_Use<int> := 1
+		 				end if
+		 			end if
+		 			
+		 			
+		 			;offset
+		 			if this.AA_MiterFold_Edge{TEMP_Edge}_Offset == null then
+		 				AA_MiterFold_Edge{TEMP_Edge}_Offset<meas> := 0
+		 			end if
+		 			AA_MiterFold_Edge{TEMP_Edge}_Offset<style> = TEMP_ShowDetails
+		 			AA_MiterFold_Edge{TEMP_Edge}_Offset<desc> = 'Miterfold: Edge {TEMP_Edge} - 5) Offset'
+		 			if this.AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_OFFSET != null then 
+		 				AA_MiterFold_Edge{TEMP_Edge}_Offset<meas> := AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_OFFSET
+		 			end if
+		 		end if
+
+	 			Prev_Edge<int> := TEMP_Edge - 1
+	 			if Prev_Edge == 0 then
+	 				Prev_Edge<int> := TEMP_Number_Edges
+	 			end if
+	 			
+	 			Next_Edge<int> := TEMP_Edge + 1
+	 			if Next_Edge > TEMP_Number_Edges then
+	 				Next_Edge<int> := 1
+	 			end if 
+	 			
+	 			if OBJECT != 12 then
+					if :OBJECT == 12 and this.Already_LibPArt == 0 then
+						LIBPART = 'DES MOINES Custom Cabinets\Door Slab No Shape'
+						Already_LibPart<int> := 1
+					end if
+
+	 				TEMP_Size := {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_Size
+	 				TEMP_Comment<text> = '{TEMP_Comment}, MITERFOLD EDGE {TEMP_Edge} - {TEMP_Size}'
+	 				TEMP_Oversize := {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_ExtraExt
+	 				if TEMP_Oversize > 0 then
+	 					TEMP_Comment<text> = '{TEMP_Comment} OVERSIZE {TEMP_OverSize}'
+	 				end if
+	 				delete TEMP_Oversize
+	 				
+	 				
+	 				TEMP_Use_Angle<deg> := {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_Angle
+	 				while TEMP_Use_Angle < 0 do
+	 					TEMP_Use_Angle += 360
+	 				end while
+	 				
+	 				while TEMP_Use_Angle > 360 do
+	 					TEMP_Use_Angle -= 360
+	 				end while
+	 				
+	 				dim {name} as new part
+	 				{name}.desc = 'Miter Edge {TEMP_Edge}'
+	 				
+	 				TEMP_X := _EDG{TEMP_Edge}X
+ 					TEMP_Y := _EDG{TEMP_Edge}Y
+					{name}.Z := 0
+					
+	 				if TEMP_Use_Angle > 180 then	 					
+	 					;have to adjust vertical position and into the board, since origin is at back of part.
+	 					TEMP_X += sin(_EDG{TEMP_Edge}AZ + 90)*sin(TEMP_Use_Angle)*DZ
+						TEMP_Y -= cos(_EDG{TEMP_Edge}AZ + 90)*sin(TEMP_Use_Angle)*DZ	
+	 					{name}.Z := DZ - cos(TEMP_Use_Angle)*DZ
+	 				end if
+	 				
+	 				if this.AA_MiterFold_Edge{TEMP_Edge}_Offset != 0 then
+	 					TEMP_X -= sin(_EDG{TEMP_Edge}AZ - 90)*{AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_Offset
+ 						TEMP_Y += cos(_EDG{TEMP_Edge}AZ - 90)*{AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_Offset
+ 					end if
+ 					
+ 					{name}.X := TEMP_X
+ 					{name}.Y := TEMP_Y
+ 					
+ 					delete TEMP_X
+ 					delete TEMP_Y
+ 					
+ 					if {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew_Use == 0 then
+	 					;not a separate part, miter folding
+	 					{name}.edx = -dx 
+	 					TEMP_Edge_Extension_Final += TEMP_Size + {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_ExtraExt
+	 				else
+	 					;have to store the extensions we make here and subtract them so that they don't get added to the later parts
+;perhaps this can all go?
+	 					TEMP := _EDG{TEMP_Edge}AZ 
+	 					if TEMP == 0 or abs(TEMP) == 180 then
+	 						;running long length
+	 						;{name}._EDG1EXT := this._EDG2EXT - this.AA_Miterfold_Stored_Separate_Edge_Ext_2
+	 						;{name}._EDG3EXT := this._EDG4EXT - this.AA_Miterfold_Stored_Separate_Edge_Ext_4
+	 					else
+	 						if abs(TEMP) == 90 then
+	 							;running short length - if we ever adjust the part's orientation to get proper grain on ends this will need to change
+	 							;{name}._EDG1EXT := this._EDG1EXT - this.AA_Miterfold_Stored_Separate_Edge_Ext_1
+	 							;{name}._EDG3EXT := this._EDG3EXT - this.AA_Miterfold_Stored_Separate_Edge_Ext_3
+	 						end if
+	 					end if
+	 					delete TEMP
+	 					
+	 					;if we ever adjust the part's orientation to get proper grain on ends this will need to change
+	 					;extra lenghts
+	 					{name}._EDG1EXT := AA_MiterFold_SepPart_ExtraLength_Use/2
+	 					{name}._EDG3EXT := AA_MiterFold_SepPart_ExtraLength_Use/2
+	 					
+	 					;extra widths
+	 					{name}._EDG2EXT := 0
+	 					{name}._EDG2EXT += {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_SeparatePart_ExtraWidth
+	 					{name}._EDG2EXT += {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_ExtraExt
+	 					{name}._EDG2EXT += AA_MiterFold_ExtraExtensionAtMiter_Use
+	 					
+	 					TEMP_Edge_Extension_Final += {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_ExtraExt
+	 					TEMP_Edge_Extension_Final += {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_SeparatePart_ExtraWidth
+	 					
+	 					;to do - grain match the part?
+	 				end if
+	 				
+	 				
+	 				{name}.DX := TEMP_Size
+	 				{name}.DY := _EDG{TEMP_Edge}DY
+	 				                              
+					TEMP_Miter_Angle<dec> := 90 - TEMP_Use_Angle/2
+										
+					{name}.AX := 0
+					{name}.AZ := _EDG{TEMP_Edge}AZ
+					{name}.AY := -1 * TEMP_Use_Angle
+					
+					if TEMP_Number_Edges == 4 then
+						if TEMP_Edge == 1 then
+							MITB := TEMP_Miter_Angle
+							AA_UCS_SET_MITB<int> := 1
+						else
+							if TEMP_Edge == 2 then
+								MITR := TEMP_Miter_Angle
+								AA_UCS_SET_MITR<int> := 1
+							else
+								if TEMP_Edge == 3 then
+									MITT := TEMP_Miter_Angle
+									AA_UCS_SET_MITT<int> := 1
+								else
+									if TEMP_Edge == 4 then
+										MITL := TEMP_Miter_Angle
+										AA_UCS_SET_MITL<int> := 1
+									end if
+								end if
+							end if
+						end if
+					end if
+					
+					;miter display part to main part
+					{name}.MITL := TEMP_Miter_Angle
+					{name}.MITR := {AA_ParmPrefix}AA_MiterFold_Edge{TEMP_Edge}_Miter 
+				
+					;miter display part to other display parts
+					if {AA_ParmPrefix}AA_MiterFold_Edge{PREV_Edge}_Angle != 0 or {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{PREV_Edge}_Angle != 0 then
+						TEMP_Joint_Angle<deg> := _EDG{TEMP_Edge}AZ - _EDG{Prev_Edge}AZ
+						{name}.MITB := TEMP_Joint_Angle/2
+						if TEMP_Use_Angle > 180 then
+							{name}.MITB *= -1
+						end if
+						
+						if _EDG{TEMP_Edge}AZ == 90 and _EDG{PREV_Edge}AZ == -180 then
+							;inside corner
+							{name}.DY += DZ
+							{name}.X -= sin(_EDG{TEMP_Edge}AZ - 180)*DZ
+ 							{name}.Y += cos(_EDG{TEMP_Edge}AZ - 180)*DZ
+						end if
+						
+						if _EDG{TEMP_Edge}AZ == 0 and _EDG{PREV_Edge}AZ == 90 then
+							;inside corner
+							{name}.DY += DZ
+							{name}.X -= sin(_EDG{TEMP_Edge}AZ - 180)*DZ
+ 							{name}.Y += cos(_EDG{TEMP_Edge}AZ - 180)*DZ
+						end if
+						
+					end if
+					if {AA_ParmPrefix}AA_MiterFold_Edge{NEXT_Edge}_Angle != 0 or {AA_ParmPrefix}AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{NEXT_Edge}_Angle != 0 then
+						TEMP_Joint_Angle<deg> := _EDG{NEXT_Edge}AZ - _EDG{TEMP_Edge}AZ
+						{name}.MITT := TEMP_Joint_Angle/2
+						if TEMP_Use_Angle > 180 then
+							{name}.MITT *= -1
+						end if
+						
+						if _EDG{TEMP_Edge}AZ == -180 and _EDG{Next_Edge}AZ == 90 then
+							;inside corner
+							{name}.DY += DZ
+						end if
+						if _EDG{TEMP_Edge}AZ == 90 and _EDG{Next_Edge}AZ == 0 then
+							;inside corner
+							{name}.DY += DZ
+						end if
+					end if
+					delete TEMP_Joint_Angle
+					
+					;finishes
+					Parm1<text> = '_FINB'
+					Parm2<text> = '_FINF'
+					Parm3<text> = '_FINEDG'
+					Parm4<text> = '_FINEND'
+					
+					TEMP_ParmInstance<int> := 1
+					while this.Parm{TEMP_ParmInstance} != null do
+						TEMP_Parm_Name<text> = 'Parm{TEMP_ParmInstance}'
+						TEMP_Parm_EndName<meas> = {TEMP_Parm_Name}
+						if this.{TEMP_Parm_EndName} != null then
+							{name}.{TEMP_Parm_EndName} := {TEMP_Parm_EndName}
+						end if
+
+						delete TEMP_Parm_Name
+						delete TEMP_Parm_EndName
+					                               
+						delete Parm{TEMP_ParmInstance}
+						TEMP_ParmInstance<int> += 1
+					end while
+					delete TEMP_ParmInstance
+					
+					;banding
+					TEMP_BAND1<int> = _EDG{TEMP_Edge}BAND
+					TEMP_BAND2<text> = '{TEMP_BAND1}'
+					
+					if TEMP_Band2 != 'N' then
+						if TEMP_Band2 == 'E' then
+							{name}.BAND = 'NE'
+						else
+							if TEMP_Band2 == 'F' then
+								{name}.BAND = 'NF'
+							else
+								if TEMP_Band2 == 'I' then
+									{name}.BAND = 'NI'
+								end if
+							end if
+						end if		
+					end if
+					
+					
+					delete TEMP_BAND1
+					delete TEMP_BAND2
+					
+					delete TEMP_Use_Angle
+					delete TEMP_Miter_Angle
+					delete TEMP_Size
+					
+					if TEMP_Edge_Extension_Final != 0 then
+						_EDG{TEMP_Edge}EXT := TEMP_Edge_Extension_Final
+
+						AA_UCS_SET_EDG{TEMP_Edge}EXT<meas> := TEMP_Edge_Extension_Final
+					end if
+						
+	 			end if
+	 		else
+	 			if :OBJECT != 12 then
+		 			delete AA_MiterFold_Edge{TEMP_Edge}_Size
+		 			delete AA_MiterFold_Edge{TEMP_Edge}_Miter
+		 			delete AA_MiterFold_Edge{TEMP_Edge}_ExtraExt
+		 			delete AA_MiterFold_Edge{TEMP_Edge}_Offset
+		 		end if
+	 			
+	 			if this.AA_UCS_SET_EDG{TEMP_Edge}EXT == 1 then
+	 				delete _EDG{TEMP_Edge}EXT
+	 				delete AA_UCS_SET_EDG{TEMP_Edge}EXT
+	 			end if
+	 			if TEMP_Edge == 1 and this.AA_UCS_SET_MITB == 1 then
+	 				delete MITB
+	 				delete AA_UCS_SET_MITB
+	 			end if
+	 			if TEMP_Edge == 2 and this.AA_UCS_SET_MITR == 1 then
+	 				delete MITR
+	 				delete AA_UCS_SET_MITR
+	 			end if
+	 			if TEMP_Edge == 3 and this.AA_UCS_SET_MITT == 1 then
+	 				delete MITT
+	 				delete AA_UCS_SET_MITT
+	 			end if
+	 			if TEMP_Edge == 4 and this.AA_UCS_SET_MITL == 1 then
+	 				delete MITL
+	 				delete AA_UCS_SET_MITL
+	 			end if
+	 			
+	 		end if
+	 		
+	 		TEMP_Edge<int> += 1
+	 	end while
+	 	delete TEMP_Edge
+	 	delete PREV_Edge
+	 	delete NEXT_Edge
+	 	
+	 	delete TEMP_ShowBasic
+	 	delete TEMP_ShowDetails
+	 	
+ 		AA_Comment_IsDefault<int> := 0
+		if this.Comment == null then
+			AA_Comment_IsDefault<int> := 1
+		else
+			if '{comment}X' == 'X' then
+				AA_Comment_IsDefault<int> := 1
+			else
+				if this.AA_UCS_SET_COMMENT != null then
+					if AA_UCS_SET_COMMENT == comment then
+						AA_Comment_IsDefault<int> := 1
+					end if
+				end if
+			end if
+		end if
+		
+ 		if AA_Comment_IsDefault == 1 then
+ 			comment = '{TEMP_Comment}'
+ 			AA_UCS_SET_COMMENT<text> = '{TEMP_Comment}'
+ 		end if
+	 	delete TEMP_Comment
+	 	delete AA_Comment_IsDefault
+	 	
+	 	if this.PID > 0 and desc != '*MITERFOLD' then
+	 		;system parts only
+	 		desc = '{desc} MITERFOLD'
+	 	end if 
+	 	
+ 	else
+ 		;clean up
+ 		delete AA_MiterFold_ShowOptions
+ 		delete AA_MiterFold_SeparatePart
+ 		delete AA_MiterFold_ExtraExtensionAtMiter
+ 		delete AA_MiterFold_SepPart_ExtraLength
+ 		
+ 		if this.AA_UCS_SET_MITB == 1 then
+			delete MITB
+			delete AA_UCS_SET_MITB
+		end if
+		if this.AA_UCS_SET_MITR == 1 then
+			delete MITR
+			delete AA_UCS_SET_MITR
+		end if
+		if this.AA_UCS_SET_MITT == 1 then
+			delete MITT
+			delete AA_UCS_SET_MITT
+		end if
+		if this.AA_UCS_SET_MITL == 1 then
+			delete MITL
+			delete AA_UCS_SET_MITL
+		end if
+	 			
+ 		TEMP_Edge<int> := 1
+ 		while TEMP_Edge <= TEMP_Number_Edges do
+ 			if this.AA_UCS_SET_EDG{TEMP_Edge}EXT != null then
+ 				delete _EDG{TEMP_Edge}EXT
+ 				delete AA_UCS_SET_EDG{TEMP_Edge}EXT
+ 				delete _EXTEDX
+ 				delete _EXTEDY
+ 			end if
+ 			if this.AA_MiterFold_Edge{TEMP_Edge}_Angle != null or this.AA_MiterFold_Edge{TEMP_Edge}_Size != null then
+	 			delete AA_MiterFold_Edge{TEMP_Edge}_Angle
+	 			delete AA_MiterFold_Edge{TEMP_Edge}_Size
+	 			delete AA_MiterFold_Edge{TEMP_Edge}_Miter
+	 			delete AA_MiterFold_Edge{TEMP_Edge}_ExtraExt
+	 			delete AA_MiterFold_Edge{TEMP_Edge}_SeparatePartNew
+	 			delete AA_MiterFold_Edge{TEMP_Edge}_Offset
+	 		end if
+ 			
+ 			TEMP_Edge<int> += 1
+ 		end while
+ 		delete TEMP_Edge
+ 	end if
+ 	
+ 	delete TEMP_Number_Edges
+ 	
+ 	exit
+
+;Parameters for use in other UCS
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_SeparatePart
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_ExtraWidth
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_OFFSET
+
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_Angle
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_Size
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_SeparatePart
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_SeparatePart_ExtraLength
+;AA_UCS_NEEDS_TO_MITERFOLD_AN_EDGE_{TEMP_Edge}_SeparatePart_ExtraWidth
+ 	
+;Revision 2:	Add comments
+;				Add mitering to previous/next edges
+;				Add finish override preservation
+;Revision 3:
+;				Fix for incorrect positive angle miters
+;Revision 4:	
+;				Add miter again parameters, fix for comment not working       
+;Revision 5:
+;				Modify part description for system parts, remove _EDGnEXT parameter on non-system parts when miterfold removed
+;Revision 6: 
+;				Add extra extension parameter
+;				Automatically extend edges on mitered but non-miterfold parts by 1/4"
+;Revision 7:
+;				Add draw bolts
+;				Add support for door parts
+;Revision 8:
+;				Add separate part mitering
+;Revision 9:
+;				Fix for negative angles not showing properly
+;				Fix for Offset attribute sticking around

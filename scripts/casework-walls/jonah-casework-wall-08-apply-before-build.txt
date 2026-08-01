@@ -1,0 +1,57 @@
+
+ For Each PT|TR|Interior|Interior* part
+ 	if Cab.Is_Casework_Wall == 0 then
+ 		exit
+ 	end if	
+	
+	if name == 'Interior' or name == 'Interior*' then
+exit
+		if Cab.AA_CaseworkWall_FrameIsInside == 1 then
+			DZ := 0
+		end if
+		exit
+	end if
+	
+	if name == 'TR' then	
+		if Cab.AA_CaseWorkWall_Default_Use == 1 then
+			OWNER = Cab.TRASH
+		end if
+		
+		if Cab.AA_CaseworkWall_FrameIsInside == 0 then
+			if _M:MatID != 975 then
+				MATID = 975
+			end if
+		else
+			if Cab.AA_CaseworkWall_AdjustForDoor == 1 then
+				if _M:MatID != Cab.S_DSLAB_MATID then
+					TEMP<int> := Cab.S_DSLAB_MATID
+					MATID = TEMP
+					_MS1001<style> = 2 ;this is the trick
+				end if
+			end if
+		end if
+		
+		exit
+	end if
+	
+	if name == 'PT' then
+		if this.PCTR == 1 or this.PCTR == 3 then
+			if this.AA_PT_Scribe == null then
+				AA_PT_Scribe<meas> := 0
+				AA_PT_Scribe<style> = 1
+				AA_PT_Scribe<desc> = 'Scribe'
+			end if
+			
+			if AA_PT_Scribe != 0 then
+				if this.PCTR == 1 then
+					_PSCL := AA_PT_Scribe
+				else
+					_PSCR := AA_PT_Scribe
+				end if
+			end if
+		else
+			delete AA_PT_Scribe
+		end if
+		exit
+	end if
+	

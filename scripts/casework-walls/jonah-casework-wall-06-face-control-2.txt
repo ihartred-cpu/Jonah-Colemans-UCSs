@@ -1,0 +1,1568 @@
+
+ For Each TR|FaceCopyOperation Part
+ 	if Cab.Is_Casework_Wall == 0 then
+ 		exit
+ 	end if	
+ 	
+ 	if name == 'FaceCopyOperation' then
+ 		if this.PID == null then
+ 			OWNER = Cab.TRASH
+ 			exit
+ 		end if
+ 	end if
+ 	
+	if name == 'TR' then
+		X := :DX/2 - 2.5
+		Y := -5
+		_TRNSP<dec> := 1
+		
+		if Cab.AA_CaseworkWall_ShowAnnotations == 1 then
+			Y := 100
+		end if
+		
+		Z := 5
+		
+		DX := 5
+		DY := 5
+		DZ := 5
+		LibPart = 'Jonah Rocks\Casework Walls\Face Control Point'
+		
+		EDX := -5
+		
+		_HIDE<int> := 7
+		TEMP<int> = :name
+		FaceName<text> = '{TEMP}'
+		delete TEMP
+		
+		AA_CaseworkWall_DoorDZ<meas> := 0.75
+ 		if :.DOR_OPEN.DOR.DX != null then
+ 			AA_CaseworkWall_DoorDZ<meas> := :.DOR_OPEN.DOR.DZ
+ 		end if
+ 		
+		
+		;preserve copy-able face info
+		if this.FaceCopyOperation.DX != null then
+			;user copied another face to here, can't create one with the same NAME.
+			TEMP_CopyFromObject<text> = 'FaceCopyOperation'
+			TEMP_CopyToObject<text> = 'CantCopyThis'
+			TEMP_Using_CopyFromObject<int> := 1
+		else
+			TEMP_CopyFromObject<text> = 'Nothing'
+			TEMP_CopyToObject<text> = 'FaceCopyOperation'
+			TEMP_Using_CopyFromObject<int> := 0
+		end if
+		
+		dim {TEMP_CopyToObject} as new line
+		{TEMP_CopyToObject}.desc = '{FaceName} Copy - After Paste You Must Cause a Rebuild'
+		{TEMP_CopyToObject}.DX := 0
+		{TEMP_CopyToObject}.DY := 0
+		{TEMP_CopyToObject}.DZ := 0
+		{TEMP_CopyToObject}.X := 0
+		{TEMP_CopyToObject}.Y := 0
+		{TEMP_CopyToObject}.Z := 0
+		{TEMP_CopyToObject}.UCSMOD<int> := 1
+		{TEMP_CopyToObject}.PID<int> := -1
+		
+		if AA_FaceCallout<text> == null then
+			AA_FaceCallout<text> = '<lst>1) NOT SET=NOT SET|2) Custom=Custom|3) Inside=Inside|4) Outside=Outside'
+		end if
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_FaceCallout<int> = this.{TEMP_CopyFromObject}.AA_FaceCallout
+			AA_FaceCallout<text> = '{AA_FaceCallout}'
+		end if
+		AA_FaceCallout_Use<text> = '{FaceName}'
+		AA_FaceCallout<style> = 1
+		AA_FaceCallout<desc> = 'Face: 00) Face Type'
+		{TEMP_CopyToObject}.AA_FaceCallout<text> = '{AA_FaceCallout}'
+
+		AA_FaceCallout_Use_Opp<text> = '{JONAH_Face_Opposite}'
+
+		desc = '{FaceName} Control - {AA_FaceCallout_Use}'
+				
+		FACE_Callout_MatID<int> := 0
+		if AA_FaceCallout == 'NOT SET' then
+			dim ERROR as new part
+			ERROR.ErrorText<text> = 'Face {FaceName} CALLOUT NOT SET'
+			ERROR.visible = false
+			ERROR.OWNER = CAB
+		end if
+		if Cab.AA_CaseworkWall_ShowAnnotations == 1 and Cab.AA_CaseworkWall_HidePanelsNew != 1 then
+			FACE_Callout_MatID<int> := MaterialID('TEXT {AA_FaceCallout_Use}')
+
+			if FACE_Callout_MatID > 0 then
+				dim CHROME as new hardware
+				CHROME.MATID := FACE_Callout_MatID
+				CHROME.desc = 'Face Name Visual'
+				CHROME.DX := 0
+				CHROME.DY := 0
+				CHROME.DZ := 0
+				CHROME.X = :Y + 50 
+				CHROME.Y := DY/2
+				CHROME.Z = -3
+				CHROME.AX := 90
+				CHROME.AY := 0
+				CHROME.AZ := -90
+			end if
+		end if
+	
+		if this.AA_FollowFace_Studs == null then
+			AA_FollowFace_Studs<text> = 'RESET'
+		end if
+		AA_FollowFace_Studs<style> = 1
+		AA_FollowFace_Studs<desc> = 'Face: 01) Studs Follow Face (RESET)'
+		if AA_FollowFace_Studs == 'RESET' then
+			AA_FollowFace_Studs<text> = '{FaceName}'			
+		end if
+		if this.AA_FollowFace_Panels == null then
+			AA_FollowFace_Panels<text> = 'RESET'
+		end if
+		AA_FollowFace_Panels<style> = 1
+		AA_FollowFace_Panels<desc> = 'Face: 01) Panels Follow Face (RESET)'
+		if AA_FollowFace_Panels == 'RESET' then
+			AA_FollowFace_Panels<text> = '{FaceName}'			
+		end if
+		
+		if this.AA_CaseworkWall_LastFaceName != null and AA_CaseworkWall_LastFaceName != '{FaceName}' then
+			;this TR has jumped faces.  Well now that's fun.  Probably reshaped, maybe user dragged and dropped.
+			if AA_FollowFace_Studs == '{AA_CaseworkWall_LastFaceName}' then
+				AA_FollowFace_Studs<text> = '{FaceName}'
+			end if
+			
+			if AA_FollowFace_Panels == '{AA_CaseworkWall_LastFaceName}' then
+				AA_FollowFace_Panels<text> = '{FaceName}'
+			end if
+			
+			_DEBUG_MOVED_FACE<int> := 1
+		end if
+		                           
+		if this.AA_OppFace_Override == null then
+			AA_OppFace_Override<text> = 'NONE'
+		end if
+		AA_OppFace_Override<desc> = 'Face: 01) Override Opposite Face'
+		AA_OppFace_Override<style> = 1
+		
+		if AA_FollowFace_Studs != '{FaceName}' then
+		    delete AA_Counter_Height_OptionState
+		    delete AA_Toe_OptionState
+		    delete AA_OutsideToe_Height
+		    delete AA_OutsideToe_Recess
+		    delete AA_Counter_Height
+		    delete AA_Counter_Recess
+		    delete AA_Counter_AFF
+		else
+			;inside/outside auto detection
+			AA_IsInsideFace<int> := 0
+			AA_IsOutsideFace<int> := 0
+			
+			if AA_FaceCallout == 'Outside' or AA_FaceCallout == 'Outside*' or AA_FaceCallout == '*Outside' or AA_FaceCallout == '*Outside*' then
+				AA_IsOutsideFace<int> := 1
+			end if
+			if AA_FaceCallout == 'Inside' or AA_FaceCallout == 'Inside*' or AA_FaceCallout == '*Inside' or AA_FaceCallout == '*Inside*'  then
+				AA_IsInsideFace<int> := 1
+			end if
+			;identify counter height in room for auto heights
+			AA_Lowest_Wall_Counter_AFF := -1
+			AA_Lowest_Wall_Counter_DZ := -1
+			
+			TEMP_Loop1<int> := 1
+			TEMP_Lowest_Y := 1000
+			TEMP_Lowest_Instance<int> := -1
+			while :::.Counter@{TEMP_Loop1}.OBJID != null do
+				if :::.Counter@{TEMP_Loop1}.Y < DY and :::.Counter@{TEMP_Loop1}.Y < TEMP_Lowest_Y then
+					TEMP_Lowest_Y := :::.Counter@{TEMP_Loop1}.Y
+					TEMP_Lowest_Instance<int> := TEMP_Loop1
+				end if
+				 
+				TEMP_Loop1<int> += 1
+			end while
+			delete TEMP_Loop1
+			delete TEMP_Lowest_Y
+			
+			if TEMP_Lowest_Instance > 0 then
+				AA_Lowest_Wall_Counter_AFF := :::.Counter@{TEMP_Lowest_Instance}.Y
+				AA_Lowest_Wall_Counter_DZ := :::.Counter@{TEMP_Lowest_Instance}.DZ
+			end if
+			delete TEMP_Lowest_Instance
+				
+			;toe notch
+			if this.AA_Toe_OptionsState == null then
+				AA_Toe_OptionsState<int> = '<lst>1) Hide all=2|2) Show all=1'
+				AA_Toe_OptionsState<style> = 1
+			end if
+			AA_Toe_OptionsState<desc> = 'Face: 02) Face Toe 1) Options'
+			
+			;toe height
+			if this.AA_OutsideToe_Height == null then
+				AA_OutsideToe_Height<meas> := 0
+			end if
+			AA_OutsideToe_Height<desc> = 'Face: 02) Face Toe 2) Height'
+			AA_OutsideToe_Height<style> = AA_Toe_OptionsState
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_OutsideToe_Height<meas> := this.{TEMP_CopyFromObject}.AA_OutsideToe_Height
+			end if
+			{TEMP_CopyToObject}.AA_OutsideToe_Height<meas> := AA_OutsideToe_Height
+			
+			;toe recess
+			if this.AA_OutsideToe_Recess == null then
+				AA_OutsideToe_Recess<meas> := 2
+			end if                          
+			AA_OutsideToe_Recess<desc> = 'Face: 02) Face Toe 3) Recess'
+			AA_OutsideToe_Recess<style> = AA_Toe_OptionsState
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_OutsideToe_Recess<meas> := this.{TEMP_CopyFromObject}.AA_OutsideToe_Recess
+			end if
+			{TEMP_CopyToObject}.AA_OutsideToe_Recess<meas> := AA_OutsideToe_Recess
+			
+			;toe Cleat
+			if this.AA_OutsideToe_Cleat == null then
+				AA_OutsideToe_Cleat<int> = '<lst>0) None=0|1) Behind Toe=1|2) As Toe=2'
+			end if                          
+			AA_OutsideToe_Cleat<desc> = 'Face: 02) Face Toe 4) Cleat'
+			AA_OutsideToe_Cleat<style> = AA_Toe_OptionsState
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_OutsideToe_Cleat<int> := this.{TEMP_CopyFromObject}.AA_OutsideToe_Cleat
+			end if
+			{TEMP_CopyToObject}.AA_OutsideToe_Cleat<int> := AA_OutsideToe_Cleat
+			
+			;toe closure
+			if this.AA_OutsideToe_Closure == null then
+				AA_OutsideToe_Closure<int> = '<lst>1) None=1|2) Enabled=2'
+			end if                          
+			AA_OutsideToe_Closure<desc> = 'Face: 02) Face Toe 5) Closure'
+			AA_OutsideToe_Closure<style> = AA_Toe_OptionsState
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_OutsideToe_Closure<int> := this.{TEMP_CopyFromObject}.AA_OutsideToe_Closure
+			end if
+			{TEMP_CopyToObject}.AA_OutsideToe_Closure<int> := AA_OutsideToe_Closure    
+			
+			if AA_OutsideToe_Closure > 1 then
+				;slot
+				if this.AA_OutsideToe_Closure_Slot_Above == null then
+					AA_OutsideToe_Closure_Slot_Above<meas> := -1 
+				end if                          
+				AA_OutsideToe_Closure_Slot_Above<desc> = 'Face: 02) Face Toe 5.1) Closure Plow (-1=default)'
+				AA_OutsideToe_Closure_Slot_Above<style> = AA_Toe_OptionsState
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_OutsideToe_Closure_Slot_Above<meas> := this.{TEMP_CopyFromObject}.AA_OutsideToe_Closure_Slot_Above
+				end if
+				{TEMP_CopyToObject}.AA_OutsideToe_Closure_Slot_Above<meas> := AA_OutsideToe_Closure_Slot_Above
+			else
+				if this.AA_OutsideToe_Closure_Slot_Above != null then
+					delete AA_OutsideToe_Closure_Slot_Above
+				end if
+			end if    
+
+			;counter recess
+			if this.AA_Counter_Height_OptionState == null then
+				AA_Counter_Height_OptionState<int> = '<lst>1) Hide all=2|2) Show all=1'
+				AA_Counter_Height_OptionState<style> = 1
+			end if
+			AA_Counter_Height_OptionState<desc> = 'Face: 03) Counter Recess 1) Options'
+			
+			;Counter recess height
+			if this.AA_Counter_Height == null then
+				AA_Counter_Height<meas> := 0
+			end if
+			AA_Counter_Height<style> = AA_Counter_Height_OptionState
+			AA_Counter_Height<desc> = 'Face: 03) Counter Recess 2) Height (-1 = auto)'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Counter_Height<meas> := this.{TEMP_CopyFromObject}.AA_Counter_Height
+			end if
+			{TEMP_CopyToObject}.AA_Counter_Height<meas> := AA_Counter_Height
+			AA_Counter_Height_Use := AA_Counter_Height
+			
+			;counter recess depth
+			if this.AA_Counter_Recess == null then
+				AA_Counter_Recess<meas> := 0
+			end if
+			AA_Counter_Recess<style> = AA_Counter_Height_OptionState
+			AA_Counter_Recess<desc> = 'Face: 03) Counter Recess 3) Recess'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Counter_Recess<meas> := this.{TEMP_CopyFromObject}.AA_Counter_Recess
+			end if
+			{TEMP_CopyToObject}.AA_Counter_Recess<meas> := AA_Counter_Recess
+			
+			;counter recess AFF
+			if this.AA_Counter_AFF == null then
+				AA_Counter_AFF<meas> := -1
+			end if
+			AA_Counter_AFF<style> = AA_Counter_Height_OptionState
+			AA_Counter_AFF<desc> = 'Face: 03) Counter Recess 4) AFF (-1 = auto)'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Counter_AFF<meas> := this.{TEMP_CopyFromObject}.AA_Counter_AFF
+			end if
+			{TEMP_CopyToObject}.AA_Counter_AFF<meas> := AA_Counter_AFF
+			AA_Counter_AFF_Use<meas> := AA_Counter_AFF
+			
+			;counter recess closure
+			if this.AA_Counter_Closure == null then
+				AA_Counter_Closure<int> = '<lst>1) None=1|2) Enable=2'
+			end if                          
+			AA_Counter_Closure<desc> = 'Face: 03) Counter Recess 5) Closure (below)'
+			AA_Counter_Closure<style> = AA_Counter_Height_OptionState
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Counter_Closure<int> := this.{TEMP_CopyFromObject}.AA_Counter_Closure
+			end if
+			{TEMP_CopyToObject}.AA_Counter_Closure<int> := AA_Counter_Closure    
+			
+			if AA_Counter_Closure > 1 then
+				;slot
+				if this.AA_Counter_Closure_Slot_Below == null then
+					AA_Counter_Closure_Slot_Below<meas> := -1
+				end if                          
+				AA_Counter_Closure_Slot_Below<desc> = 'Face: 03) Counter Recess 5.1) Closure Plow (-1=default)'
+				AA_Counter_Closure_Slot_Below<style> = AA_Counter_Height_OptionState
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_Counter_Closure_Slot_Below<meas> := this.{TEMP_CopyFromObject}.AA_Counter_Closure_Slot_Below
+				end if
+				{TEMP_CopyToObject}.AA_Counter_Closure_Slot_Below<meas> := AA_Counter_Closure_Slot_Below
+			else
+				if this.AA_Counter_Closure_Slot_Below != null then
+					delete AA_Counter_Closure_Slot_Below
+				end if
+			end if    
+
+			
+			if AA_Lowest_Wall_Counter_AFF > 0 and AA_Lowest_Wall_Counter_DZ > 0 then
+				if AA_Counter_Height_Use == -1 then
+					AA_Counter_Height_Use := AA_Lowest_Wall_Counter_DZ + 0.0625
+				end if
+				if AA_Counter_Height_Use == -1 then
+					AA_Counter_AFF_Use := AA_Lowest_Wall_Counter_AFF
+				end if
+			end if
+		end if
+		
+		;structural cleats
+		if this.AA_Cleats_Number == null then
+			AA_Cleats_Number<int> := 0
+			AA_Cleats_Number<style> = 1
+		end if
+		AA_Cleats_Number<desc> = 'Face: 04) Cleat 1) Quantity'
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_Cleats_Number<int> := this.{TEMP_CopyFromObject}.AA_Cleats_Number
+		end if
+		;if JONAH_Has_FACE_To_Left == 1 and JONAH_FACE_TO_LEFT_AY == JONAH_FACE_AY then
+			;when faces are in line we let the left cleats run through
+			;AA_Cleats_Number<int> := 0
+		;end if
+		
+		{TEMP_CopyToObject}.AA_Cleats_Number<int> := AA_Cleats_Number
+		
+		;these we want per face even if we're following another face
+		delete AA_Cleats_OptionsState
+		if Cab.{AA_FollowFace_Studs}.TR.AA_Cleats_Number > 0 or Cab.{AA_FollowFace_Studs}.TR.AA_OutsideToe_Cleat > 0 then
+			if this.AA_Cleats_OptionsState_New != null then
+				TEMP_Stored_OptionState<int> := this.AA_Cleats_OptionsState_New
+			end if
+			if this.AA_Cleats_OptionsState_New == null then
+				AA_Cleats_OptionsState_New<int> := 2
+				AA_Cleats_OptionsState_New<style> = 1
+			end if
+			
+			TEMP_Cleat_Options<text> = ''
+			TEMP_Loop_CleatOption<int> := 1
+			if Cab.{AA_FollowFace_Studs}.TR.AA_OutsideToe_Cleat > 0 then
+				TEMP_Loop_CleatOption<int> := 0
+			end if
+			while TEMP_Loop_CleatOption <= Cab.{AA_FollowFace_Studs}.TR.AA_Cleats_Number do
+				TEMP_OptionNum<int> := TEMP_Loop_CleatOption + 7
+				if TEMP_OptionNum < 10 then
+					TEMP_OptionNumText<text> = '0{TEMP_OptionNum}'
+				else
+					TEMP_OptionNumText<text> = '{TEMP_OptionNum}'
+				end if
+				TEMP_Cleat_Options<text> = '{TEMP_Cleat_Options}|{TEMP_OptionNumText}) Cleat #{TEMP_Loop_CleatOption} ONLY={TEMP_OptionNum}'
+				
+				TEMP_Loop_CleatOption<int> += 1
+			end while
+			delete TEMP_Loop_CleatOption
+			delete TEMP_OptionNumText
+			delete TEMP_OptionNum 
+			
+			AA_Cleats_OptionsState_New<int> = '<lst>01) Hide All=1|02) Show Basic Only=2|03) Show All=3|04) Show Face Level Only=4|05) Show Cleat Level Breaks Only=5|06) Add/Delete=6{TEMP_Cleat_Options}'
+			AA_Cleats_OptionsState_New<desc> = 'Face: 04) Cleat 2) Options'
+			
+			delete TEMP_Cleat_Options
+			
+			if this.TEMP_Stored_OptionState != null then
+				AA_Cleats_OptionsState_New<int> := TEMP_Stored_OptionState
+				delete TEMP_Stored_OptionState
+			end if
+			
+			
+			if AA_Cleats_OptionsState_New == 6 then
+				if this.AA_Cleats_Modify_Delete == null then
+					AA_Cleats_Modify_Delete<int> := -1
+					AA_Cleats_Modify_Delete<style> = 1
+					AA_Cleats_Modify_Delete<desc> = 'Face: 04) Cleat 2.1) Modify - Delete'
+				end if
+				if this.AA_Cleats_Modify_Insert == null then
+					AA_Cleats_Modify_Insert<int> := -1
+					AA_Cleats_Modify_Insert<style> = 1
+					AA_Cleats_Modify_Insert<desc> = 'Face: 04) Cleat 2.2) Modify - Insert After'
+				else
+					if AA_Cleats_Modify_Insert >= 0 then
+						AA_Cleats_Number<int> := AA_Cleats_Number + 1
+					end if
+				end if
+			else
+				delete AA_Cleats_Modify_Delete
+				delete AA_Cleats_Modify_Insert
+			end if
+			
+			AA_Cleats_OptionState_ExceptAFF<int> := 2
+			AA_Cleats_OptionState_AFF<int> := 2
+			AA_Cleats_OptionState_FaceOnly<int> := 2
+			AA_Cleats_OptionState_Breaks<int> := 2
+			
+			if AA_Cleats_OptionsState_New == 3 then
+				AA_Cleats_OptionState_FaceOnly<int> := 1
+				AA_Cleats_OptionState_ExceptAFF<int> := 1
+				AA_Cleats_OptionState_AFF<int> := 1
+			else
+			 	if AA_Cleats_OptionsState_New == 2 then
+			 		AA_Cleats_OptionState_AFF<int> := 1
+			 	else
+			 		if AA_Cleats_OptionsState_New == 4 then
+			 			AA_Cleats_OptionState_FaceOnly<int> := 1
+			 		end if
+			 	end if
+			 end if
+			 if AA_Cleats_OptionsState_New == 5 or AA_Cleats_OptionsState_New == 3 then
+			 	AA_Cleats_OptionState_Breaks<int> := 1
+			 end if
+			 
+			 ;face adjust left
+			 if this.AA_Cleats_ADJL == null then
+				AA_Cleats_ADJL<meas> := 0
+			end if
+			AA_Cleats_ADJL<style> = AA_Cleats_OptionState_FaceOnly                     
+			AA_Cleats_ADJL<desc> = 'Face: 04) Cleat 3) Face Adjust Left'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Cleats_ADJL<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_ADJL
+			end if
+			{TEMP_CopyToObject}.AA_Cleats_ADJL<meas> := AA_Cleats_ADJL
+			
+			;face adjust right
+			if this.AA_Cleats_ADJR == null then
+				AA_Cleats_ADJR<meas> := 0
+			end if
+			AA_Cleats_ADJR<style> = AA_Cleats_OptionState_FaceOnly
+			AA_Cleats_ADJR<desc> = 'Face: 04) Cleat 4) Face Adjust Right'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Cleats_ADJR<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_ADJR
+			end if
+			{TEMP_CopyToObject}.AA_Cleats_ADJR<meas> := AA_Cleats_ADJR
+			
+			;face plow
+			if this.AA_Cleats_PLOW == null then
+				AA_Cleats_PLOW<meas> := -1
+			end if
+			AA_Cleats_PLOW<style> = AA_Cleats_OptionState_FaceOnly
+			AA_Cleats_PLOW<desc> = 'Face: 04) Cleat 5) Plow Into Stud (-1 = default)'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Cleats_PLOW<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_PLOW
+			end if
+			{TEMP_CopyToObject}.AA_Cleats_PLOW<meas> := AA_Cleats_PLOW
+			
+			;face screw holes
+			if this.AA_Cleats_ScrewHoles == null then
+				AA_Cleats_ScrewHoles<bool> = true
+			end if
+			AA_Cleats_ScrewHoles<style> = AA_Cleats_OptionState_FaceOnly
+			AA_Cleats_ScrewHoles<desc> = 'Face: 04) Cleat 6) Screw Holes'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Cleats_ScrewHoles<bool> := this.{TEMP_CopyFromObject}.AA_Cleats_ScrewHoles
+			end if
+			{TEMP_CopyToObject}.AA_Cleats_ScrewHoles<bool> := AA_Cleats_ScrewHoles
+			
+			;face break
+			if this.AA_Cleats_Break == null then
+				AA_Cleats_Break<meas> := 0
+			end if
+			AA_Cleats_Break<style> = AA_Cleats_OptionState_FaceOnly
+			AA_Cleats_Break<desc> = 'Face: 04) Cleat 7) Break'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Cleats_Break<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_Break
+			end if
+			{TEMP_CopyToObject}.AA_Cleats_Break<meas> := AA_Cleats_Break
+			
+			;delete all parts
+			if this.AA_Cleats_NoParts == null then
+				AA_Cleats_NoParts<bool> := 0
+			end if
+			AA_Cleats_NoParts<style> = AA_Cleats_OptionState_FaceOnly
+			AA_Cleats_NoParts<desc> = 'Face: 04) Cleat 8) Delete Parts'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Cleats_NoParts<bool> := this.{TEMP_CopyFromObject}.AA_Cleats_NoParts
+			end if
+			{TEMP_CopyToObject}.AA_Cleats_NoParts<bool> := AA_Cleats_NoParts
+
+			if this.RADIUS != null then
+				;delete all parts
+				if this.AA_Cleats_Strut_State == null then
+					AA_Cleats_Strut_State<int> = '<lst>1) Automatic=1|2) Strut and Cleat=2|3) Strut Only=3|4) Cleat Only=4'
+					if this.AA_Cleats_Strut_Disable == 1 then
+						;old for compatibility
+						AA_Cleats_Strut_State<int> := 4
+					end if
+				end if
+				AA_Cleats_Strut_State<style> = AA_Cleats_OptionState_FaceOnly
+				AA_Cleats_Strut_State<desc> = 'Face: 04) Cleat 9) Struts'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_Cleats_Strut_State<int> := this.{TEMP_CopyFromObject}.AA_Cleats_Strut_State
+				end if
+				{TEMP_CopyToObject}.AA_Cleats_Strut_State<int> := AA_Cleats_Strut_State
+			end if			
+			
+		else
+			delete AA_Cleats_OptionsState_New
+			delete AA_Cleats_ADJR
+			delete AA_Cleats_ADJL
+			delete AA_Cleats_PLOW
+			delete AA_Cleats_ScrewHoles
+			delete AA_Cleats_Break
+			delete AA_Cleats_NoParts
+			delete AA_Cleats_Strut_State
+		end if
+
+		if this.AA_FollowFace_Studs != '{FaceName}' then
+			AA_Cleats_Number<int> := 0
+		end if
+		
+		;if JONAH_Has_FACE_To_Left == 1 and JONAH_FACE_TO_LEFT_AY == JONAH_FACE_AY then
+			;when faces are in line we let the left face run through
+;			delete AA_Cleats_Number
+		;end if
+		
+		;REMEMBER WHEN ADDING ANY NEW ATTRIBUTES IN HERE TO ADD TO INSERTING AND DELETING CODE
+		
+		TEMP_Loop1<int> := 0
+		while this.AA_Cleats_{TEMP_Loop1}_Width != null or TEMP_Loop1 <= Cab.{AA_FollowFace_Studs}.TR.AA_Cleats_Number do
+			
+			TEMP_Add_Parms<int> := 0
+			if TEMP_Loop1 == 0 then
+				if Cab.{AA_FollowFace_Studs}.TR.AA_OutsideToe_Cleat > 0 then
+					TEMP_Add_Parms<int> := 1
+				end if
+			else
+				if TEMP_Loop1 <= Cab.{AA_FollowFace_Studs}.TR.AA_Cleats_Number then
+					TEMP_Add_Parms<int> := 1
+				end if
+			end if
+			
+			if TEMP_Add_Parms == 1 then
+				if AA_Cleats_OptionsState_New > 6 then
+					;showing only cleat
+					if AA_Cleats_OptionsState_New - 7 == TEMP_Loop1 then
+						;show all
+						AA_Cleats_OptionState_ExceptAFF<int> := 1
+						AA_Cleats_OptionState_AFF<int> := 1
+					else
+						;hide
+						AA_Cleats_OptionState_ExceptAFF<int> := 2
+						AA_Cleats_OptionState_AFF<int> := 2
+					end if	
+				end if
+								
+				if this.AA_FollowFace_Studs == '{FaceName}' then
+					;we only want these if we're not following a face
+					if this.AA_Cleats_{TEMP_Loop1}_Width == null then
+						AA_Cleats_{TEMP_Loop1}_Width<meas> := -1
+					end if
+					AA_Cleats_{TEMP_Loop1}_Width<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 01) Width'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_Width<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Width
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Width<meas> := AA_Cleats_{TEMP_Loop1}_Width
+					
+					;aff
+					if this.AA_Cleats_{TEMP_Loop1}_AFF == null then
+						AA_Cleats_{TEMP_Loop1}_AFF<meas> := -1
+					end if
+					AA_Cleats_{TEMP_Loop1}_AFF<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 02) AFF (-1 = auto)'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_AFF<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_AFF
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_AFF<meas> := AA_Cleats_{TEMP_Loop1}_AFF
+					
+					;inset
+					if this.AA_Cleats_{TEMP_Loop1}_Inset == null then
+						AA_Cleats_{TEMP_Loop1}_Inset<meas> := 0
+					end if
+					AA_Cleats_{TEMP_Loop1}_Inset<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 03) Inset'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_Inset<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Inset
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Inset<meas> := AA_Cleats_{TEMP_Loop1}_Inset
+					
+					;plow
+					if this.AA_Cleats_{TEMP_Loop1}_PLOW == null then
+						AA_Cleats_{TEMP_Loop1}_PLOW<meas> := -1
+					end if
+					if Cab.AA_CaseworkWall_VersionLast < 2.4 and this.AA_Cleats_{TEMP_Loop1}_PLOW == 0 then
+						AA_Cleats_{TEMP_Loop1}_PLOW<meas> := -1
+					end if
+					AA_Cleats_{TEMP_Loop1}_PLOW<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 06) Plow Into Stud (-1 = default)'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_PLOW<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_PLOW
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_PLOW<meas> := AA_Cleats_{TEMP_Loop1}_PLOW
+					
+					;Rabbet
+					if this.AA_Cleats_{TEMP_Loop1}_Rabbet == null then
+						AA_Cleats_{TEMP_Loop1}_Rabbet<int> = '<lst>1) None=1|2) Top=2|3) Bottom=3'
+					end if
+					AA_Cleats_{TEMP_Loop1}_Rabbet<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 14) Rabbet'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_Rabbet<int> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Rabbet
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Rabbet<int> := AA_Cleats_{TEMP_Loop1}_Rabbet
+					
+					;rabbet depth
+					if this.AA_Cleats_{TEMP_Loop1}_Rabbet_Depth == null then
+						AA_Cleats_{TEMP_Loop1}_Rabbet_Depth<meas> := 0.25
+					end if
+					AA_Cleats_{TEMP_Loop1}_Rabbet_Depth<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 15) Rabbet Depth'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_Rabbet_Depth<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Rabbet_Depth
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Rabbet_Depth<meas> := AA_Cleats_{TEMP_Loop1}_Rabbet_Depth
+					
+					;rabbet width
+					if this.AA_Cleats_{TEMP_Loop1}_Rabbet_Width == null then
+						AA_Cleats_{TEMP_Loop1}_Rabbet_Width<meas> := 0.25
+					end if
+					AA_Cleats_{TEMP_Loop1}_Rabbet_Width<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 16) Rabbet Width'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_Rabbet_Width<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Rabbet_Width
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Rabbet_Width<meas> := AA_Cleats_{TEMP_Loop1}_Rabbet_Width
+					
+					;adjust top
+					if this.AA_Cleats_{TEMP_Loop1}_ADJT == null then
+						AA_Cleats_{TEMP_Loop1}_ADJT<meas> := 0
+					end if
+					AA_Cleats_{TEMP_Loop1}_ADJT<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 17) Adjust Top'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_ADJT<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_ADJT
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_ADJT<meas> := AA_Cleats_{TEMP_Loop1}_ADJT
+					
+					;adjust bottom
+					if this.AA_Cleats_{TEMP_Loop1}_ADJB == null then
+						AA_Cleats_{TEMP_Loop1}_ADJB<meas> := 0
+					end if
+					AA_Cleats_{TEMP_Loop1}_ADJB<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 18) Adjust Bottom'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_ADJB<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_ADJB
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_ADJB<meas> := AA_Cleats_{TEMP_Loop1}_ADJB
+					
+					;closure
+					if TEMP_Loop1 > 0 then
+						;toe is controlled by toe setting
+						if this.AA_Cleats_{TEMP_Loop1}_Closure == null then
+							AA_Cleats_{TEMP_Loop1}_Closure<int> = '<lst>1) None=1|2) Top=3|3) Bottom=5|4) Both=7' ;spaces left for with part/without part
+						end if
+						AA_Cleats_{TEMP_Loop1}_Closure<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 19) Closure'
+						if TEMP_Using_CopyFromObject == 1 then
+							AA_Cleats_{TEMP_Loop1}_Closure<int> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Closure
+						end if
+						{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Closure<int> := AA_Cleats_{TEMP_Loop1}_Closure
+						AA_Cleats_{TEMP_Loop1}_Closure<style> = AA_Cleats_OptionState_ExceptAFF 
+						
+						if this.AA_Cleats_{TEMP_Loop1}_Closure > 1 then
+							if this.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above == null then
+								AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<meas> := -1
+								AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<style> = 1
+								AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<Desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 19.1) Closure Plow Above (-1=default)'
+							end if
+							if TEMP_Using_CopyFromObject == 1 then
+								AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above
+							end if
+							{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<meas> := AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above
+							AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<style> = AA_Cleats_OptionState_ExceptAFF 
+							
+							if this.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below == null then
+								AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below<meas> := -1
+								AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below<style> = 1
+								AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below<Desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 19.2) Closure Plow Below (-1=default)'
+							end if
+							if TEMP_Using_CopyFromObject == 1 then
+								AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below
+							end if
+							{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below<meas> := AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below
+							AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<style> = AA_Cleats_OptionState_ExceptAFF 
+						else
+							if this.AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above != null then
+								delete AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above
+								delete AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below
+							end if
+						end if
+					end if
+					
+					
+					;auto width
+					AA_Cleats_{TEMP_Loop1}_Width_USE<meas> := AA_Cleats_{TEMP_Loop1}_Width
+					if AA_Cleats_{TEMP_Loop1}_Width_USE == -1 then
+						if TEMP_Loop1 == 0 then
+							;toe cleat
+							AA_Cleats_{TEMP_Loop1}_Width_USE := AA_OutsideToe_Height
+						else
+							AA_Cleats_{TEMP_Loop1}_Width_USE := 3
+						end if
+					end if		
+
+					;auto inset, height and just a little bit of auto width - its ok to directly address ToeHeight here because we aren't ever running those code on faces that are following
+					AA_Cleats_{TEMP_Loop1}_AFF_USE<meas> := AA_Cleats_{TEMP_Loop1}_AFF
+					AA_Cleats_{TEMP_Loop1}_Inset_USE := AA_Cleats_{TEMP_Loop1}_Inset
+					if TEMP_Loop1 == 0 then
+						if AA_Cleats_{TEMP_Loop1}_AFF_USE == -1 then
+							AA_Cleats_{TEMP_Loop1}_AFF_USE := 0
+						end if
+						AA_Cleats_{TEMP_Loop1}_Inset_USE += AA_OutsideToe_Recess
+						if AA_OutsideToe_Cleat == 2 then
+							AA_Cleats_{TEMP_Loop1}_Inset_USE -= Cab.WALLCLEAT_DZ
+						end if
+					else
+						if TEMP_Loop1 == 1 then
+							if AA_OutsideToe_Height == 0 then
+								if AA_IsOutsideFace == 1 and AA_Cleats_{TEMP_Loop1}_Width == -1 then									
+									AA_Cleats_{TEMP_Loop1}_Width_USE := 5
+								end if
+							end if
+							if AA_Cleats_{TEMP_Loop1}_AFF_USE == -1 then
+								;move up for the toe kick
+								AA_Cleats_{TEMP_Loop1}_AFF_USE := AA_OutsideToe_Height
+								if AA_OutsideToe_Closure > 1 then
+									AA_Cleats_{TEMP_Loop1}_AFF_USE += Cab.WALLCLEAT_DZ
+								end if
+							end if
+						else
+							if TEMP_Loop1 == this.AA_Cleats_Number and TEMP_Loop1 > 0 then
+								;top
+								if AA_IsOutsideFace == 1 and AA_Cleats_{TEMP_Loop1}_Width == -1 then
+									AA_Cleats_{TEMP_Loop1}_Width_USE := 5
+								end if
+								if AA_Cleats_{TEMP_Loop1}_AFF_USE == -1 then
+									AA_Cleats_{TEMP_Loop1}_AFF_USE := Cab.DY - this.AA_Cleats_{TEMP_Loop1}_Width_USE
+									if  Cab.AA_CaseworkWall_VersionLast >= 2.5 then
+										if Cab.SCT != 0 then
+											AA_Cleats_{TEMP_Loop1}_AFF_USE -= Cab.SCT
+										end if
+									end if
+								end if
+							else
+								;intermediates - first handle the under counter one on the inside
+								if AA_Cleats_Number == 3 and TEMP_Loop1 == 2 and AA_Lowest_Wall_Counter_AFF > 0 then
+									;special case for middles on inside/outside
+									if AA_IsInsideFace == 1 then
+										if AA_Cleats_{TEMP_Loop1}_Width == -1 then
+											AA_Cleats_{TEMP_Loop1}_Width_Use := 5
+										end if
+										if AA_Cleats_{TEMP_Loop1}_AFF_USE == -1 then
+											AA_Cleats_{TEMP_Loop1}_AFF_USE := AA_Lowest_Wall_Counter_AFF - AA_Cleats_{TEMP_Loop1}_Width_Use
+										end if
+									end if
+	
+									if AA_Cleats_{TEMP_Loop1}_AFF_USE == -1 and AA_IsOutsideFace == 1 then
+										AA_Cleats_{TEMP_Loop1}_AFF_USE := AA_Lowest_Wall_Counter_AFF - AA_Cleats_{TEMP_Loop1}_Width_Use * 2
+									end if
+								else
+									if AA_Cleats_{TEMP_Loop1}_AFF_USE == -1 then
+										AA_Cleats_{TEMP_Loop1}_AFF_USE := CAb.DY/this.AA_Cleats_Number*TEMP_Loop1 - this.AA_Cleats_{TEMP_Loop1}_Width_Use/2
+										if AA_IsOutsideFace == 1 then
+											AA_Cleats_{TEMP_Loop1}_AFF_USE -= 2
+										end if
+									end if
+								end if
+							end if
+						end if
+						
+						if AA_Counter_RECESS > 0 then
+							if AA_Cleats_{TEMP_Loop1}_AFF_USE + AA_Cleats_{TEMP_Loop1}_Width_USE > AA_Counter_AFF and AA_Cleats_{TEMP_Loop1}_AFF_USE < AA_Counter_AFF + AA_Counter_Height then
+								AA_Cleats_{TEMP_Loop1}_Inset_USE += (AA_Counter_RECESS - AA_CaseworkWall_DoorDZ)
+							end if
+						end if
+					end if
+					
+					;auto inset for canted faces
+					if this.AA_Face_Cant != 90 then
+						TEMP_CANT_Inset := tan(90-AA_Face_Cant) * (Cab.DY - AA_Cleats_{TEMP_Loop1}_AFF_USE)
+_CANT_{TEMP_Loop1} := TEMP_CANT_Inset
+						AA_Cleats_{TEMP_Loop1}_Inset_USE += TEMP_CANT_Inset
+						delete TEMP_CANT_Inset
+					end if
+						
+				
+					AA_Cleats_{TEMP_Loop1}_Width<style> = AA_Cleats_OptionState_AFF
+					AA_Cleats_{TEMP_Loop1}_AFF<style> = AA_Cleats_OptionState_AFF
+					AA_Cleats_{TEMP_Loop1}_Inset<style> = AA_Cleats_OptionState_AFF
+					AA_Cleats_{TEMP_Loop1}_PLOW<style> = AA_Cleats_OptionState_ExceptAFF
+					AA_Cleats_{TEMP_Loop1}_ADJT<style> = AA_Cleats_OptionState_ExceptAFF
+					AA_Cleats_{TEMP_Loop1}_ADJB<style> = AA_Cleats_OptionState_ExceptAFF
+					
+					AA_Cleats_{TEMP_Loop1}_Rabbet<style> = AA_Cleats_OptionState_ExceptAFF
+					if AA_Cleats_{TEMP_Loop1}_Rabbet > 0 then 
+						AA_Cleats_{TEMP_Loop1}_Rabbet_Depth<style> = AA_Cleats_OptionState_ExceptAFF
+						AA_Cleats_{TEMP_Loop1}_Rabbet_Width<style> = AA_Cleats_OptionState_ExceptAFF
+					else
+						AA_Cleats_{TEMP_Loop1}_Rabbet_Depth<style> = 2
+						AA_Cleats_{TEMP_Loop1}_Rabbet_Width<style> = 2
+					end if
+				end if
+				;we want these whether we're following a face or not
+				;adjust left
+				if this.AA_Cleats_{TEMP_Loop1}_ADJL == null then
+					AA_Cleats_{TEMP_Loop1}_ADJL<meas> := 0
+				end if
+				AA_Cleats_{TEMP_Loop1}_ADJL<style> = AA_Cleats_OptionState_ExceptAFF
+				AA_Cleats_{TEMP_Loop1}_ADJL<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 04) Adjust Left'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_Cleats_{TEMP_Loop1}_ADJL<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_ADJL
+				end if
+				{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_ADJL<meas> := AA_Cleats_{TEMP_Loop1}_ADJL
+				
+				;adjust right
+				if this.AA_Cleats_{TEMP_Loop1}_ADJR == null then
+					AA_Cleats_{TEMP_Loop1}_ADJR<meas> := 0
+				end if
+				AA_Cleats_{TEMP_Loop1}_ADJR<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 05) Adjust Right'
+				AA_Cleats_{TEMP_Loop1}_ADJR<style> = AA_Cleats_OptionState_ExceptAFF
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_Cleats_{TEMP_Loop1}_ADJR<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_ADJR
+				end if
+				{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_ADJR<meas> := AA_Cleats_{TEMP_Loop1}_ADJR
+					
+				;I don't think we'll copy these from face to face.
+				;delete part
+				if this.AA_Cleats_{TEMP_Loop1}_NoPart == null then
+					AA_Cleats_{TEMP_Loop1}_NoPart<bool> := 0
+				end if
+				AA_Cleats_{TEMP_Loop1}_NoPart<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 07) Delete Part'
+				AA_Cleats_{TEMP_Loop1}_NoPart<style> = AA_Cleats_OptionState_ExceptAFF
+				
+				;breaks count
+				if this.AA_Cleats_{TEMP_Loop1}_Breaks_Count == null then
+					if this.AA_Cleats_{TEMP_Loop1}_DeleteFrom > 0 or this.AA_Cleats_{TEMP_Loop1}_DeleteTo > 0 then
+						;backwards compatibility
+						AA_Cleats_{TEMP_Loop1}_Breaks_Count<int> := 1
+					else
+						AA_Cleats_{TEMP_Loop1}_Breaks_Count<int> := 0
+					end if
+				else
+					;fix for mistake
+					if Cab.AA_CaseworkWall_VersionLast < 2.2 and AA_Cleats_{TEMP_Loop1}_Breaks_Count == 1 and AA_Cleats_{TEMP_Loop1}_Breaks_From_1 = 0 and AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks} == 0 then
+						AA_Cleats_{TEMP_Loop1}_Breaks_Count<int> := 0
+					end if
+				
+				end if
+				AA_Cleats_{TEMP_Loop1}_Breaks_Count<style> = AA_Cleats_OptionState_Breaks
+				AA_Cleats_{TEMP_Loop1}_Breaks_Count<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 08) Quantity Breaks'
+				
+				TEMP_Loop_Breaks<int> := 1
+				while TEMP_Loop_Breaks <= AA_Cleats_{TEMP_Loop1}_Breaks_Count or this.AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks} != null do  
+					if TEMP_Loop_Breaks > AA_Cleats_{TEMP_Loop1}_Breaks_Count then
+						delete AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks}
+						delete AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks}
+					else
+						;from
+						if this.AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks} == null then
+							if this.AA_Cleats_{TEMP_Loop1}_DeleteFrom != null then
+								;backwards compatibility
+								AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks}<meas> := AA_Cleats_{TEMP_Loop1}_DeleteFrom
+							else
+								AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks}<meas> := 0
+							end if
+						end if
+						AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks}<style> = AA_Cleats_OptionState_Breaks
+						AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks}<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 09) #{TEMP_Loop_Breaks} From'
+						
+						;to
+						if AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks} == null then
+							if this.AA_Cleats_{TEMP_Loop1}_DeleteFrom > 0 or this.AA_Cleats_{TEMP_Loop1}_DeleteTo > 0 then
+								;backwards compatibility
+								AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks}<meas> := AA_Cleats_{TEMP_Loop1}_DeleteTo - AA_Cleats_{TEMP_Loop1}_DeleteFrom
+							else
+								AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks}<meas> := 0
+							end if
+						end if
+						AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks}<style> = AA_Cleats_OptionState_Breaks
+						AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks}<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 09) #{TEMP_Loop_Breaks} Width'
+					end if
+					
+					TEMP_Loop_Breaks<int> += 1
+				end while
+				delete TEMP_Loop_Breaks
+				
+				;remove old way of doing this.
+				delete AA_Cleats_{TEMP_Loop1}_DeleteFrom
+				delete AA_Cleats_{TEMP_Loop1}_DeleteTo
+				
+				if this.RADIUS != null then
+					;radius unit
+					;strut state
+					if this.AA_Cleats_{TEMP_Loop1}_Strut_State == null then
+						AA_Cleats_{TEMP_Loop1}_Strut_State<int> = '<lst>1) Automatic=1|2) Strut and Cleat=2|3) Strut Only=3|4) Cleat Only=4'
+					
+						;for compatibility
+						if this.AA_Cleats_{TEMP_Loop1}_Strut_Disable == 1 and this.AA_Cleats_{TEMP_Loop1}_Strut_Only == 0 then
+							AA_Cleats_{TEMP_Loop1}_Strut_State<int> := 4
+						else
+							if this.AA_Cleats_{TEMP_Loop1}_Strut_Disable == 0 and this.AA_Cleats_{TEMP_Loop1}_Strut_Only == 1 then
+								AA_Cleats_{TEMP_Loop1}_Strut_State<int> := 3
+							end if
+						end if
+					end if
+					AA_Cleats_{TEMP_Loop1}_Strut_State<style> = AA_Cleats_OptionState_AFF
+					AA_Cleats_{TEMP_Loop1}_Strut_State<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 10) Strut'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_Strut_State<int> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Strut_State
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Strut_State<int> := AA_Cleats_{TEMP_Loop1}_Strut_State
+					AA_Cleats_{TEMP_Loop1}_Strut_State_USE<int> := AA_Cleats_{TEMP_Loop1}_Strut_State
+					if AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 1 then
+						;automatic
+						AA_Cleats_{TEMP_Loop1}_Strut_State_USE<int> := AA_Cleats_Strut_State
+						if AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 1 then
+							AA_Cleats_{TEMP_Loop1}_Strut_State_USE<int> := 2
+						end if
+					end if
+					
+					;strut position
+					if this.AA_Cleats_{TEMP_Loop1}_Strut_Position == null then
+						AA_Cleats_{TEMP_Loop1}_Strut_Position<meas> := -4
+					end if
+					AA_Cleats_{TEMP_Loop1}_Strut_Position<style> = AA_Cleats_OptionState_AFF
+					AA_Cleats_{TEMP_Loop1}_Strut_Position<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 11) Strut: Position (-1=center,-2=bottom,-3=top,-4=auto)'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_Strut_Position<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Strut_Position
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Strut_Position<meas> := AA_Cleats_{TEMP_Loop1}_Strut_Position
+					
+					;strut auto position
+					AA_Cleats_{TEMP_Loop1}_Strut_Position_USE := AA_Cleats_{TEMP_Loop1}_Strut_Position
+					if AA_Cleats_{TEMP_Loop1}_Strut_Position_USE == -4 then
+						AA_Cleats_{TEMP_Loop1}_Strut_Position_USE<meas> := -1 ;center
+					 	if AA_Cleats_{TEMP_Loop1}_AFF_USE == 0 then
+					 		AA_Cleats_{TEMP_Loop1}_Strut_Position_USE<meas> := -3 ;top
+					 	else
+					 		if AA_Cleats_{TEMP_Loop1}_AFF_USE + AA_Cleats_{TEMP_Loop1}_Width_USE >= Cab.DY - Cab.AA_Effective_SCT - 1 then
+					 			AA_Cleats_{TEMP_Loop1}_Strut_Position_USE<meas> := -2 ;bottom
+					 		end if
+					 	end if
+					 end if
+					 	
+					;strut width
+					if this.AA_Cleats_{TEMP_Loop1}_Strut_Width == null then
+						AA_Cleats_{TEMP_Loop1}_Strut_Width<meas> := -1
+					end if
+					AA_Cleats_{TEMP_Loop1}_Strut_Width<style> = AA_Cleats_OptionState_AFF
+					AA_Cleats_{TEMP_Loop1}_Strut_Width<desc> = 'Face: 04) Cleat 8) #{TEMP_Loop1} 12) Strut: Width (-1 = auto)'
+					if TEMP_Using_CopyFromObject == 1 then
+						AA_Cleats_{TEMP_Loop1}_Strut_Width<meas> := this.{TEMP_CopyFromObject}.AA_Cleats_{TEMP_Loop1}_Strut_Width
+					end if
+					{TEMP_CopyToObject}.AA_Cleats_{TEMP_Loop1}_Strut_Width<meas> := AA_Cleats_{TEMP_Loop1}_Strut_Width
+				else
+					if this.AA_Cleats_{TEMP_Loop1}_Strut_State != null then 
+						delete AA_Cleats_{TEMP_Loop1}_Strut_Position
+						delete AA_Cleats_{TEMP_Loop1}_Strut_State
+						delete AA_Cleats_{TEMP_Loop1}_Strut_Width
+					end if
+				end if
+			else
+				delete AA_Cleats_{TEMP_Loop1}_Width
+				delete AA_Cleats_{TEMP_Loop1}_Width_USE
+				delete AA_Cleats_{TEMP_Loop1}_AFF
+				delete AA_Cleats_{TEMP_Loop1}_AFF_USE
+				delete AA_Cleats_{TEMP_Loop1}_Inset
+				delete AA_Cleats_{TEMP_Loop1}_ADJL
+				delete AA_Cleats_{TEMP_Loop1}_ADJR
+				delete AA_Cleats_{TEMP_Loop1}_PLOW
+				delete AA_Cleats_{TEMP_Loop1}_NoPart
+				delete AA_Cleats_{TEMP_Loop1}_ADJT
+				delete AA_Cleats_{TEMP_Loop1}_ADJB
+				delete AA_Cleats_{TEMP_Loop1}_Closure
+				delete AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above
+				delete AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below
+				
+				if AA_Cleats_{TEMP_Loop1}_Breaks_Count > 0 then 
+					TEMP_Loop_Breaks<int> := 1
+					while TEMP_Loop_Breaks <= AA_Cleats_{TEMP_Loop1}_Breaks_Count or this.AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks} != null do  
+						delete AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks}
+						delete AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks}
+					
+						TEMP_Loop_Breaks<int> += 1
+					end while
+					delete TEMP_Loop_Breaks
+				end if
+
+				delete AA_Cleats_{TEMP_Loop1}_Breaks_Count
+				delete AA_Cleats_{TEMP_Loop1}_Strut_State
+				delete AA_Cleats_{TEMP_Loop1}_Strut_Position
+				delete AA_Cleats_{TEMP_Loop1}_Strut_Width
+				delete AA_Cleats_{TEMP_Loop1}_Rabbet
+				delete AA_Cleats_{TEMP_Loop1}_Rabbet_Depth
+				delete AA_Cleats_{TEMP_Loop1}_Rabbet_Width	
+			end if
+			
+			;cleanup old stuff
+			delete AA_Cleats_{TEMP_Loop1}_Strut_Disable
+			delete AA_Cleats_{TEMP_Loop1}_Strut_Only
+			
+			delete TEMP_Add_Parms
+			
+			TEMP_Loop1<int> += 1
+		end while
+		delete TEMP_Loop1		
+		
+		if this.AA_FollowFace_Studs != '{FaceName}' then
+			delete AA_Cleats_Number
+		end if
+		
+		;wire chases
+		if this.AA_WireChase_Number == null then
+			AA_WireChase_Number<int> := 0
+			AA_WireChase_Number<style> = 1
+		end if
+		AA_WireChase_Number<desc> = 'Face: 05) Wire Chase 1) Quantity'
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_WireChase_Number<int> := this.{TEMP_CopyFromObject}.AA_WireChase_Number
+		end if
+		{TEMP_CopyToObject}.AA_WireChase_Number<meas> := AA_WireChase_Number
+		
+		if this.AA_FollowFace_Studs != '{FaceName}' then
+			AA_WireChase_Number<int> := 0
+		end if
+		
+		if this.AA_WireChase_Number > 0 then
+			if this.AA_WireChase_OptionsState == null then
+				AA_WireChase_OptionsState<int> = '<lst>1) Hide=2|2) Show=1'
+				AA_WireChase_OptionsState<int> := 1
+				AA_WireChase_OptionsState<style> = 1
+			end if
+			AA_WireChase_OptionsState<desc> = 'Face: 05) Wire Chase 2) Options'
+		else
+			delete AA_WireChase_OptionsState
+		end if 
+		
+		TEMP_Loop1<int> := 1
+		while this.AA_WireChase_{TEMP_Loop1}_Width != null or TEMP_Loop1 <= AA_WireChase_Number do
+			if TEMP_Loop1 <= AA_WireChase_Number then
+				;width
+				if this.AA_WireChase_{TEMP_Loop1}_Width == null then
+					AA_WireChase_{TEMP_Loop1}_Width<meas> := -1
+					AA_WireChase_{TEMP_Loop1}_Width<style> := 1
+				end if
+				AA_WireChase_{TEMP_Loop1}_Width<desc> = 'Face: 05) Wire Chase 3) #{TEMP_Loop1} 1) Width'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_WireChase_{TEMP_Loop1}_Width<meas> := this.{TEMP_CopyFromObject}.AA_WireChase_{TEMP_Loop1}_Width
+				end if
+				{TEMP_CopyToObject}.AA_WireChase_{TEMP_Loop1}_Width<meas> := AA_WireChase_{TEMP_Loop1}_Width
+				
+				;height
+				if this.AA_WireChase_{TEMP_Loop1}_Height == null then
+					AA_WireChase_{TEMP_Loop1}_Height<meas> := 8
+					AA_WireChase_{TEMP_Loop1}_Height<style> := 1
+				end if
+				AA_WireChase_{TEMP_Loop1}_Height<desc> = 'Face: 05) Wire Chase 3) #{TEMP_Loop1} 2) Height'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_WireChase_{TEMP_Loop1}_Height<meas> := this.{TEMP_CopyFromObject}.AA_WireChase_{TEMP_Loop1}_Height
+				end if
+				{TEMP_CopyToObject}.AA_WireChase_{TEMP_Loop1}_Height<meas> := AA_WireChase_{TEMP_Loop1}_Height
+				
+				;aff
+				if this.AA_WireChase_{TEMP_Loop1}_AFF == null then
+					AA_WireChase_{TEMP_Loop1}_AFF<meas> := 12*TEMP_Loop1
+					AA_WireChase_{TEMP_Loop1}_AFF<style> := 1
+				end if
+				AA_WireChase_{TEMP_Loop1}_AFF<desc> = 'Face: 05) Wire Chase 3) #{TEMP_Loop1} 3) AFF'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_WireChase_{TEMP_Loop1}_AFF<meas> := this.{TEMP_CopyFromObject}.AA_WireChase_{TEMP_Loop1}_AFF
+				end if
+				{TEMP_CopyToObject}.AA_WireChase_{TEMP_Loop1}_AFF<meas> := AA_WireChase_{TEMP_Loop1}_AFF
+				
+				;position X
+				if this.AA_WireChase_{TEMP_Loop1}_PosX == null then
+					AA_WireChase_{TEMP_Loop1}_PosX<meas> := 0
+					AA_WireChase_{TEMP_Loop1}_PosX<style> := 1
+				end if
+				AA_WireChase_{TEMP_Loop1}_PosX<desc> = 'Face: 05) Wire Chase 3) #{TEMP_Loop1} 4) Position'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_WireChase_{TEMP_Loop1}_PosX<meas> := this.{TEMP_CopyFromObject}.AA_WireChase_{TEMP_Loop1}_PosX
+				end if
+				{TEMP_CopyToObject}.AA_WireChase_{TEMP_Loop1}_PosX<meas> := AA_WireChase_{TEMP_Loop1}_PosX
+				
+				;type
+				if this.AA_WireChase_{TEMP_Loop1}_Type == null then
+					AA_WireChase_{TEMP_Loop1}_Type<int> = '<lst>1) Rectangle=1|2) Circle=2'
+					AA_WireChase_{TEMP_Loop1}_Type<style> := 1
+				end if
+				AA_WireChase_{TEMP_Loop1}_Type<desc> = 'Face: 05) Wire Chase 3) #{TEMP_Loop1} 5) Type'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_WireChase_{TEMP_Loop1}_Type<int> := this.{TEMP_CopyFromObject}.AA_WireChase_{TEMP_Loop1}_Type
+				end if
+				{TEMP_CopyToObject}.AA_WireChase_{TEMP_Loop1}_Type<meas> := AA_WireChase_{TEMP_Loop1}_Type
+			
+				 AA_WireChase_{TEMP_Loop1}_Width<style> = AA_WireChase_OptionsState 
+				 AA_WireChase_{TEMP_Loop1}_Height<style> = AA_WireChase_OptionsState 
+				 AA_WireChase_{TEMP_Loop1}_AFF<style> = AA_WireChase_OptionsState 
+				 AA_WireChase_{TEMP_Loop1}_Type<style> = AA_WireChase_OptionsState 
+				 AA_WireChase_{TEMP_Loop1}_PosX<style> = AA_WireChase_OptionsState 
+			else
+				delete AA_WireChase_{TEMP_Loop1}_Width
+				delete AA_WireChase_{TEMP_Loop1}_Height
+				delete AA_WireChase_{TEMP_Loop1}_AFF
+				delete AA_WireChase_{TEMP_Loop1}_Type
+				delete AA_WireChase_{TEMP_Loop1}_PosX
+			end if
+			
+			TEMP_Loop1<int> += 1
+		end while
+		delete TEMP_Loop1
+		
+		if this.AA_FollowFace_Studs != '{FaceName}' then
+			delete AA_WireChase_Number
+		end if
+		
+		;removable panel cutouts
+		if this.AA_RemovablePanels_Number == null then
+			AA_RemovablePanels_Number<int> := 0
+			AA_RemovablePanels_Number<style> = 1
+		end if
+		AA_RemovablePanels_Number<desc> = 'Face: 06) Removable Panels 01) Quantity'
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_RemovablePanels_Number<int> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_Number
+		end if
+		{TEMP_CopyToObject}.AA_RemovablePanels_Number<meas> := AA_RemovablePanels_Number
+			
+		
+		if this.AA_FollowFace_Panels != '{FaceName}' then
+			AA_RemovablePanels_Number<int> := 0
+		end if
+		
+		if this.AA_RemovablePanels_Number > 0 then
+			if this.AA_RemovablePanels_OptionsState != null then
+				TEMP_Stored_OptionState<int> := this.AA_RemovablePanels_OptionsState
+			end if
+			
+			if this.AA_RemovablePanels_OptionsState == null then
+				AA_RemovablePanels_OptionsState<int> := 3
+				AA_RemovablePanels_OptionsState<style> = 1
+			end if
+			AA_RemovablePanels_OptionsState<desc> = 'Face: 06) Removable Panels 02) Options'
+			
+			TEMP_Loop_RemovablePanelOption<int> := 1
+			while TEMP_Loop_RemovablePanelOption <= Cab.{AA_FollowFace_Panels}.TR.AA_RemovablePanels_Number do
+				TEMP_OptionNum<int> := TEMP_Loop_RemovablePanelOption + 3
+				if TEMP_OptionNum < 10 then
+					TEMP_OptionNumText<text> = '0{TEMP_OptionNum}'
+				else
+					TEMP_OptionNumText<text> = '{TEMP_OptionNum}'
+				end if
+				TEMP_RemovablePanel_Options<text> = '{TEMP_RemovablePanel_Options}|{TEMP_OptionNumText}) Removable #{TEMP_Loop_RemovablePanelOption} ONLY={TEMP_OptionNum}'
+				
+				TEMP_Loop_RemovablePanelOption<int> += 1
+			end while
+			delete TEMP_Loop_RemovablePanelOption
+			delete TEMP_OptionNumText
+			delete TEMP_OptionNum 
+			AA_RemovablePanels_OptionsState<int> = '<lst>01) Hide All=2|02) Show All=1|03) Show Face Level=3{TEMP_RemovablePanel_Options}'
+			delete TEMP_RemovablePanel_Options
+			
+			if this.TEMP_Stored_OptionState != null then
+				AA_RemovablePanels_OptionsState<int> := TEMP_Stored_OptionState
+				delete TEMP_Stored_OptionState
+			end if
+			
+			AA_RemovablePanels_OptionsState_Details<int> := 2
+			AA_RemovablePanels_OptionsState_Face<int> := 2
+			if AA_RemovablePanels_OptionsState == 3 or AA_RemovablePanels_OptionsState == 1 then
+				AA_RemovablePanels_OptionsState_Face<int> := 1
+			end if                 
+			
+			;default width
+			if this.AA_RemovablePanels_DefaultWidth == null then
+				AA_RemovablePanels_DefaultWidth<meas> := -1
+			end if
+			AA_RemovablePanels_DefaultWidth<style> = AA_RemovablePanels_OptionsState_Face
+			AA_RemovablePanels_DefaultWidth<desc> = 'Face: 06) Removable Panels 03) Default Width (-1=equal)'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_RemovablePanels_DefaultWidth<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_DefaultWidth
+			end if
+			{TEMP_CopyToObject}.AA_RemovablePanels_DefaultWidth<meas> := AA_RemovablePanels_DefaultWidth
+
+			;default height
+			if this.AA_RemovablePanels_DefaultHeight == null then
+				AA_RemovablePanels_DefaultHeight<meas> := 12
+				if Cab.AA_Casework_RemovablePanel_DefaultHeight > 0 then
+					;legacy method
+					AA_RemovablePanels_DefaultHeight<meas> := Cab.AA_Casework_RemovablePanel_DefaultHeight
+				end if 
+			end if
+			AA_RemovablePanels_DefaultHeight<style> = AA_RemovablePanels_OptionsState_Face 
+			AA_RemovablePanels_DefaultHeight<desc> = 'Face: 06) Removable Panels 04) Default Height'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_RemovablePanels_DefaultHeight<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_DefaultHeight
+			end if
+			{TEMP_CopyToObject}.AA_RemovablePanels_DefaultHeight<meas> := AA_RemovablePanels_DefaultHeight
+			
+			;default AFF
+			if this.AA_RemovablePanels_DefaultAFF == null then
+				AA_RemovablePanels_DefaultAFF<meas> := 6
+			end if
+			AA_RemovablePanels_DefaultAFF<style> = AA_RemovablePanels_OptionsState_Face 
+			AA_RemovablePanels_DefaultAFF<desc> = 'Face: 06) Removable Panels 05) Default AFF'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_RemovablePanels_DefaultAFF<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_DefaultAFF
+			end if
+			{TEMP_CopyToObject}.AA_RemovablePanels_DefaultAFF<meas> := AA_RemovablePanels_DefaultAFF
+			
+			;default position
+			if this.AA_RemovablePanels_DefaultPOSX == null then
+				AA_RemovablePanels_DefaultPOSX<meas> := 6
+			end if
+			AA_RemovablePanels_DefaultPOSX<style> = AA_RemovablePanels_OptionsState_Face 
+			AA_RemovablePanels_DefaultPOSX<desc> = 'Face: 06) Removable Panels 06) Default Position (-1=equal)'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_RemovablePanels_DefaultPOSX<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_DefaultPOSX
+			end if
+			{TEMP_CopyToObject}.AA_RemovablePanels_DefaultPOSX<meas> := AA_RemovablePanels_DefaultPOSX
+			
+			;Left Clearance
+			if this.AA_RemovablePanels_LeftClearance == null then
+				AA_RemovablePanels_LeftClearance<meas> := 3
+			end if
+			AA_RemovablePanels_LeftClearance<style> = AA_RemovablePanels_OptionsState_Face 
+			AA_RemovablePanels_LeftClearance<desc> = 'Face: 06) Removable Panels 07) Left Clearance (-1=equal)'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_RemovablePanels_LeftClearance<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_LeftClearance
+			end if
+			{TEMP_CopyToObject}.AA_RemovablePanels_LeftClearance<meas> := AA_RemovablePanels_LeftClearance
+			
+			;Right Clearance
+			if this.AA_RemovablePanels_RightClearance == null then
+				AA_RemovablePanels_RightClearance<meas> := 3
+			end if
+			AA_RemovablePanels_RightClearance<style> = AA_RemovablePanels_OptionsState_Face 
+			AA_RemovablePanels_RightClearance<desc> = 'Face: 06) Removable Panels 08) Right Clearance (-1=equal)'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_RemovablePanels_RightClearance<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_RightClearance
+			end if
+			{TEMP_CopyToObject}.AA_RemovablePanels_RightClearance<meas> := AA_RemovablePanels_RightClearance
+			
+		else
+			delete AA_RemovablePanels_OptionsState
+			delete AA_RemovablePanels_DefaultHeight
+			delete AA_RemovablePanels_DefaultWidth
+			delete AA_RemovablePanels_DefaultAFF
+			delete AA_RemovablePanels_DefaultPOSX
+			delete AA_RemovablePanels_DefaultPOSX_Use
+			delete AA_RemovablePanels_LeftClearance
+			delete AA_RemovablePanels_RightClearance
+		end if 
+		
+		TEMP_Loop1<int> := 1
+		while this.AA_RemovablePanels_{TEMP_Loop1}_Width != null or TEMP_Loop1 <= AA_RemovablePanels_Number do
+			if TEMP_Loop1 <= AA_RemovablePanels_Number then
+				if AA_RemovablePanels_OptionsState == 1 or AA_RemovablePanels_OptionsState == TEMP_Loop1 + 3 then
+					AA_RemovablePanels_OptionsState_Details<int> := 1
+				else
+				    AA_RemovablePanels_OptionsState_Details<int> := 2
+				end if                 
+			
+				;position X
+				if this.AA_RemovablePanels_{TEMP_Loop1}_PosX_New == null then
+					AA_RemovablePanels_{TEMP_Loop1}_PosX_New<meas> := -1
+				end if
+				AA_RemovablePanels_{TEMP_Loop1}_PosX_New<desc> = 'Face: 06) Removable Panels 09) #{TEMP_Loop1} 1) Position'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_RemovablePanels_{TEMP_Loop1}_PosX_New<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_{TEMP_Loop1}_PosX_New
+				end if
+				{TEMP_CopyToObject}.AA_RemovablePanels_{TEMP_Loop1}_PosX_New<meas> := AA_RemovablePanels_{TEMP_Loop1}_PosX_New
+				
+				;width
+				if this.AA_RemovablePanels_{TEMP_Loop1}_Width == null then
+					AA_RemovablePanels_{TEMP_Loop1}_Width<meas> := 0
+				end if
+				AA_RemovablePanels_{TEMP_Loop1}_Width<desc> = 'Face: 06) Removable Panels 09) #{TEMP_Loop1} 2) Width'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_RemovablePanels_{TEMP_Loop1}_Width<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_{TEMP_Loop1}_Width
+				end if
+				{TEMP_CopyToObject}.AA_RemovablePanels_{TEMP_Loop1}_Width<meas> := AA_RemovablePanels_{TEMP_Loop1}_Width
+				
+				;height
+				if this.AA_RemovablePanels_{TEMP_Loop1}_Height == null then
+					AA_RemovablePanels_{TEMP_Loop1}_Height<meas> := 0
+				end if
+				AA_RemovablePanels_{TEMP_Loop1}_Height<desc> = 'Face: 06) Removable Panels 09) #{TEMP_Loop1} 3) Height'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_RemovablePanels_{TEMP_Loop1}_Height<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_{TEMP_Loop1}_Height
+				end if
+				{TEMP_CopyToObject}.AA_RemovablePanels_{TEMP_Loop1}_Height<meas> := AA_RemovablePanels_{TEMP_Loop1}_Height
+				
+				;aff
+				if this.AA_RemovablePanels_{TEMP_Loop1}_AFF == null then
+					AA_RemovablePanels_{TEMP_Loop1}_AFF<meas> := 0
+				end if
+				AA_RemovablePanels_{TEMP_Loop1}_AFF<desc> = 'Face: 06) Removable Panels 09) #{TEMP_Loop1} 4) AFF'
+				if TEMP_Using_CopyFromObject == 1 then
+					AA_RemovablePanels_{TEMP_Loop1}_AFF<meas> := this.{TEMP_CopyFromObject}.AA_RemovablePanels_{TEMP_Loop1}_AFF
+				end if
+				{TEMP_CopyToObject}.AA_RemovablePanels_{TEMP_Loop1}_AFF<meas> := AA_RemovablePanels_{TEMP_Loop1}_AFF
+			
+				 AA_RemovablePanels_{TEMP_Loop1}_Width<style> = AA_RemovablePanels_OptionsState_Details
+				 AA_RemovablePanels_{TEMP_Loop1}_AFF<style> = AA_RemovablePanels_OptionsState_Details
+				 AA_RemovablePanels_{TEMP_Loop1}_Height<style> = AA_RemovablePanels_OptionsState_Details
+				 AA_RemovablePanels_{TEMP_Loop1}_PosX_New<style> = AA_RemovablePanels_OptionsState_Details
+			else
+				delete AA_RemovablePanels_{TEMP_Loop1}_Width
+				delete AA_RemovablePanels_{TEMP_Loop1}_AFF
+				delete AA_RemovablePanels_{TEMP_Loop1}_Height
+				delete AA_RemovablePanels_{TEMP_Loop1}_PosX_New
+			end if
+			delete AA_RemovablePanels_{TEMP_Loop1}_PosX ;old positioning style 
+			
+			TEMP_Loop1<int> += 1
+		end while
+		delete TEMP_Loop1
+		
+		
+		;effective default position/relative positioning - must come after individual parameters are created
+		if this.AA_RemovablePanels_Number > 0 then
+			TEMP_Pos_X<meas> := 0
+			TEMP_Total_Space_Taken<meas> := 0
+			AA_RemovablePanels_DefaultPOSX_Use := AA_RemovablePanels_DefaultPOSX
+			AA_RemovablePanels_DefaultWidth_Use := AA_RemovablePanels_DefaultWidth
+			;calculate default spacings
+			if AA_RemovablePanels_DefaultPOSX_Use == -1 or AA_RemovablePanels_DefaultWidth_Use == -1 then
+				TEMP_Loop_Calc_Equal<int> := 1
+				TEMP_Qty_Set_Positions<int> := 0
+				TEMP_Qty_Set_Widths<int> := 0
+				while TEMP_Loop_Calc_Equal <= AA_RemovablePanels_Number do
+					;equal positioning
+					TEMP_EQL_Use_POS := this.AA_RemovablePanels_{TEMP_Loop_Calc_Equal}_PosX_New
+					TEMP_EQL_Use_DX := this.AA_RemovablePanels_{TEMP_Loop_Calc_Equal}_Width
+				
+					;widths
+					if TEMP_EQL_Use_DX <= 0 and AA_RemovablePanels_DefaultWidth > 0 then
+						TEMP_EQL_Use_DX := AA_RemovablePanels_DefaultWidth_Use
+					end if
+					if TEMP_EQL_Use_DX > 0 then
+						TEMP_Qty_Set_Widths<int> += 1
+						TEMP_Total_Space_Taken += TEMP_EQL_Use_DX
+					end if
+					
+					;positining
+					if TEMP_EQL_Use_POS < 0 then
+						if TEMP_Loop_Calc_Equal == 1 and AA_RemovablePanels_LeftClearance >= 0 then
+							TEMP_EQL_Use_POS := AA_RemovablePanels_LeftClearance
+							TEMP_Qty_Set_Positions<int> += 1
+						end if 
+					end if
+					if TEMP_EQL_Use_POS < 0 and AA_RemovablePanels_DefaultPOSX_Use >= 0 then
+						TEMP_EQL_Use_POS := AA_RemovablePanels_DefaultPOSX_Use
+					end if
+					if TEMP_EQL_Use_POS >= 0 then
+						TEMP_Qty_Set_Positions<int> += 1
+						TEMP_Total_Space_Taken += TEMP_EQL_Use_POS
+					end if
+					
+					;position to end
+					if TEMP_Loop_Calc_Equal == AA_RemovablePanels_Number and AA_RemovablePanels_RightClearance >= 0 then
+						TEMP_Qty_Set_Positions<int> += 1
+						TEMP_Total_Space_Taken += AA_RemovablePanels_RightClearance
+					end if								
+					
+					TEMP_Loop_Calc_Equal<int> += 1
+				end while
+				delete TEMP_Loop_Calc_Equal
+			
+				if AA_RemovablePanels_DefaultPOSX_Use == -1 then 
+					AA_RemovablePanels_DefaultPOSX_Use := (:DX - TEMP_Total_Space_Taken)/(AA_RemovablePanels_Number+1 - TEMP_Qty_Set_Positions)
+				end if
+				if AA_RemovablePanels_DefaultWidth_Use == -1 then
+					AA_RemovablePanels_DefaultWidth_Use := (:DX - TEMP_Total_Space_Taken)/(AA_RemovablePanels_Number - TEMP_Qty_Set_Widths) 
+				end if
+				
+				delete TEMP_EQL_Use_POS
+				delete TEMP_EQL_Use_DX
+				delete TEMP_Qty_Set_Positions
+				delete TEMP_Total_Space_Taken
+				delete TEMP_Qty_Set_Widths 
+			end if
+				
+			TEMP_Loop_Rel_Pos<int> := 1
+			while TEMP_Loop_Rel_Pos <= AA_RemovablePanels_Number do
+				;relative positioning
+				TEMP_Effective_PosX_Value := AA_RemovablePanels_{TEMP_Loop_Rel_Pos}_PosX_New 
+				TEMP_USE_DX := AA_RemovablePanels_{TEMP_Loop_Rel_Pos}_Width 
+				if TEMP_USE_DX <= 0 then
+					TEMP_USE_DX :=  AA_RemovablePanels_DefaultWidth_Use
+				end if
+				
+				if TEMP_Effective_PosX_Value == -1 then 
+					;left/right clearances
+					if TEMP_Loop_Rel_Pos == 1 and AA_RemovablePanels_LeftClearance <> -1 then
+						TEMP_Effective_PosX_Value := AA_RemovablePanels_LeftClearance
+					end if 
+					if TEMP_Loop_Rel_Pos == AA_RemovablePanels_Number and AA_RemovablePanels_RightClearance <> -1 then
+						TEMP_Effective_PosX_Value := :DX - (TEMP_Pos_X + TEMP_USE_DX) - AA_RemovablePanels_RightClearance
+					end if
+					
+					if TEMP_Effective_PosX_Value == -1 then
+						;use default
+						TEMP_Effective_PosX_Value := AA_RemovablePanels_DefaultPOSX_Use
+					end if
+				end if
+				
+				AA_RemovablePanels_{TEMP_Loop_Rel_Pos}_PosX_Effective<meas> := TEMP_Pos_X + TEMP_Effective_PosX_Value
+				
+				TEMP_Pos_X<meaS> += TEMP_Effective_PosX_Value + TEMP_Use_DX
+				delete TEMP_Effective_PosX_Value
+				
+				TEMP_Loop_Rel_Pos<int> += 1
+			end while
+			delete TEMP_Loop_Rel_Pos
+		
+			
+			delete TEMP_Pos_X
+			delete TEMP_USE_DX		
+		end if
+				
+		
+		delete AA_RemovablePanels_OptionsState_Face
+		delete AA_RemovablePanels_OptionsState_Details
+		
+		
+		if this.AA_FollowFace_Panels != '{FaceName}' then
+			delete AA_RemovablePanels_Number
+		end if
+		
+		;Stud Screws
+		if this.AA_Studs_Screws == null then
+			AA_Studs_Screws<bool> = false
+			AA_Studs_Screws<style> = 1
+		end if
+		AA_Studs_Screws<desc> = 'Face: 07) Stud Screws In Panels 1) Enable'
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_Studs_Screws<bool> := this.{TEMP_CopyFromObject}.AA_Studs_Screws
+		end if
+		{TEMP_CopyToObject}.AA_Studs_Screws<meas> := AA_Studs_Screws
+
+		if this.AA_FollowFace_Panels != '{FaceName}' then
+			delete AA_Studs_Screws
+		end if
+		
+		if AA_Studs_Screws == 1 then
+			;adjust bottom
+			if this.AA_Studs_Screws_ADJBOT == null then
+				AA_Studs_Screws_ADJBOT<meas> := 0
+				AA_Studs_Screws_ADJBOT<style> = 1
+			end if
+			AA_Studs_Screws_ADJBOT<desc> = 'Face: 07) Stud Screws In Panels 2) Bottom Adjust'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Studs_Screws_ADJBOT<meas> := this.{TEMP_CopyFromObject}.AA_Studs_Screws_ADJBOT
+			end if
+			{TEMP_CopyToObject}.AA_Studs_Screws_ADJBOT<meas> := AA_Studs_Screws_ADJBOT
+			
+			;adjust top
+			if this.AA_Studs_Screws_ADJTOP == null then
+				AA_Studs_Screws_ADJTOP<meas> := 0
+				AA_Studs_Screws_ADJTOP<style> = 1
+			end if
+			AA_Studs_Screws_ADJTOP<desc> = 'Face: 07) Stud Screws In Panels 2) Top Adjust'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Studs_Screws_ADJTOP<meas> := this.{TEMP_CopyFromObject}.AA_Studs_Screws_ADJTOP
+			end if
+			{TEMP_CopyToObject}.AA_Studs_Screws_ADJTOP<meas> := AA_Studs_Screws_ADJTOP
+			
+			;adjust Z
+			if this.AA_Studs_Screws_ADJZ == null then
+				AA_Studs_Screws_ADJZ<meas> := 0
+				AA_Studs_Screws_ADJZ<style> = 1
+			end if
+			AA_Studs_Screws_ADJZ<desc> = 'Face: 07) Stud Screws In Panels 3) Z Adjust'
+			if TEMP_Using_CopyFromObject == 1 then
+				AA_Studs_Screws_ADJZ<meas> := this.{TEMP_CopyFromObject}.AA_Studs_Screws_ADJZ
+			end if
+			{TEMP_CopyToObject}.AA_Studs_Screws_ADJZ<meas> := AA_Studs_Screws_ADJZ
+		
+		else
+			;clean up
+			delete AA_Studs_Screws_ADJBOT
+			delete AA_Studs_Screws_ADJTOP
+			delete AA_Studs_Screws_ADJZ
+		end if
+		
+		
+		;extend dadoes
+		if this.AA_Studs_Extend == null then
+			AA_Studs_Extend<bool> = false
+			AA_Studs_Extend<style> = 1
+		end if
+		AA_Studs_Extend<desc> = 'Face: 08) Stud Dadoes Extend'
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_Studs_Extend<bool> := this.{TEMP_CopyFromObject}.AA_Studs_Extend
+		end if
+		{TEMP_CopyToObject}.AA_Studs_Extend<meas> := AA_Studs_Extend
+		
+		if this.AA_FollowFace_Panels != '{FaceName}' then
+			delete AA_Studs_Extend
+		end if
+		
+		;top adjust
+		if this.AA_Face_TopAdjust == null then
+			AA_Face_TopAdjust<meas> = 0
+			AA_Face_TopAdjust<style> = 1
+		end if
+		AA_Face_TopAdjust<desc> = 'Face: 09) Top Adjust'
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_Face_TopAdjust<meas> := this.{TEMP_CopyFromObject}.AA_Face_TopAdjust
+		end if
+		{TEMP_CopyToObject}.AA_Face_TopAdjust<meas> := AA_Face_TopAdjust
+		
+		if this.AA_FollowFace_Panels != '{FaceName}' then
+			delete AA_Face_TopAdjust
+		end if
+		
+		;cant
+		if this.AA_Face_Cant == null then
+			AA_Face_Cant<deg> = 90
+			AA_Face_Cant<style> = 1
+		end if
+		AA_Face_Cant<desc> = 'Face: 10) Cant Angle'
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_Face_Cant<deg> := this.{TEMP_CopyFromObject}.AA_Face_Cant
+		end if
+		{TEMP_CopyToObject}.AA_Face_Cant<deg> := AA_Face_Cant
+		
+		;number studs
+	    if this.AA_Studs_Number == null then
+			AA_Studs_Number<bool> = false
+			AA_Studs_Number<style> = 1
+		end if
+		AA_Studs_Number<desc> = 'Face: 11) Number Studs'
+		if TEMP_Using_CopyFromObject == 1 then
+			AA_Studs_Number<bool> := this.{TEMP_CopyFromObject}.AA_Studs_Number
+		end if
+		{TEMP_CopyToObject}.AA_Studs_Number<meas> := AA_Studs_Number
+		
+		if this.AA_FollowFace_Panels != '{FaceName}' then
+			delete AA_Studs_Number
+		end if
+		
+		
+		delete TEMP_CopyFromObject
+		delete TEMP_CopyToObject
+		delete TEMP_Using_CopyFromObject
+		
+		QTY := 1
+		
+		AA_CaseworkWall_LastFaceName<text> = '{FaceName}'
+		AA_CaseworkWall_LastFaceName<style> = 2
+		AA_CaseworkWall_LastFaceName<desc> = 'z DO NOT DELETE UCS STORAGE'
+		exit
+	end if

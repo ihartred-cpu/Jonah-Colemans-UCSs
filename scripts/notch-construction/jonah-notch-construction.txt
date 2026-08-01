@@ -1,0 +1,471 @@
+;Notch Construction Revision 12
+;Jonah Coleman (Jonah@FletcherWoodProducts.com)
+                                       
+;This UCS can only be used with versions of CV >= 8
+  
+;Revision history is at the end of the UCS
+          
+For Each PT|S_DIV|FS|DS|SH Part
+   
+    ;make parts run through one another
+    if this.JCS_NotchConstruction_Run_Me_Through == null then
+        JCS_NotchConstruction_Run_Me_Through<bool> = false
+        JCS_NotchConstruction_Run_Me_Through<style> = 1
+        JCS_NotchConstruction_Run_Me_Through<desc> = 'Notch: Enable'
+    end if
+      
+    if :.{name}@1.OBJID == this.OBJID then
+        ;this is the first of the type of seperator in the interior, add parameter allowing all to enabled
+        if this.JCS_NotchConstruction_Interior_EnableAll == null then
+            JCS_NotchConstruction_Interior_EnableAll<int> = '<lst>Nothing=0|Enable All=1|Disable All=2'
+            JCS_NotchConstruction_Interior_EnableAll<style> = 1
+            JCS_NotchConstruction_Interior_EnableAll<desc> = 'Notch: Enable Entire Interior'
+        end if
+    else
+        delete JCS_NotchConstruction_Interior_EnableAll
+    end if
+      
+      
+    TEMP_ForceEnable<int> := :.{name}@1.JCS_NotchConstruction_Interior_EnableAll
+    if  TEMP_ForceEnable == 1 then
+        ;first seperator set to force enable all
+        JCS_NotchConstruction_Run_Me_Through<bool> = true
+    else
+        if TEMP_ForceEnable == 2 then
+            ;first seperator set to force disable all
+            JCS_NotchConstruction_Run_Me_Through<bool> = false
+        end if
+    end if
+    delete TEMP_ForceEnable
+      
+    if JCS_NotchConstruction_Run_Me_Through then
+		if this.JCS_NotchConstruction_NotchLength == null then
+	    	Public JCS_NotchConstruction_NotchLength<meas> = 0 ;Notch length (0=half)
+	    	JCS_NotchConstruction_NotchLength<style> = 1
+	    	JCS_NotchConstruction_NotchLength<desc> = 'Notch: Dado Length (0=half)'
+	    end if
+	    if JCS_NotchConstruction_NotchLength == 0 then
+    		;half
+    		JCS_NotchConstruction_NotchLength_Use<meas> := DX/2
+    	else
+    		JCS_NotchConstruction_NotchLength_Use<meas> := JCS_NotchConstruction_NotchLength
+    	end if
+    
+        Public JCS_NotchConstruction_OversizeDado<meas> = 1/32 ;Notch dado width oversize
+	    Public JCS_NotchConstruction_OversizeDadoLength<meas> = 1/2 ;Notch dado length oversize
+	    ;CV2025-PATCH (opt-in, default OFF): a forum report (see source-threads/nexus-thread-notch-construction-rev12.txt,
+	    ;Eric@bloomsburydesign.com) said the drawer-stretcher part origin moved from Top Back Left (CV11, what this
+	    ;script assumes) to Bottom Front Right somewhere around CV2023, which would flip the sign of the DY extension
+	    ;below and make an extended DS stick out the wrong side.
+	    ;CONFIRMED NOT REPRODUCING on this shop's CV2025 install: with this flag OFF (the shipped default, unchanged),
+	    ;a DS set to "entire interior" sizing stays correctly within the interior frame. Left in place, still opt-in
+	    ;and off, in case a different CV2025 build/config still hits the forum-reported symptom -- but on this
+	    ;install the original, unmodified script already behaves correctly. See TESTING.md #8.
+	    Public JCS_NotchConstruction_CV2023Plus_DSOrigin<bool> = false ;CV2023+ DS origin compensation (confirmed not needed on this install)
+	                  
+	    Public JCS_NotchConstruction_DebugLevel<int> = '<lst>False=0|True=1' ;Debug
+	    JCS_NotchConstruction_Debug_Value<int> := 0
+	    JCS_NotchConstruction_Debug_Value<style> = 1
+	    JCS_NotchConstruction_Debug_Value<desc> = 'Notch: Debug Value'
+	      
+	    Public JCS_NotchConstruction_NotchType<int> = '<lst>Horz in front=1|Horz behind=2' ;Notch Type
+	    Public JCS_NotchConstruction_LengthType_Default<int> = '<lst>Entire Interior=1|Manual Sizing=2' ;Length Type
+    
+        JCS_NotchConstruction_Debug_Value := 1
+                          
+        if this.JCS_NotchConstruction_NotchType_Use == null then
+            JCS_NotchConstruction_NotchType_Use<int> = '<lst>Horz in front=1|Horz behind=2' ;Notch Type
+            JCS_NotchConstruction_NotchType_Use<desc> = 'Notch: Type'
+            JCS_NotchConstruction_NotchType_Use<style> = 1
+                          
+            JCS_NotchConstruction_NotchType_Use<int> := JCS_NotchConstruction_NotchType
+        end if
+          
+        if this.JCS_NotchConstruction_LengthType_Use == null or this.JCS_NotchConstruction_Run_Me_Through_Generations != null then
+            JCS_NotchConstruction_LengthType_Use<int> = '<lst>Entire Interior=1|Manual Sizing=2' ;Notch Type
+            JCS_NotchConstruction_LengthType_Use<desc> = 'Notch: Length'
+            JCS_NotchConstruction_LengthType_Use<style> = 1
+                  
+            JCS_NotchConstruction_LengthType_Use<int> := JCS_NotchConstruction_LengthType_Default
+              
+            if this.JCS_NotchConstruction_Run_Me_Through_Generations != null then
+                ;was originally set to "# of sections" which is no longer an option
+                delete JCS_NotchConstruction_Run_Me_Through_Generations
+            end if
+        end if
+                  
+          
+        if JCS_NotchConstruction_LengthType_Use == 1 then
+            ;entire interior selected               
+            JCS_NotchConstruction_Debug_Value := 2
+ 
+            ;identify parent CO
+            TEMP_Loop1<int> := 1
+            TEMP_Parent_X<meas> := 0
+            TEMP_Parent_Y<meas> := 0
+            TEMP_Parent_DX<meas> := 0
+            TEMP_Parent_DY<meas> := 0
+            while CO@{TEMP_Loop1}.PID > 0 and TEMP_Parent_DX == 0 do
+                if CO@{TEMP_Loop1}.ID == PARID then
+                    TEMP_Parent_X<meas> := CO@{TEMP_Loop1}.X
+                    TEMP_Parent_Y<meas> := CO@{TEMP_Loop1}.Y
+                    TEMP_Parent_DX<meas> := CO@{TEMP_Loop1}.DX
+                    TEMP_Parent_DY<meas> := CO@{TEMP_Loop1}.DY
+                end if
+                TEMP_Loop1<int> += 1
+            end while
+ 
+            if TEMP_Parent_X > 0 then
+                ;modify the part size to run through the CO.
+                if name == 'FS' or name == 'DS' or name == 'SH' then
+                    TEMP_IncreasePartSize<meas> := ((CO@1.X + CO@1.DX) - (TEMP_Parent_X + TEMP_Parent_DX))
+                    if name == 'DS' and JCS_NotchConstruction_CV2023Plus_DSOrigin then
+                        ;CV2025-PATCH (untested): compensate for the Bottom Front Right DS origin by growing the
+                        ;part from the opposite end (shift Y back by the same amount DY grows) instead of only
+                        ;extending DY from the original Top Back Left origin. Verify against a real model before trusting.
+                        Y -= TEMP_IncreasePartSize
+                    end if
+                    DY += TEMP_IncreasePartSize
+                else
+                    TEMP_IncreasePartSize<meas> := ((CO@1.Y + CO@1.DY) - (TEMP_Parent_Y + TEMP_Parent_DY))
+                    DY += TEMP_IncreasePartSize
+                end if
+            end if
+        end if
+ 
+        ;this code allows us to limit our seach to the items that are likely to intercept.
+        ;setting TEMP_Loop1 to 1 and TEMP_End_Loop1 to 5 would cause a complete search, if we ever think that might happen.
+        if name == 'FS' or name == 'DS' or name == 'SH' then
+            TEMP_Loop1<int> := 4
+            TEMP_End_Loop1<int> := 5
+        else
+            TEMP_Loop1<int> := 1
+            TEMP_End_Loop1<int> := 3
+        end if
+          
+        TEMP_INTERSECTION_COUNT := 0
+          
+        while TEMP_Loop1 <= TEMP_End_Loop1 do
+            ;TEMP_Loop1: check for intersection with 1=FS, 2=DS, 3=SH, 4=PT, 5=S_DIV
+            TEMP_INTERSECTION_COUNT_THIS_SEPARATOR_TYPE := 0
+              
+            TEMP_Loop2<int> := 1
+            TEMP_Out_Of_Part_Instances := 0
+            while TEMP_Out_Of_Part_Instances == 0 do
+                CHECK_PART_X := 0
+                CHECK_PART_Y := 0
+                CHECK_PART_Z := 0
+                  
+                CHECK_PART_DX := 0
+                CHECK_PART_DY := 0
+                CHECK_PART_DZ := 0
+                  
+                if TEMP_Loop1 == 1 then
+                    TEMP_PartType<text> = 'FS'
+                else
+                    if TEMP_Loop1 == 2 then
+                        TEMP_PartType<text> = 'DS'
+                    else
+                        if TEMP_Loop1 == 3 then
+                            TEMP_PartType<text> = 'SH'
+                        else
+                            if TEMP_Loop1 == 4 then
+                                TEMP_PartType<text> = 'PT'
+                            else
+                                if TEMP_Loop1 == 5 then
+                                    TEMP_PartType<text> = 'S_DIV'
+                                end if
+                            end if
+                        end if
+                    end if
+                end if
+                  
+                ;new awesome inline parameter evaluation, thanks Solid!
+                if {TEMP_PartType}@{TEMP_Loop2}.PID > 0 then
+                    CHECK_PART_X := {TEMP_PartType}@{TEMP_Loop2}.X
+                    CHECK_PART_Y := {TEMP_PartType}@{TEMP_Loop2}.Y
+                    CHECK_PART_Z := {TEMP_PartType}@{TEMP_Loop2}.Z
+                      
+                    CHECK_PART_DX := {TEMP_PartType}@{TEMP_Loop2}.DX
+                    CHECK_PART_DY := {TEMP_PartType}@{TEMP_Loop2}.DY
+                    CHECK_PART_DZ := {TEMP_PartType}@{TEMP_Loop2}.DZ
+                else
+                    TEMP_Out_Of_Part_Instances := 1
+                end if
+                                                          
+                if TEMP_Loop1 <= 3 then
+                    ;checking for intersection with fixed shelves/drawer stretchers, we know our current part is vertical and the check part is horizontal
+                    IF (X-DZ > CHECK_PART_X) and (X < (CHECK_PART_X + CHECK_PART_DY)) then
+                        if (Y < CHECK_PART_Y) AND ((Y+DY) > CHECK_PART_Y+CHECK_PART_DZ) then
+                            ;don't know why it doesn't work to combine these into a single if-then, but it doesn't.  This is where most of my debug time was spent.
+                            TEMP_INTERSECTION_COUNT<int> += 1
+                            TEMP_INTERSECTION_COUNT_THIS_SEPARATOR_TYPE<int> += 1
+              
+                            if JCS_NotchConstruction_NotchType_Use == 1 then
+                                ;we don't want the dado to fall outside this part - this is primarily aimed at drawer stretchers
+                                if JCS_NotchConstruction_NotchLength_Use > CHECK_PART_DX - JCS_NotchConstruction_OversizeDadoLength then
+                                    JCS_NotchConstruction_NotchLength_Use := CHECK_PART_DX - JCS_NotchConstruction_OversizeDadoLength*2
+                                end if
+                            end if
+         
+                            ;add dado to this part
+                            dim NotchDado as new dado
+                            NotchDado.desc = 'Notch Construction Dado'
+                            NotchDado._FACEWP := 1
+                              
+                            NotchDado.DX := CHECK_PART_DZ + JCS_NotchConstruction_OversizeDado
+                            NotchDado.DZ := DZ
+                              
+                            NotchDado.AX := 180
+                            NotchDado.AY := 0
+                            NotchDado.AZ := 90
+                              
+                            NotchDado.Y := CHECK_PART_Y - Y - JCS_NotchConstruction_OversizeDado/2 
+                            NotchDado.Z := 0
+                              
+                            TEMP_Diff_Z := CHECK_PART_Z - Z
+                              
+                            if JCS_NotchConstruction_NotchType_Use == 1 then
+                                ;horz in front  
+                                NotchDado.X := DX - JCS_NotchConstruction_NotchLength_Use - JCS_NotchConstruction_OversizeDadoLength
+                                NotchDado.DY := JCS_NotchConstruction_NotchLength_Use + JCS_NotchConstruction_OversizeDadoLength
+                            else
+                                ;horz is behind
+                                NotchDado.X := 0
+                                NotchDado.DY := DX - JCS_NotchConstruction_NotchLength_Use + JCS_NotchConstruction_OversizeDadoLength
+                                ;this code will keep the dado from running to the back of the vertical part, but then how do you put the horz part in?
+                                ;NotchDado.X := TEMP_Diff_Z
+                                ;NotchDado.DY := DX - JCS_NotchConstruction_NotchLength_Use - TEMP_Diff_Z
+                            end if
+  
+                            ;add master dado to notch intersecting part
+                            dim NotchMaster as new mdado
+                            NotchMaster.desc = 'Notch Construction Master Dado'
+                            NotchMaster._EDGWP := 1
+                              
+                            NotchMaster.DX := DZ
+                            NotchMaster.DZ := CHECK_PART_DZ
+                              
+                            NotchMaster.AX := 0
+                            NotchMaster.AY := 0
+                            NotchMaster.AZ := 0
+                              
+                            NotchMaster.X := 0
+                            NotchMaster.Z := -1*(CHECK_PART_Y - Y + CHECK_PART_DZ)
+                              
+                            NotchMaster.S_MORTL := -1*(JCS_NotchConstruction_OversizeDado/2)
+                            NotchMaster.S_MORTR := -1*(JCS_NotchConstruction_OversizeDado/2)
+                              
+                            if JCS_NotchConstruction_NotchType_Use == 1 then
+                                ;horz in front  
+                                NotchMaster.Y := TEMP_Diff_Z
+                                NotchMaster.DY := DX - JCS_NotchConstruction_NotchLength_Use - TEMP_Diff_Z + JCS_NotchConstruction_OversizeDadoLength
+                            else
+                                ;horz is behind
+                                NotchMaster.Y := DX - JCS_NotchConstruction_NotchLength_Use - JCS_NotchConstruction_OversizeDadoLength
+                                NotchMaster.DY := JCS_NotchConstruction_NotchLength_Use + JCS_NotchConstruction_OversizeDadoLength
+                            end if
+                              
+                            ;record debugging stuff
+                            if JCS_NotchConstruction_DebugLevel == 1 then
+                                NotchMaster.CHECK_PART_X := CHECK_PART_X 
+                                NotchMaster.CHECK_PART_Y := CHECK_PART_Y
+                                NotchMaster.CHECK_PART_Z := CHECK_PART_Z
+                              
+                                NotchMaster.CHECK_PART_DX := CHECK_PART_DX
+                                NotchMaster.CHECK_PART_DY := CHECK_PART_DY
+                                NotchMaster.CHECK_PART_DZ := CHECK_PART_DZ
+                                NotchMaster.TEMP_Diff_Z := TEMP_DIFF_Z
+                            end if
+                            delete TEMP_Diff_Z
+                        end if
+                    end if
+                else
+                    ;checking for intersection with PT or S_DIV, we know our current part is horizontal and the check part is vetical
+                    if (X < (CHECK_PART_X-CHECK_PART_DZ)) and ((X+DY) > CHECK_PART_X) then
+                        if (Y > CHECK_PART_Y) and ((Y+DZ) < (CHECK_PART_Y + CHECK_PART_DY)) then
+                            ;don't know why it doesn't work to combine these into a single if-then, but it doesn't.  This is where most of my debug time was spent.
+                            TEMP_INTERSECTION_COUNT<int> += 1
+                            TEMP_INTERSECTION_COUNT_THIS_SEPARATOR_TYPE<int> += 1
+                              
+                            if JCS_NotchConstruction_NotchType_Use == 1 then
+                                ;we don't want the dado to fall outside this part - this is primarily aimed at drawer stretchers
+                                if JCS_NotchConstruction_NotchLength_Use > DX - JCS_NotchConstruction_OversizeDadoLength then
+                                    JCS_NotchConstruction_NotchLength_Use := DX - JCS_NotchConstruction_OversizeDadoLength*2
+                                end if
+                            end if
+                              
+                            ;add dado to this part
+                            dim NotchDado as new dado
+                            NotchDado.desc = 'Notch Construction Dado'
+                            NotchDado._FACEWP := 1
+                              
+                            NotchDado.DX := CHECK_PART_DZ + JCS_NotchConstruction_OversizeDado
+                            NotchDado.DZ := DZ
+                              
+                            NotchDado.AX := 180
+                            NotchDado.AY := 0
+                            NotchDado.AZ := 90
+                              
+                            NotchDado.Y := CHECK_PART_X - X - CHECK_PART_DZ - JCS_NotchConstruction_OversizeDado/2 
+                            NotchDado.Z := 0
+                              
+                            TEMP_Diff_Z := ABS(Z - CHECK_PART_Z)
+                              
+                            if JCS_NotchConstruction_NotchType_Use == 1 then
+                                ;horz in front  
+                                NotchDado.X := 0
+                                NotchDado.DY := DX - JCS_NotchConstruction_NotchLength_Use + JCS_NotchConstruction_OversizeDadoLength
+                            else
+                                ;horz is behind
+                                NotchDado.X := DX - JCS_NotchConstruction_NotchLength_Use - JCS_NotchConstruction_OversizeDadoLength
+                                NotchDado.DY := JCS_NotchConstruction_NotchLength_Use + JCS_NotchConstruction_OversizeDadoLength
+                            end if
+  
+                            ;add master dado to notch intersecting part
+                            dim NotchMaster as new MDADO
+                            NotchMaster.desc = 'Notch Construction Master Dado'
+                              
+                            NotchMaster._EDGWP := 1
+                              
+                            NotchMaster.DX := DZ
+                            NotchMaster.DZ := CHECK_PART_DZ
+                              
+                            NotchMaster.AX := 0
+                            NotchMaster.AY := 0
+                            NotchMaster.AZ := 0
+                              
+                            NotchMaster.X := 0
+                            NotchMaster.Z := -1*(CHECK_PART_X - X)
+                              
+                            NotchMaster.S_MORTL := -1*(JCS_NotchConstruction_OversizeDado/2)
+                            NotchMaster.S_MORTR := -1*(JCS_NotchConstruction_OversizeDado/2)
+                                                                                                                              
+                            if JCS_NotchConstruction_NotchType_Use == 1 then
+                                ;horz in front  
+                                NotchMaster.Y := DX - JCS_NotchConstruction_NotchLength_Use - JCS_NotchConstruction_OversizeDadoLength
+                                NotchMaster.DY := JCS_NotchConstruction_NotchLength_Use + JCS_NotchConstruction_OversizeDadoLength
+                            else
+                                ;horz is behind
+                                NotchMaster.Y := -TEMP_Diff_Z
+                                NotchMaster.DY := DX - JCS_NotchConstruction_NotchLength_Use + TEMP_Diff_Z + JCS_NotchConstruction_OversizeDadoLength
+                                ;this code will keep the dado from running to the back of the vertical part, but then how do you put the horz part in?
+                                ;NotchMaster.Y := 0
+                                ;NotchMaster.DY := DX - JCS_NotchConstruction_NotchLength_Use
+                            end if
+                              
+                            ;record debugging stuff
+                            if JCS_NotchConstruction_DebugLevel == 1 then
+                                NotchMaster.CHECK_PART_X := CHECK_PART_X 
+                                NotchMaster.CHECK_PART_Y := CHECK_PART_Y
+                                NotchMaster.CHECK_PART_Z := CHECK_PART_Z
+                              
+                                NotchMaster.CHECK_PART_DX := CHECK_PART_DX
+                                NotchMaster.CHECK_PART_DY := CHECK_PART_DY
+                                NotchMaster.CHECK_PART_DZ := CHECK_PART_DZ
+                                NotchMaster.TEMP_DIFF_Z := TEMP_DIFF_Z
+                            end if
+                              
+                            delete TEMP_Diff_Z
+                        end if
+                    end if
+                end if
+  
+                TEMP_Loop2<int> += 1
+            end while
+            delete TEMP_Loop2
+            delete TEMP_Out_Of_Part_Instances
+              
+            if JCS_NotchConstruction_DebugLevel == 0 then
+                ;clean up check parameters
+                delete CHECK_PART_X
+                delete CHECK_PART_Y
+                delete CHECK_PART_Z
+                  
+                delete CHECK_PART_DX
+                delete CHECK_PART_DY
+                delete CHECK_PART_DZ
+                  
+                delete CHECK_PART_AX
+                delete CHECK_PART_AY
+                delete CHECK_PART_AZ
+            else
+                JCS_NotchConstruction_Debug_INTERSECTIONS_{TEMP_PartType} := TEMP_INTERSECTION_COUNT_THIS_SEPARATOR_TYPE
+            end if
+            delete TEMP_INTERSECTION_COUNT_THIS_SEPARATOR_TYPE
+           
+            TEMP_Loop1<int> += 1
+        end while
+        delete TEMP_Loop1
+        delete TEMP_End_Loop1
+        delete TEMP_PartType
+                  
+              
+        if JCS_NotchConstruction_DebugLevel == 0 then
+            delete TEMP_IncreasePartSize
+    
+            delete TEMP_Parent_X
+            delete TEMP_Parent_Y
+            delete TEMP_Parent_DX
+            delete TEMP_Parent_DY
+              
+            delete TEMP_INTERSECTION_COUNT
+            delete JCS_NotchConstruction_Debug_Value
+        end if
+        delete JCS_NotchConstruction_NotchLength_Use    
+    else
+        ;clean up
+        delete JCS_NotchConstruction_Interior_EnableAll
+        delete JCS_NotchConstruction_NotchType
+        delete JCS_NotchConstruction_NotchLength
+        delete JCS_NotchConstruction_OverSizeDado
+        delete JCS_NotchConstruction_OversizeDadoLength
+        delete JCS_NotchConstruction_DebugLevel
+        delete JCS_NotchConstruction_NotchType_Use 
+     end if
+     
+ exit
+ 
+ ;Revision 2:
+    ;Added oversize dado to master dado operations
+;Revision 3:
+    ;Added support for choosing whether to run through the entire interior or a specified number of sectionings
+    ;Fixed bug causing failure when unit of measurement set to metric.
+;Revision 4
+    ;Added support for manual sizing control
+    ;Fix for sizing when item was not in the first (left-most or bottom-most) section
+;Revision 5
+    ;Accounting for DZ of parts when placing dados
+    ;Support for SH type
+    ;Additional debug parameters
+    ;Fixed bug causing failure when checking for horizontal separator intersection with S_DIV
+    ;Added support for 20 CO and up to 10 of each type of separator 
+;Revision 6
+    ;Fix for joints where the horz runs behind and the parts are differing depths (i.e. PT to DS).
+;Revision 7
+    ;Add support for oversizing notch lengths
+;Revision 8
+    ;Fix for vertical running through a SH not creating joinery
+    ;Fix for missing public variables for versions < 7.1
+;Revision 9
+    ;Update to use new version 8 inline parameter evaluation - now supports unlimited number of sectionings
+    ;Fix for dados being larger than matching parts if dado length entered > horizontal part size (this is primarily aimed at drawer stretchers, all other seperators are typically large enough it doesn't matter)
+    ;Removed number of sectionings size option - too confusing.  Parts previously set to this will default to the UCS default set in public parameters.
+    ;Added feature where the first of each seperator type will have an enable all option to enable all of that part type in the interior.
+;Revision 10
+    ;Fix for entire interior not properly accounting for seperators larger than their CO (i.e. dadoed into other seperators).
+;Revision 11
+	;More refactoring to use CV 8 features
+	;Added option for notch length to be half the part
+	;Fix for loop variables becoming a measurement.
+;Revision 12
+	;Add parameter to change notch size per Part.
+;Revision 13 (CV2025-PATCH, this repo, not Jonah Coleman's)
+	;Fixed 'delete delete' duplicate keyword typo in the disabled-cleanup branch.
+	;Added JCS_NotchConstruction_CV2023Plus_DSOrigin toggle (default off, untested) to compensate for the
+	;reported CV2023+ drawer-stretcher origin change (Top Back Left -> Bottom Front Right). See README.md.
+;Revision 14 (CV2025-PATCH, this repo, not Jonah Coleman's)
+	;Confirmed against real CV2025 output (TESTING.md #8): with JCS_NotchConstruction_CV2023Plus_DSOrigin
+	;off (the shipped default), an "entire interior" DS stays correctly within the interior frame -- the
+	;forum-reported CV2023+ origin issue does not reproduce on this install. The unmodified script already
+	;works correctly here; the flag stays in place, off, in case another install needs it.

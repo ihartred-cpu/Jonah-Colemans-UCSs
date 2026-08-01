@@ -1,0 +1,389 @@
+NOTE ON THIS CAPTURE (added when filing, not part of the source):
+This is the Hexagon Nexus forum thread "Jonah's Notch Construction Revision 12"
+(forum: CV User Created Standards), as pasted into the conversation by the user on
+2026-07-31. Post text, usernames, relative timestamps and quoted material are
+verbatim as received. Removed: the per-post navigation boilerplate the paste
+repeated after every reply ("Vote Up / <n> / Vote Down / Reply / More", "[View
+More]"), and the site chrome at the top and bottom of the page (portal nav, forum
+list, related-thread teasers, copyright line) -- no content, and several times the
+length of the actual discussion. The thread's stated reply count is 127; the paste
+contains far fewer, so this is a partial capture of the discussion -- the visible
+page, not the whole thread. Screenshots referenced in several posts ("this is what
+I'm calling notch construction:", "I have no problem generating the notched
+construction", Adam Mauss's angled-shelf image, Other Bruce's failure screenshots)
+did not survive the paste and are not present, which makes a few replies read as
+non-sequiturs. Two links were pasted in Nexus's truncated form and are recorded as
+received: "esupport.planit.com/.../3087.aspx" and
+"screencast.com/.../x2Pjc2WUSHyb". No wording inside any post has been altered.
+
+THE UCS SOURCE IN THE FIRST POST IS NOT REPRODUCED HERE. It is the same revision
+already on file, byte-exact, at ../examples/jonah-notch-construction.txt (446
+lines). Verified by matching the header, the full revision-history block, and
+several interior landmarks including the CO@{n} parent walk, the two
+"most of my debug time" comments, the "thanks Solid!" comment, and the
+"delete delete" line at 403. Filing it a second time would create a duplicate of
+the kind examples/README.md already warns about. Curated write-up of what this
+thread establishes: ../notch-construction-jonah.md
+
+================================================================================
+
+Jonah's Notch Construction Revision 12
+Jonah.Coleman -- over 14 years ago
+Forum: CABINET VISION > CV User Created Standards
+(stated at capture time: 127 replies, 629 subscribers, 4699 views)
+
+This is revision 11, updated to take advantage of Solid 8.0's new inline parameter
+evaluation.  This new feature means that this UCS supports unlimited numbers of
+intersections, plus the code size went from 1350 lines to 420 (!!!!!!!!!!!!!!!) and
+is more maintainable.  Somebody buy Chip a case of beer or something.
+
+[UCS source omitted -- see ../examples/jonah-notch-construction.txt]
+
+--------------------------------------------------------------------------------
+
+Spot -- over 14 years ago
+
+What are you doing with this?
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 14 years ago -- in reply to Spot
+
+Notch construction.
+:)
+esupport.planit.com/.../3087.aspx
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 14 years ago -- in reply to Jonah.Coleman
+
+Updated to Revision 7 - added a public parameter for notch oversize length.
+
+I originally planned on the add to dado option in S2M taking care of this, but
+these are getting combined with the outline of the part and when that happens they
+are not extended.
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 14 years ago -- in reply to Jonah.Coleman
+
+Just to clearly answer the question above, this is what I'm calling notch
+construction:
+
+[image did not survive the paste]
+
+--------------------------------------------------------------------------------
+
+Andrew Kalafatis -- over 14 years ago -- in reply to Jonah.Coleman
+
+I'm not sure I understand what is going on with the notches?
+
+--------------------------------------------------------------------------------
+
+Harley -- over 14 years ago -- in reply to Andrew Kalafatis
+
+in the pic above there is a notch in the front of the partition and a notch in the
+back of the shelf allowing them to slide together.
+
+--------------------------------------------------------------------------------
+
+linfordz -- over 14 years ago -- in reply to Harley
+
+What is the best way to copy it into a UCS? When I use copy and paste it creates
+one really long line in my ucs. Is there a way to do this keeping the original
+format?
+
+Thanks Jonah for all your hard work.
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 14 years ago -- in reply to linfordz
+
+Double click the text, then copy/paste.
+
+If you are using chrome, you need to double click, then highlight the text by left
+clicking at the beginning and dragging down to the bottom before copying.
+
+--------------------------------------------------------------------------------
+
+dan@webbercoleman.com -- over 14 years ago -- in reply to Jonah.Coleman
+
+Since I've not used this before.. how do you trigger the joint? I've pasted the UCS
+into a new one...
+
+Wait. Guess I oughta turn it back on...
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 14 years ago -- in reply to dan@webbercoleman.com
+
+Click on either the vertical or horizontal, and it is controlled by attributes.
+screencast.com/.../x2Pjc2WUSHyb
+
+--------------------------------------------------------------------------------
+
+dan@webbercoleman.com -- over 14 years ago -- in reply to Jonah.Coleman
+
+Yeah.. I got it. Works like a champ.
+Thanks!
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 14 years ago -- in reply to dan@webbercoleman.com
+
+Yeah, I originally put this together for someone else but have been doing a lot of
+it since then.
+
+It is a very convenient way to do these- I even do this now where I have a 2 door 2
+drawer base with a partition- send the partition all the way to the top and use
+notch construction to put the drawer stretcher all the way across.
+
+And for cubbies... oh my god.
+
+--------------------------------------------------------------------------------
+
+[View More -- pagination link; an unknown number of replies between here and the
+next post are not in this capture]
+
+--------------------------------------------------------------------------------
+
+drafter -- over 12 years ago
+
+This works great so far for me. We use this construction on a lot of different
+places. Thanks for the hard work.
+
+--------------------------------------------------------------------------------
+
+Other Bruce -- over 11 years ago
+
+How come I'm always the one that needs SPED help?  I am getting a failure that one
+other person mentioned, then said it was their issue (but didn't define how).
+
+If I delete line three the fail moves down to some other empty line.
+
+Please educate me....
+
+Thanks-
+OB
+
+[two images did not survive the paste]
+
+--------------------------------------------------------------------------------
+
+Kaleb -- over 11 years ago -- in reply to Other Bruce
+
+If I remember right (not usual so take this with a grain of salt), I remember and
+issue when copying UCS code off the forum... I can not remember which browser
+worked and which did not, but I without dig too deep my first guess would be that
+you MAY have used the "wrong" browser when copying the UCS code.
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 11 years ago -- in reply to Kaleb
+
+Yep use internet explorer.
+
+--------------------------------------------------------------------------------
+
+Other Bruce -- over 11 years ago -- in reply to Jonah.Coleman
+
+Thanks Kaleb I shall trust my stalwart Opera a bit less going forward....  & Jonah,
+thanks x ((3.143*1000)6), I have a wine room coming up on the job I'm drawing.
+
+--------------------------------------------------------------------------------
+
+Adam Mauss -- over 11 years ago -- in reply to Other Bruce
+
+Jonah, would you expect this to work where the shelves are set at an angle?
+
+[image did not survive the paste]
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 11 years ago -- in reply to Adam Mauss
+
+No. It is premised on standard orientations.
+
+--------------------------------------------------------------------------------
+
+Adam Mauss -- over 11 years ago -- in reply to Jonah.Coleman
+
+ok. thanks
+
+--------------------------------------------------------------------------------
+
+Jared -- over 10 years ago
+
+Is there a tutorial on UCS's? Like UCS's for Dummies? lol I'm totally new to this
+aspect of CV. I don't want to take up someone's time too much, but if I could be
+pointed in the direction of something that would give me the absolute basics I
+would be thankful.
+
+I've read this whole thread and I really need to get this UCS working for me, but I
+don't know where to start. I've copied the code using IE and pasted into UCS editor
+I believe, but nothing changes for me.
+
+Any help would be awesome.
+Thanks
+
+--------------------------------------------------------------------------------
+
+Chip Martin -- over 10 years ago -- in reply to Jared
+
+I would recommend our eLearning courses. Specifically Object Intelligence Complete
+and User Created Standards Complete.
+
+--------------------------------------------------------------------------------
+
+Adam Mauss -- over 10 years ago -- in reply to Jared
+
+Is the yellow light on next to the UCS?
+
+--------------------------------------------------------------------------------
+
+Jared -- over 10 years ago -- in reply to Adam Mauss
+
+Yea, the light is on.
+
+First, I'll tell you what I did. I copied an existing UCS, deleted it's code and
+replaced it with this code. This might've been absolutely the wrong thing to do,
+but like I said.....noob.
+
+--------------------------------------------------------------------------------
+
+Adam Mauss -- over 10 years ago -- in reply to Jared
+
+from an ortho view....smiley face if you click on a partition or fixed shelf, is
+there not options list on the bottom left of the screen?
+
+--------------------------------------------------------------------------------
+
+Jared -- over 10 years ago -- in reply to Adam Mauss
+
+Adam,
+
+That was it. I was convinced that I had to be in Section Level for some reason.
+Enabled the notching and the other attributes showed up.
+
+Thanks a ton! I can probably manage from here.
+
+Cheers!
+
+--------------------------------------------------------------------------------
+
+Mark Sams -- over 10 years ago
+
+Jonah:
+
+I use this notch UCS often. It always works great. I have a job where I need to set
+the partitions at a 20 degree angle. I can set the angle on the partitions without
+a problem but the notch from the USC does not move. Is there a way I can get the
+notch to match the partition? Or have you thought about adding this to the UCS?
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 10 years ago -- in reply to Mark Sams
+
+I did a lot of work at one point on a version that could handle arbitrary angles,
+and lost that work in an unfortunate accident involving my wiz_Data.wdb file.
+
+It is *not* easy.
+
+--------------------------------------------------------------------------------
+
+Mark Sams -- over 10 years ago -- in reply to Jonah.Coleman
+
+I did a little work today and I was able to change the angle of the dado in the
+partition. It was the fixed shelf that I was having trouble with. I finally did the
+change manually on each part so I could get it done toady. I may play with it
+sometime. I can also relate the these "Unfortunate Accidents."
+
+--------------------------------------------------------------------------------
+
+Bill Crouch -- over 10 years ago
+
+I'm sure I'm missing something in this UCS, as far as I can understand it.
+
+I have no problem generating the notched construction.
+
+The problem comes when I send it to my NBR.
+
+The material I'm using is 1" thick. The notches are correct as to spacing and notch
+widths.
+
+The problem is that when I check the output at the NBR both the notch and the
+outlining cuts are the same depth: .502", done in a single pass. The depth should
+be .754".
+
+I've checked tool data between CV9 and our NBR and they are correct to each other.
+
+The max depth of cut on the CV9 tool setup is set at 25/32".
+
+The same tool is assigned to do both the notch and the outline cuts.
+
+Any suggestions on what to check next?
+
+--------------------------------------------------------------------------------
+
+Bill Crouch -- over 10 years ago -- in reply to Bill Crouch
+
+Correction on the depth of cut: should be 1.004", not .754"
+
+--------------------------------------------------------------------------------
+
+Palmer -- over 9 years ago -- in reply to Bill Crouch
+
+Just getting to use this - Jonah Rocks!
+
+Anyone else have trouble with a changing the material size and qualified dados?
+
+I changed my FS and PT material (by room) to use 1/4" material and all of the dados
+into the sides, top, bottom are stuck at 5/8" wide - which is what they would be
+for my 3/4" material qualified dado. I changed the room construction method to NOT
+a qualified dado and it's fine.
+
+No big deal, I can live with that. Just wondering if I have a UCS messing with me
+somewhere?
+
+--------------------------------------------------------------------------------
+
+Jonah.Coleman -- over 9 years ago -- in reply to Palmer
+
+Ha, I actually forgot all about this and never used it at my current employer.
+Added it now. Thanks earlier me!
+
+Are you asking about the dadoes my UCS creates or the system ones? You'll need to
+post a new thread for the system one or it is very confusing.
+
+--------------------------------------------------------------------------------
+
+Palmer -- over 9 years ago -- in reply to Jonah.Coleman
+
+Cool. Nice to know I could pay a very small favor back to all the huge ones you
+have indirectly done for me in the past.
+
+Yeah, I guess it is the system dados. It's no big deal to change. I was just
+wondering if it was another UCS affecting it in my system.
+
+This thing is cool!
+
+--------------------------------------------------------------------------------
+
+Vinny Bentley -- over 9 years ago -- in reply to Jonah.Coleman
+
+Great UCS Jonah...This will come in handy....
+
+--------------------------------------------------------------------------------
+
+Eric@bloomsburydesign.com -- over 2 years ago
+
+So. the company I'm working for recently upgraded to CV2023, but in this upgrade it
+appears that this UCS has broken in regards to drawer stretchers. in the older
+version (cv11)  the Drawer Stretcher Origin Was Located Top Back Left , But In 2023
+it appears that it has been shifted to Bottom Front Right. So when this UCS is
+Activated the Extended Drawer Stretcher Sticks Out The Left Side Of The Cabinet.
+
+Is There A New version Of This UCS Available? or Does Anyone Have a Solution To
+This?
+
+[no reply to this post is present in the capture]

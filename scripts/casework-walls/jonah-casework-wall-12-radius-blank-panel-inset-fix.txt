@@ -1,0 +1,126 @@
+;This should be before any other part level UCS
+For Each PANEL part
+	if :name == 'DOR_OPEN' and OBJECT == 17 and DOR_OPEN.SDJ != null then
+		
+	else
+		EXIT
+	end if
+	
+	if this.AA_Fix_For_Radius_Panels == null then
+		AA_Fix_For_Radius_Panels<int> = '<lst>1) Auto=1|2) Enabled=2|3) Disabled=3'
+		AA_Fix_For_Radius_Panels<style> = 1
+		AA_Fix_For_Radius_Panels<Desc> = 'Fix For Inset'
+	end if
+	
+	AA_Fix_For_Radius_Panels_USE<int> := AA_Fix_For_Radius_Panels
+	if AA_Fix_For_Radius_Panels == 1 and cab.Is_Casework_Wall == 1 then
+		AA_Fix_For_Radius_Panels_USE<int> := 2
+	end if
+	
+	if AA_Fix_For_Radius_Panels_USE == 3 then
+		exit
+	end if
+	
+_FIX_FOR_RADIUS_PANELS<int> := 1	
+	if ::.TR.RADIUS == null then
+		exit
+	end if
+	
+	FACE_Radius := ::.TR.RADIUS
+	if FACE_RADIUS < 0 then
+		;FACE_RADIUS += DZ
+	else
+		FACE_RADIUS += DZ
+	end if
+	
+		 				
+	circle_x := ::DX/2
+	circle_z := 0 - Sqrt(sqr(FACE_Radius) - sqr(::DX/2))
+	
+	;calculate start/end angle
+	nPi<dec> := 3.14159265358979323846264338328
+	
+	;guess I'll have to implement atan2 myself
+	TEMP_Loop_atan2<int> := 1
+	while TEMP_Loop_atan2 <= 2 do
+		if TEMP_Loop_atan2 == 1 then
+			nZ<dec> := 0 - circle_Z
+			nX<dec> := 0 - Circle_X 
+		else
+			nZ<dec> := 0 - circle_z 
+			nX<dec> := ::DX - circle_X 
+		end if
+		
+		if nx == 0 then
+			if nz > 0 then
+				nResult<dec> := nPi/2
+			else
+				if nZ < 0 then
+					nResult<dec> := 3.0 * nPi / 2.0
+				else
+					;no direction can be determined
+					nResult<dec> := 0
+				end if
+			end if
+		else
+			if nX < 0 then
+				nResult<dec> := ATan(nZ/nX)*nPi/180 + nPi
+			else
+				nResult<dec> :=  ATan(nZ/nx)*nPi/180
+			end if
+		end if
+		
+		while nResult < 0 do
+			nResult<dec> += (2.0 * nPi)
+		end while
+		
+		;atan returns radians, we need to convert to degrees
+		nResult *= (180/nPi) 
+		
+		if TEMP_Loop_atan2 == 1 then
+			StartAngleInDegrees<dec> := nResult
+		else
+			EndAngleInDegrees<dec> := nResult
+		end if
+	
+		TEMP_Loop_atan2<int> += 1
+	end while
+	delete nResult
+	delete nX
+	delete nZ
+	delete nPi
+	delete TEMP_Loop_atan2	
+		
+	TEMP_Total_Inset := SDJ
+	;calculate center point
+	if FACE_Radius > 0 then
+		TEMP_CleatRadius := FACE_Radius - TEMP_Total_Inset
+	else
+		TEMP_CleatRadius := FACE_Radius - TEMP_Total_Inset + 0.75
+	end if
+
+	;calculate new start/end points
+	if FACE_Radius > 0 then
+		TEMP_WALLCLEAT_X := 0 + cos(StartAngleInDegrees)*(-1*TEMP_Total_Inset)
+		TEMP_WALLCLEAT_Z := 0 + sin(StartAngleInDegrees)*(-1*TEMP_Total_Inset)
+		TEMP_End_X := ::DX + cos(EndAngleInDegrees)*(-1*TEMP_Total_Inset)
+		TEMP_End_Z := 0 + sin(EndAngleInDegrees)*(-1*TEMP_Total_Inset)
+	else
+		TEMP_WALLCLEAT_X := 0 + cos(StartAngleInDegrees)*(TEMP_Total_Inset)
+		TEMP_WALLCLEAT_Z := 0 - sin(StartAngleInDegrees)*(TEMP_Total_Inset)
+		TEMP_End_X := ::DX + cos(EndAngleInDegrees)*(TEMP_Total_Inset)
+		TEMP_End_Z := 0 - sin(EndAngleInDegrees)*(TEMP_Total_Inset)
+	end if
+		
+	X := TEMP_WALLCLEAT_X
+	Z := TEMP_WALLCLEAT_Z
+	DX := Sqrt(sqr(TEMP_End_X - TEMP_WALLCLEAT_X)+sqr(TEMP_End_Z - TEMP_WALLCLEAT_Z))
+	
+	delete TEMP_Total_Inset
+	delete TEMP_WALLCLEAT_X
+	delete TEMP_WALLCLEAT_Z
+	delete TEMP_END_X
+	delete TEMP_END_Z
+
+	RADIUS := TEMP_CleatRadius
+	delete TEMP_CleatRadius

@@ -1,0 +1,204 @@
+;calculate overlays for each door/drawer opening
+
+For Each DOR_OPEN|DWR_OPEN Part	
+	if name == 'DOR_OPEN' then
+		DOOR_IS_STILE_AND_RAIL<int> := 0
+		
+		TEMP_DOORSTYLEID := this.DOR.DOORSTYLEID
+		;if TEMP_DOORSTYLEID == 52 or TEMP_DOORSTYLEID == 50 then
+			;DOOR_IS_STILE_AND_RAIL<int> := 1
+		;end if
+	end if   
+	
+	TEMP_Loop1<int> := 1
+	AA_Open_Instance<int> := -1
+	while :.{name}@{TEMP_Loop1}.OBJID != null and AA_Open_Instance == -1 do
+		if :.{name}@{TEMP_Loop1}.OBJID == OBJID then
+			AA_Open_Instance<int> := TEMP_Loop1
+		else
+			TEMP_Loop1<int> += 1
+		end if
+	end while
+	delete TEMP_Loop1
+	
+	FWP_OVERLAYS_LEFT_END<int> := 0
+	FWP_OVERLAYS_RIGHT_END<int> := 0
+	FWP_OVERLAYS_TOP<int> := 0
+	FWP_OVERLAYS_BOTTOM<int> := 0 
+	
+	;determine what we're overlaying
+	if PABSX < 1 then
+		FWP_OVERLAYS_LEFT_END<int> := 1
+	end if
+	if PABSX + DX > Cab.DX - 1 then
+		FWP_OVERLAYS_RIGHT_END<int> := 1
+	end if
+	
+	if PABSY + DY > Cab.DY - Cab.AA_Effective_SCT - 1 then
+		FWP_OVERLAYS_TOP<int> := 1
+	end if
+	
+	if PABSY < :PABSY + 1 + Cab.AA_Effective_SCB then
+		FWP_OVERLAYS_BOTTOM<int> := 1
+	end if
+	
+	;calc reveals
+	if name == 'DOR_OPEN' then
+		if DOR_OPEN.DOR.PID > 0 then
+			FWP_REVL := DOR_OPEN.DOR.X
+			FWP_REVR := DOR_OPEN.DX - (DOR_OPEN.DOR.X + DOR_OPEN.DOR.DX)
+			FWP_REVB := DOR_OPEN.DOR.Y
+			FWP_REVT := DOR_OPEN.DY - (DOR_OPEN.DOR.Y + DOR_OPEN.DOR.DY)
+		else
+			if DOR_OPEN.PANEL.PID > 0 then
+				FWP_REVL := DOR_OPEN.PANEL.X
+				FWP_REVR := DOR_OPEN.DX - (DOR_OPEN.PANEL.X + DOR_OPEN.PANEL.DX)
+				FWP_REVB := DOR_OPEN.PANEL.Y
+				FWP_REVT := DOR_OPEN.DY - (DOR_OPEN.PANEL.Y + DOR_OPEN.PANEL.DY)
+			end if
+		end if
+		
+		if this.DOR.AA_OffsetDoorDize != 0 then
+			FWP_REVL += this.DOR.AA_OffsetDoorSize
+			FWP_REVR += this.DOR.AA_OffsetDoorSize  
+			FWP_REVT += this.DOR.AA_OffsetDoorSize 
+			FWP_REVB += this.DOR.AA_OffsetDoorSize 
+		end if
+	end if
+	
+	if name == 'DWR_OPEN' then
+		AA_PATH_TO_DWR<text> = 'DWR_OPEN.DBOX.DWR'
+		if STYPE == 5 then
+			AA_PATH_TO_DWR<text> = 'DWR_OPEN.DWR'
+		end if		
+			
+		FWP_REVL := {AA_PATH_TO_DWR}.PABSX - PABSX
+		FWP_REVR := DWR_OPEN.PABSX + DWR_OPEN.DX - ({AA_PATH_TO_DWR}.PABSX + {AA_PATH_TO_DWR}.DX)
+		FWP_REVB := {AA_PATH_TO_DWR}.PABSY - PABSY
+		FWP_REVT := DWR_OPEN.PABSY + DWR_OPEN.DY - ({AA_PATH_TO_DWR}.PABSY + {AA_PATH_TO_DWR}.DY)
+	end if
+	
+	;calc overlays
+	TEMP_PARTITION_DZ := 0.75
+	
+	if FWP_OVERLAYS_LEFT_END == 1 then
+		;left side overlays a cabinet end
+		TEMP_LEFT_END_DZ := Cab.Case.LF.DZ
+		if TEMP_LEFT_END_DZ == 0 then
+			TEMP_LEFT_END_DZ := Cab.Case.LU.DZ
+			if TEMP_LEFT_END_DZ == 0 then
+				TEMP_LEFT_END_DZ := Cab.Case.S_LSE.DZ
+			end if
+		end if
+		
+		FWP_OVLL := TEMP_LEFT_END_DZ - FWP_REVL
+		
+		FWP_OVLL += Cab.SCL
+		
+		delete TEMP_LEFT_END_DZ
+	else
+		;left side overlays a partition
+		FWP_OVLL := TEMP_PARTITION_DZ/2 - FWP_REVL
+	end if
+	
+	if FWP_OVERLAYS_RIGHT_END == 1 then
+		;right end overlays cabinet end
+		TEMP_RIGHT_END_DZ := Cab.Case.RF.DZ
+		if TEMP_RIGHT_END_DZ == 0 then
+			TEMP_RIGHT_END_DZ := Cab.CAse.RU.DZ
+			if TEMP_RIGHT_END_DZ == 0 then
+				TEMP_RIGHT_END_DZ := Cab.CAse.S_RSE.DZ
+			end if
+		end if
+		
+		FWP_OVLR := TEMP_RIGHT_END_DZ - FWP_REVR
+		FWP_OVLR += Cab.SCR
+		
+		delete TEMP_RIGHT_END_DZ
+	else
+		;right overlays partition
+		FWP_OVLR := TEMP_PARTITION_DZ/2 - FWP_REVR
+	end if
+	
+	if this.DBOX.DWR.OBJID != null then
+		TEMP_Child<text> = 'DBOX.DWR'
+	else
+		if this.DWR.OBJID != null then
+			TEMP_Child<text> = 'DWR'
+		else
+			if this.DOR.OBJID != null then
+				TEMP_Child<text> = 'DOR'
+			else
+				TEMP_Child<text> = 'PANEL'
+			end if
+		end if
+	end if
+		
+	if FWP_OVERLAYS_TOP == 1 then
+		;top overlays cabinet top
+		if Cab.CAse.TO.OBJID != null then
+			TEMP_Name<text> = 'TO'
+		else
+			TEMP_Name<text> = 'TS'
+		end if
+		
+		TEMP_TOP_DZ := Cab.Case.{TEMP_Name}.DZ
+		
+		FWP_OVLT := this.{TEMP_Child}.PABSY + this.{TEMP_Child}.DY - Cab.Case.{TEMP_Name}.PABSY
+		
+		;FWP_OVLT := TEMP_TOP_DZ - FWP_REVT
+		;FWP_OVLT += Cab.AA_Effective_SCT
+		
+		delete TEMP_TOP_DZ
+		delete TEMP_Name
+	else	
+		;top overlays a fixed shelf/drawer stretcher/something to that effect
+		TEMP_TOP_DZ := Cab.Interior.DS.DZ
+		if TEMP_TOP_DZ == 0 then 
+			TEMP_TOP_DZ := Cab.Interior.FS.DZ
+		end if
+		
+		FWP_OVLT := TEMP_TOP_DZ/2 - FWP_REVT
+		
+		delete TEMP_TOP_DZ
+		
+		;handle relative top position
+		if this.JONAH_Interior_Split_Above_Path != 'NONE' then
+			FWP_OVLT := this.{TEMP_Child}.PABSY + this.{TEMP_Child}.DY - {JONAH_Interior_Split_Above_Path}.PABSY
+			
+			;if {JONAH_Interior_Split_Above_Path}.PCTR == 1 then
+				;FWP_OVLT := {JONAH_Interior_Split_Above_Path}.DZ - FWP_REVT
+			;end if
+		end if
+	end if
+	
+	delete TEMP_Child
+	
+	
+
+	if FWP_OVERLAYS_BOTTOM == 1 then
+		;bottom overlays cabinet bottom
+		TEMP_BOTTOM_DZ := Cab.Case.BO.DZ
+		if TEMP_BOTTOM_DZ == 0 then
+			TEMP_BOTTOM_DZ := Cab.Case.DE.DZ
+		end if
+		
+		FWP_OVLB := TEMP_BOTTOM_DZ - FWP_REVB
+		FWP_OVLB += Cab.AA_Effective_SCB
+		delete TEMP_BOTTOM_DZ
+	else	
+		;bottom overlays a fixed shelf/drawer stretcher
+		TEMP_BOTTOM_DZ := CAb.Interior.DS.DZ
+		if TEMP_BOTTOM_DZ == 0 then
+			TEMP_BOTTOM_DZ := Cab.Interior.FS.DZ
+		end if
+		
+		FWP_OVLB := TEMP_BOTTOM_DZ/2 - FWP_REVB
+		
+		delete TEMP_BOTTOM_DZ
+	end if
+
+	delete TEMP_Partition_DZ
+	
+;=================================================================================
+

@@ -1,0 +1,153 @@
+;FWP: Visible Part Splits 
+;makes part splits visible v1.0
+;by Jonah Coleman (Jonah@FletcherWoodProducts.com)       
+;Fletcher Wood Products
+
+for each * PART
+	if OBJECT == 17 then
+		TEMP_Loop1 := 1
+		WHILE TEMP_Loop1 <= 2 do
+			TEMP_Continue := true
+			
+			TEMP_Loop2 := 0
+			while TEMP_Continue do
+				TEMP_SplitLoc := -1
+				
+				if TEMP_Loop1 == 1 then
+					;X splits
+					if TEMP_Loop2 == 0 then
+						TEMP_SplitLoc := _SPLITX
+					else
+						if TEMP_Loop2 == 1 then
+							TEMP_SplitLoc := _SPLITX1
+						else
+							if TEMP_Loop2 == 2 then
+								TEMP_SplitLoc := _SPLITX2
+							else
+								if TEMP_Loop2 == 3 then
+									TEMP_SplitLoc := _SPLITX3
+								else
+								    if TEMP_Loop2 == 4 then
+										TEMP_SplitLoc := _SPLITX4
+									else
+										if TEMP_Loop2 == 5 then
+											TEMP_SplitLoc := _SPLITX5
+										else
+											if TEMP_Loop2 == 6 then
+												TEMP_SplitLoc := _SPLITX6
+											else
+												if TEMP_Loop2 == 7 then
+													TEMP_SplitLoc := _SPLITX7
+												else
+													if TEMP_Loop2 == 8 then
+														TEMP_SplitLoc := _SPLITX8
+													else
+														if TEMP_Loop2 == 9 then
+															TEMP_SplitLoc := _SPLITX9
+														else
+															if TEMP_Loop2 == 10 then
+																TEMP_SplitLoc := _SPLITX10
+															end if
+														end if
+													end if
+												end if
+											end if
+										end if
+									end if
+								end if
+							end if
+						end if
+					end if
+				else
+					;Y splits
+					if TEMP_Loop2 == 0 then
+						TEMP_SplitLoc := _SPLITY
+					else
+						if TEMP_Loop2 == 1 then
+							TEMP_SplitLoc := _SPLITY1
+						else
+							if TEMP_Loop2 == 2 then
+								TEMP_SplitLoc := _SPLITY2
+							else
+								if TEMP_Loop2 == 3 then
+									TEMP_SplitLoc := _SPLITY3
+								else
+									if TEMP_Loop2 == 4 then
+										TEMP_SplitLoc := _SPLITY4
+									else
+										if TEMP_Loop2 == 5 then
+											TEMP_SplitLoc := _SPLITY5
+										else
+											if TEMP_Loop2 == 6 then
+												TEMP_SplitLoc := _SPLITY6
+											else
+												if TEMP_Loop2 == 7 then
+													TEMP_SplitLoc := _SPLITY7
+												else
+													if TEMP_Loop2 == 8 then
+														TEMP_SplitLoc := _SPLITY8
+													else
+														if TEMP_Loop2 == 9 then
+															TEMP_SplitLoc := _SPLITY9
+														else
+															if TEMP_Loop2 == 10 then
+																TEMP_SplitLoc := _SPLITY10
+															end if
+														end if
+													end if
+												end if
+											end if
+										end if
+									end if				
+								end if
+							end if
+						end if
+					end if
+				end if
+				
+				if TEMP_SplitLoc == -1 and TEMP_Loop2 >= 1 then
+					;definitely want to look for _SPLIT? and _SPLIT?1, sometimes the first split is one and sometimes the other.
+					TEMP_Continue := false
+				else
+					if TEMP_SplitLoc > 0 then
+						;there is a split, create a part to display.
+						dim board as new part
+						BOARD.name = 'SPLIT VISUAL'
+						BOARD._NOCNC := 1
+						BOARD.MATID = 2983
+							
+						if TEMP_Loop1 == 1 then
+							;x split
+							BOARD.DX := 0.0625
+							BOARD.DY := DY
+							BOARD.DZ := DZ
+							
+							BOARD.X :=  TEMP_SplitLoc - 1/32
+							BOARD.Y := 0
+						else
+							;y split
+							BOARD.DX := DX
+							BOARD.DY := 0.0625
+							BOARD.DZ := DZ
+							
+							BOARD.X := 0
+							BOARD.Y := TEMP_SplitLoc - 1/32
+						end if
+						BOARD.Z := 0
+							
+						BOARD.AX := 0
+						BOARD.AY := 0
+						BOARD.AZ := 0
+					end if
+					TEMP_Loop2 += 1
+				end if
+			end while
+			
+			TEMP_Loop1 += 1
+		end while
+	end if
+	
+	delete TEMP_Loop1
+	delete TEMP_Loop2
+	delete TEMP_Continue
+	delete TEMP_SplitLoc

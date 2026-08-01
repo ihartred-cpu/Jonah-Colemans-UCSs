@@ -1,0 +1,112 @@
+for each face|face*|Interior|Interior*|DOR_OPEN|DWR_OPEN part
+ 	if name == 'DOR_OPEN' or name == 'DWR_OPEN' then
+		;identify MR above
+		TEMP_Instance<int> := 1
+		TEMP_MR_Above_ID<int> := -1
+		JONAH_MR_Above_Instance<int> := -1
+		JONAH_Interior_Split_Above_Path<text> = 'NONE'
+		
+		while :.MR@{TEMP_Instance}.DX != null and TEMP_MR_Above_ID == -1 do
+			if :.MR@{TEMP_Instance}.PABSY == PABSY + DY then
+				TEMP_MR_Above_ID<int> := :.MR@{TEMP_Instance}.ID
+				JONAH_MR_Above_Instance<int> := TEMP_Instance
+			end if
+			
+			TEMP_Instance<int> += 1
+		end while
+		
+		if TEMP_MR_Above_ID > 0 then
+			TEMP_Loop_Part<int> := 1
+			while TEMP_Loop_Part <= 2 and JONAH_Interior_Split_Above_Path == 'NONE' do
+				if TEMP_Loop_Part == 1 then
+					TEMP_Part<text> = 'DS'
+				else
+					TEMP_Part<text> = 'FS'
+				end if
+				TEMP_Instance<int> := 1
+				while Cab.{JONAH_InteriorName}.{TEMP_Part}@{TEMP_Instance}.OBJID != null and JONAH_Interior_Split_Above_Path == 'NONE' do
+				 	if Cab.{JONAH_InteriorName}.{TEMP_Part}@{TEMP_Instance}.FPAR == TEMP_MR_Above_ID then
+				 		JONAH_Interior_Split_Above_Path<text> = 'Cab.{JONAH_InteriorName}.{TEMP_Part}@{TEMP_Instance}'
+				 	end if
+					TEMP_Instance<int> += 1
+				end while
+				
+				TEMP_Loop_Part<int> += 1
+			end while
+			delete TEMP_Loop_Part
+			delete TEMP_Part
+		end if
+		delete TEMP_Instance
+		delete TEMP_MR_Above_ID
+		exit
+	end if
+	
+	if name == 'Interior' or name == 'Interior*' then
+		;find face name
+		delete JONAH_FaceName
+		if name == 'Interior' then
+			JONAH_FaceName<text> = 'Face'
+		else
+			TEMP_Loop1<int> := 1
+			while TEMP_Loop1 <= Cab.AA_Max_Face and this.JONAH_FaceName == null do
+				if name == 'Interior{TEMP_Loop1}' then
+					JONAH_FaceName<text> = 'Face{TEMP_Loop1}'
+				end if
+				TEMP_Loop1<int> += 1
+			end while
+			delete TEMP_Loop1
+		end if
+		
+		exit
+	end if
+	
+	if name == 'FACE' or name == 'FACE*' then
+	    ;find interior name
+		JONAH_FaceName<text> = '{name}'
+		delete JONAH_InteriorName
+		if name == 'Face' then
+			JONAH_InteriorName<text> = 'Interior'
+			JONAH_FaceNumber<int> := 0
+		else
+			TEMP_Loop1<int> := 1
+			while TEMP_Loop1 <= Cab.AA_Max_Face and this.JONAH_InteriorName == null do
+			if name == 'Face{TEMP_Loop1}' then
+				JONAH_InteriorName<text> = 'Interior{TEMP_Loop1}'
+				JONAH_FaceNumber<int> := TEMP_Loop1
+			end if
+			TEMP_Loop1<int> += 1
+			end while
+			delete TEMP_Loop1
+		end if
+	        
+        JONAH_Face_AY<dec> := AY
+              
+        if AX == -180 and AZ == -180 then
+        	;I don't know why it does this some times
+        	if AY == 0 then
+        		JONAH_FACE_AY<dec> += 180
+        	else
+	        	if AY >= 0 then
+	        		JONAH_FACE_AY<dec> += 90
+	        	else
+	        		JONAH_FACE_AY<dec> += 270
+	        	end if      		
+	        end if
+        end if
+                    
+        while JONAH_Face_AY < 0 do
+            JONAH_Face_AY<dec> += 360
+        end while
+        
+       
+ 
+        JONAH_EndX := X + cos(JONAH_Face_AY) * DX 
+        JONAH_EndZ := Z - sin(JONAH_Face_AY) * DX
+        
+        ;determine offset of interior from face (i.e. face overlays a finished end)
+		JONAH_Face_Interior_Offset_Start := Cab.{JONAH_InteriorName}.CO@1.X
+		JONAH_Face_Interior_Offset_End := DX - (Cab.{JONAH_InteriorName}.CO@1.X + Cab.{JONAH_InteriorName}.CO@1.DX) 
+        
+		JONAH_MidX := (JONAH_EndX + X)/2
+		JONAH_MidZ := (JONAH_EndZ + Z)/2
+    end if

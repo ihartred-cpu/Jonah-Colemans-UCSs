@@ -1,0 +1,70 @@
+for each FACE*|TR part
+	if name == 'FACE' or name == 'FACE*' then 		
+ 		;parts to examine to get thickness
+ 		dim WALLCLEAT as new part
+ 		WALLCLEAT.QTY := 0
+ 		WALLCLEAT.DZ = _M:DZ
+ 		WALLCLEAT.desc = 'Wall Cleat Thickness Test'
+ 		WALLCLEAT_DZ := this.WALLCLEAT.DZ
+ 		exit
+ 	end if
+ 	
+	;inserting/deleting cleats
+	if this.AA_Cleats_Modify_Delete == null or this.AA_Cleats_Modify_Delete == -1 then
+		exit
+	else
+		if Cab.Is_Casework_Wall == 0 then
+	 		exit
+	 	end if	
+ 	
+		if AA_Cleats_Number >= AA_Cleats_Modify_Delete then
+			TEMP_Loop1<int> := 1
+			TEMP_Deleted<int> := 0
+			while TEMP_Loop1 <= AA_Cleats_Number-1 do
+				if TEMP_Loop1 >= AA_Cleats_Modify_Delete then
+					TEMP_Next<int> := TEMP_Loop1 + 1
+					AA_Cleats_{TEMP_Loop1}_Width := AA_Cleats_{TEMP_Next}_Width
+					AA_Cleats_{TEMP_Loop1}_AFF := AA_Cleats_{TEMP_Next}_AFF
+					AA_Cleats_{TEMP_Loop1}_Inset := AA_Cleats_{TEMP_Next}_Inset
+					AA_Cleats_{TEMP_Loop1}_PLOW := AA_Cleats_{TEMP_Next}_PLOW
+					AA_Cleats_{TEMP_Loop1}_ADJL := AA_Cleats_{TEMP_Next}_ADJL
+					AA_Cleats_{TEMP_Loop1}_ADJR := AA_Cleats_{TEMP_Next}_ADJR
+					AA_Cleats_{TEMP_Loop1}_NoPart<bool> := AA_Cleats_{TEMP_Next}_NoPart
+					AA_Cleats_{TEMP_Loop1}_Breaks_Count<int> := AA_Cleats_{TEMP_Next}_Breaks_Count
+					
+					if AA_Cleats_{TEMP_Loop1}_Breaks_Count > 0 then
+						TEMP_Loop_Breaks<int> := 1
+						while TEMP_Loop_Breaks <= AA_Cleats_{TEMP_Loop1}_Breaks_Count do
+							AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_Breaks} := AA_Cleats_{TEMP_Next}_Breaks_From_{TEMP_Loop_Breaks}
+							AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_Breaks} := AA_Cleats_{TEMP_Next}_Breaks_Width_{TEMP_Loop_Breaks}
+							
+							TEMP_Loop_Breaks<int> += 1
+						end while
+						delete TEMP_Loop_Breaks
+					end if
+					
+					if AA_Cleats_{TEMP_Loop1}_Strut_Disable != null then
+						AA_Cleats_{TEMP_Loop1}_Strut_State<int> := AA_Cleats_{TEMP_Next}_Strut_State
+						AA_Cleats_{TEMP_Loop1}_Strut_Position<int> := AA_Cleats_{TEMP_Next}_Strut_Position
+						AA_Cleats_{TEMP_Loop1}_Strut_Width := AA_Cleats_{TEMP_Next}_Strut_Width
+					end if
+				end if
+				
+				AA_Cleats_{TEMP_Loop1}_Rabbet<int> := AA_Cleats_{TEMP_Next}_Rabbet
+				AA_Cleats_{TEMP_Loop1}_Rabbet_Depth := AA_Cleats_{TEMP_Next}_Rabbet_Depth
+				AA_Cleats_{TEMP_Loop1}_Rabbet_Width := AA_Cleats_{TEMP_Next}_Rabbet_Width
+				AA_Cleats_{TEMP_Loop1}_ADJT := AA_Cleats_{TEMP_Next}_ADJT
+				AA_Cleats_{TEMP_Loop1}_ADJB := AA_Cleats_{TEMP_Next}_ADJB
+				AA_Cleats_{TEMP_Loop1}_Closure<int> := AA_Cleats_{TEMP_Next}_Closure
+				AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above<meas> := AA_Cleats_{TEMP_Loop1}_Closure_Slot_Above
+				AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below<meas> := AA_Cleats_{TEMP_Loop1}_Closure_Slot_Below
+				
+				TEMP_Loop1<int> += 1
+			end while
+			delete TEMP_Loop1			
+			
+			AA_Cleats_Number<int> := AA_Cleats_Number - 1
+		end if
+		
+		AA_Cleats_Modify_Delete<int> := -1
+	end if

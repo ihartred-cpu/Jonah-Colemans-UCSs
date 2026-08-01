@@ -1,0 +1,298 @@
+;Renames Door/Drawer Slabs
+
+ For Each DOR|DWR|S_DSLAB|PANEL|HNG|DLAMF|DLAMB|PULL|PULLD|DBAND Part
+	if :OBJECT == 10 then
+		;copied
+		EXIT
+	end if
+
+
+
+	if name == 'DOR' or name == 'DWR' or name == 'PANEL' then
+		if this.AA_DescOverride == null then
+			AA_DescOverride<text> = 'NONE'
+			AA_DescOverride<style> = 1
+			AA_DescOverride<desc> = 'Panel: Description Override (NONE = default)'
+		end if
+		if this.AA_BAND_OVERRIDE != null and this.AA_BAND_OVERRIDE == 'N' and Cab.IS_Casework_Wall == 1 then
+			delete AA_BAND_OVERRIDE
+		end if
+		
+		if this.BAND == null then 
+			if Cab.IS_Casework_Wall == 1 then
+				BAND = 'N'
+			else
+				BAND = 'DDDD'
+			end if
+		end if
+		
+		if this.AA_Take_Part_Material == null then
+			AA_Take_Part_Material<text> = '0'
+			AA_Take_Part_Material<style> = 1
+			AA_Take_Part_Material<desc> = 'Door: Slab Part Type (0=none)' 
+		end if
+	end if
+
+	if name == 'PANEL' then
+		if OBJECT != 17 then
+			;not the part, the actual opening
+			if AA_DescOverride != 'NONE' then
+				desc = '{AA_DescOverride}'
+			end if
+		end if
+	end if
+	
+	if name == 'DOR' or name == 'DWR' or name == 'PANEL' then
+		if this.AA_MIT_State == null then
+			AA_MIT_State<bool> = false
+			AA_MIT_State<style> = 1
+			AA_MIT_State<desc> = 'Panel Adjust: 0) Show Options'
+		end if
+		
+		TEMP_Loop1<int> := 1
+		while TEMP_Loop1 <= 4 do
+			if TEMP_Loop1 == 1 then
+				TEMP_Char<text> = 'B'
+			else
+				if TEMP_Loop1 == 2 then
+					TEMP_Char<text> = 'R'
+				else
+					if TEMP_Loop1 == 3 then
+						TEMP_Char<text> = 'T'
+					else
+						if TEMP_Loop1 == 4 then
+							TEMP_Char<text> = 'L'
+						end if
+					end if
+				end if
+			end if
+			
+			if this.AA_MIT{TEMP_Char} == null then
+				AA_MIT{TEMP_Char}<dec> := -1
+			end if
+			AA_MIT{TEMP_Char}<desc> = 'Panel Adjust: 2) Miter {TEMP_Char} (-1 = auto)'
+			AA_MIT{TEMP_Char}<style> = AA_MIT_State
+			if this.AA_EXT{TEMP_Char} == null then
+				AA_EXT{TEMP_Char}<meas> := 0
+			end if
+			AA_EXT{TEMP_Char}<desc> = 'Panel Adjust: 2) Extend {TEMP_Char}'
+			AA_EXT{TEMP_Char}<style> = AA_MIT_State
+			
+			if this.AA_FaceLaminate_Adj_{TEMP_Char} == null then
+				AA_FaceLaminate_Adj_{TEMP_Char}<meas> := 0
+			end if
+			AA_FaceLaminate_Adj_{TEMP_Char}<desc> = 'Panel Adjust: 3) Adjust Face Laminate {TEMP_Char}'
+			AA_FaceLaminate_Adj_{TEMP_Char}<style> = AA_MIT_State
+			
+			TEMP_Loop1<int> += 1
+		end while
+		delete TEMP_Char
+		delete TEMP_Loop1
+	end if
+
+	if name == 'S_DSLAB' then
+		if this.PID != 0 then
+			if :AA_Take_Part_Material != '0' then	
+				dim {AA_Take_Part_Material} as new part
+				{AA_Take_Part_Material}.QTY := 0
+			
+				TEMP_MatID<int> := this.{AA_Take_Part_Material}._M:MatID
+				if TEMP_MatID != _M:MatID then
+					MATID = TEMP_MatID
+					DZ := this.{AA_Take_Part_Material}.DZ
+				end if
+				delete TEMP_MatID
+			end if
+		end if
+		
+		if :name == 'DOR' or :name == 'DWR' or :name == 'PANEL' then
+			;parts only
+			TEMP_ParentName<int> = :name
+			TEMP_ParentName<text> = '{TEMP_ParentName}'
+			
+			if {TEMP_ParentName}.RADIUS != 0 then
+				;these parameters do not come through to S2M and we need them for unrolling.
+				EM_ARCEDX = S_DSLAB.ARCEDX
+				EM_ARCEDY = S_DSLAB.ARCEDY
+					
+				;fix for horizontal, radius doors not properly calculating sizes
+				if AZ != 0 and PANEL.RADIUS != 0 then
+					;EDY := {TEMP_ParentName}.ARCEDX
+					;EDX = -ARCEDX  
+					EM_ARCEDX := 0
+					EM_ARCEDY := EDY
+				end if
+			end if
+		end if
+	end if
+	
+	TEMP_Panel_Is_Part<int> := 0
+	if name == 'PANEL' and OBJECT == 17 then
+		TEMP_Panel_Is_Part<int> := 1
+		DZ := _M:DZ
+	end if
+	
+	TEMP_Comment<int> = this.comment
+	TEMP_Comment<text> = '{TEMP_Comment}'
+		
+	if name == 'S_DSLAB' or name == 'DLAMF' or TEMP_Panel_Is_Part == 1 then
+		TEMP_Needs_Loop<int> := 0
+		if AA_MITB != 0 or AA_MITL != 0 or AA_MITT != 0 or AA_MITR != 0 or AA_EXTB != 0 or AA_EXTL != 0 or AA_EXTT != 0 or AA_EXTR != 0 then
+			TEMP_Needs_Loop<int> := 1
+		else
+			if AA_FaceLaminate_Adj_B != 0 or AA_FaceLaminate_Adj_T != 0 or AA_FaceLaminate_Adj_L != 0 or AA_FaceLaminate_Adj_R != 0 then
+				TEMP_Needs_Loop<int> := 1
+			end if
+		end if
+		
+		if TEMP_Needs_Loop == 1 then
+			TEMP_Loop1<int> := 1
+			if AX == 0 and AY == 0 and AZ == 0 then
+				TEMP_Vertical_Grain<int> := 1
+			else
+				TEMP_Vertical_Grain<int> := 2
+			end if
+			
+			Already_LibPart<int> := 0
+			while TEMP_Loop1 <= 4 do
+				if TEMP_Loop1 == 1 then
+					TEMP_Control_Char<text> = 'B'
+					if TEMP_Vertical_Grain == 1 then
+						TEMP_Char<text> = 'B'
+						TEMP_Edge<int> := 1
+						TEMP_ADJ_SIZE_PARM<text> = 'DY'
+						TEMP_ADJ_SIZE_POS<text> = 'Y'
+					else
+					    TEMP_Char<text> = 'R'
+						TEMP_Edge<int> := 2
+						TEMP_ADJ_SIZE_PARM<text> = 'DX'
+						TEMP_ADJ_SIZE_POS<text> = 'NONE'
+					end if
+				else
+					if TEMP_Loop1 == 2 then
+						TEMP_Control_Char<text> = 'R'
+						if TEMP_Vertical_Grain == 1 then
+							TEMP_Char<text> = 'R'
+							TEMP_Edge<int> := 2
+							TEMP_ADJ_SIZE_PARM<text> = 'DX'
+							TEMP_ADJ_SIZE_POS<text> = 'NONE'
+						else
+					        TEMP_Char<text> = 'T'
+							TEMP_Edge<int> := 3
+							TEMP_ADJ_SIZE_PARM<text> = 'DY'
+							TEMP_ADJ_SIZE_POS<text> = 'NONE'
+						end if
+					else
+						if TEMP_Loop1 == 3 then
+							TEMP_Control_Char<text> = 'T'
+							if TEMP_Vertical_Grain == 1 then
+								TEMP_Char<text> = 'T'
+								TEMP_Edge<int> := 3
+								TEMP_ADJ_SIZE_PARM<text> = 'DY'
+								TEMP_ADJ_SIZE_POS<text> = 'NONE'
+							else
+					            TEMP_Char<text> = 'L'
+								TEMP_Edge<int> := 4
+								TEMP_ADJ_SIZE_PARM<text> = 'DX'
+								TEMP_ADJ_SIZE_POS<text> = 'X'
+							end if
+						else
+							if TEMP_Loop1 == 4 then
+								TEMP_Control_Char<text> = 'L'
+								if TEMP_Vertical_Grain == 1 then
+									TEMP_Char<text> = 'L'
+									TEMP_Edge<int> := 4
+									TEMP_ADJ_SIZE_PARM<text> = 'DX'
+									TEMP_ADJ_SIZE_POS<text> = 'X'
+								else
+					                TEMP_Char<text> = 'B'
+									TEMP_Edge<int> := 1
+									TEMP_ADJ_SIZE_PARM<text> = 'DY'
+									TEMP_ADJ_SIZE_POS<text> = 'Y'
+								end if
+							end if
+						end if
+					end if
+				end if
+				
+				if name != 'DLAMF' then
+					if AA_EXT{TEMP_Control_Char} != 0 then
+						_EDG{TEMP_Edge}EXT := AA_EXT{TEMP_Control_Char}
+						TEMP_Comment<text> = '{TEMP_Comment}, EDGE {TEMP_Loop1} OVERSIZED, '
+					end if
+					TEMP_MIT<dec> := AA_MIT{TEMP_Control_Char}
+					if TEMP_MIT == -1 then
+						ANG_DIFF_{TEMP_Char}<deg> := 0
+						TEMP_MIT<dec> := 0
+						if TEMP_Loop1 == 2 and :::JONAH_Has_Face_To_Right and :::JONAH_Face_To_Right_Is_Inside_Corner == 0 and ::X + ::DX >= :::DX then
+							if this.RADIUS == 0 and :RADIUS == 0 and Cab.{JONAH_Face_To_Right_Name}.TR.RADIUS == 0 then
+								ANG_DIFF_{TEMP_Char}<deg> := (JONAH_FACE_AY - JONAH_FACE_TO_RIGHT_AY)
+							end if
+						else
+							if TEMP_Loop1 == 4 and :::JONAH_Has_Face_To_Left == 1 and :::JONAH_Face_To_Left_Is_Inside_Corner == 0 and ::X <= 0 then
+								if this.RADIUS == 0 and :RADIUS == 0 and Cab.{JONAH_Face_To_LEFT_Name}.TR.RADIUS == 0 then
+									ANG_DIFF_{TEMP_Char}<deg> := (JONAH_FACE_TO_LEFT_AY-JONAH_FACE_AY)
+								end if
+							end if
+						end if
+						if ANG_DIFF_{TEMP_Char} != 0 then
+							TEMP_MIT<dec> := ANG_DIFF_{TEMP_Char}/2
+							if TEMP_MIT < 0 then
+								if TEMP_MIT < -45 then
+									TEMP_MIT<dec> += 45
+								else
+									if TEMP_MIT > -45 then
+										TEMP_MIT<dec> -= 45
+									end if
+								end if
+							end if
+						end if
+					end if
+					if TEMP_MIT != 0 then
+						if TEMP_MIT > 90 then
+							TEMP_MIT<dec> -= 90
+							TEMP_MIT<dec> *= -1
+						end if
+						MIT{TEMP_Char} := TEMP_MIT
+						_EDG{TEMP_Char}EXT := 1/4
+						TEMP_Comment<text> = '{TEMP_Comment}, EDGE {TEMP_Loop1} MITER - OVERSIZED, '
+						if TEMP_Panel_Is_Part == 0 and this.Already_LibPArt == 0 then
+							LIBPART = 'Jonah Rocks\Door Slab No Shape'
+							_APPLIED_LIBPART<int> := 1
+							Already_LibPart<int> := 1
+						end if
+					end if
+					delete TEMP_MIT
+				else
+					if AA_FaceLaminate_Adj_{TEMP_Char} != 0 then
+						{TEMP_ADJ_SIZE_PARM} += AA_FaceLaminate_Adj_{TEMP_Char}
+						
+						if TEMP_ADJ_SIZE_POS != 'NONE' then					
+							{TEMP_ADJ_SIZE_POS} -= AA_FaceLaminate_Adj_{TEMP_Char}
+						end if 
+					end if
+				end if
+			
+				TEMP_Loop1<int> += 1
+			end while
+			delete TEMP_ADJ_SIZE_PARM
+			delete TEMP_ADJ_SIZE_POS
+			delete Already_LibPart
+			delete TEMP_Char
+			delete TEMP_Loop1
+			delete TEMP_Edge
+		end if
+		delete TEMP_Needs_Loop
+		
+		if name == 'DLAMF' then
+			exit
+		end if
+		
+ 		if :name != 'DOR_OPEN' then
+ 			;excludes blank panels
+ 			comment = '{TEMP_Comment}'
+ 		end if
+		delete TEMP_Comment
+		_UCS_SET_COMMENT_2<int> := 1
+	end if
+	delete TEMP_Panel_Is_Part

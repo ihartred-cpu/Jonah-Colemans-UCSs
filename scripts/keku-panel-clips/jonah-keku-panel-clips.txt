@@ -1,0 +1,582 @@
+;Removable Panel Clips Revision 3
+;See comments at end before editing
+;Written by Jonah Coleman
+;JonahC@ArchitecturalArts.com
+
+ For Each DOR|PANEL|DWR|S_DSLAB|PT Part
+ 	if name == 'S_DSLAB' and this.PID != null then
+ 		exit
+ 	end if
+ 	
+ 	if name == 'PT' then
+		delete AA_PanelClip_State
+ 		
+ 		if this.AA_PanelClip_State_New == null then
+ 			AA_PanelClip_State_New<int> = '<lst>1) Default=1|2) None=2|3) Left Only=3|4) Right Only=4'
+ 			AA_PanelClip_State_New<style> = 1
+ 			AA_PanelClip_State_New<desc> = 'Keku: Action'
+ 		end if
+ 		exit
+ 	end if
+ 	
+ 	if name == 'PANEL' or name == 'DOR' or name == 'DWR' then
+ 		if this.FWP_PanelClip_Override_Outset != null and this.FWP_PanelClip_Override_Outset != -1 then
+ 			Z := this.FWP_PanelClip_Override_Outset
+ 		end if
+ 	end if
+ 	
+ 	if name == 'PANEL' or name == 'S_DSLAB' or name == 'DWR' or name == 'DOR' then
+ 		if this.FWP_RemovableClips == null then
+ 			FWP_RemovableClips<bool> = false
+ 			FWP_RemovableClips<style> = 1
+ 		end if
+ 		FWP_RemovableClips<desc> = 'Keku: 00) Enable'
+ 		
+		if this.UCS_Keku_Enable == 1 then
+			FWP_RemovableClips<bool> = 1
+		end if
+ 	end if
+ 	
+ 	TEMP_CheckClips<bool> := false
+ 	 	
+ 	if (name == 'DOR' and HNG == 0 and ::name != 'CASE') then
+ 		TEMP_CheckClips<bool> := true
+ 	else
+ 		if this.FWP_RemovableClips != null then
+	 		TEMP_CheckClips<bool> := true
+	 	end if
+	 end if
+	 
+	 if TEMP_CheckClips == 0 then
+	 	exit
+	 end if
+	 	 
+	 if TEMP_CheckClips then
+ 		;panel
+ 		if FWP_RemovableClips == 1 then
+			if this.FWP_PanelClip_OptionState == null then
+		 		FWP_PanelClip_OptionState<int> = '<lst>1) Show Options=1|2) Hide Options=2'
+		 		FWP_PanelClip_OptionState<style> = 1
+		 		FWP_PanelClip_OptionState<desc> = 'Keku: 01) Show Options'
+		 	end if 			
+		 	
+			if this.FWP_PanelClip_Override_QTY == null then
+		 		FWP_PanelClip_Override_QTY<int> := -1
+		 	end if
+		 	FWP_PanelClip_Override_QTY<style> = FWP_PanelClip_OptionState
+		 	FWP_PanelClip_Override_QTY<desc> = 'Keku: 02) Num Clips (-1 = default)' 			
+ 			
+ 			if this.FWP_PanelClip_Override_HNGL == null then
+ 				if this.FWP_PanelClip_Override_HNGT != null then
+ 					;backwards compatibility
+ 					FWP_PanelClip_Override_HNGL<meas> := FWP_PanelClip_Override_HNGT
+ 				else
+ 					FWP_PanelClip_Override_HNGL<meas> = -1
+ 				end if
+ 			end if
+ 			FWP_PanelClip_Override_HNGL<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Override_HNGL<Desc> = 'Keku: 03) Left Gap (-1 = default)'
+ 			
+ 			if this.FWP_PanelClip_Override_HNGR == null then
+ 				if this.FWP_PanelClip_Override_HNGB != null then
+ 					;backwards compatibility
+ 					FWP_PanelClip_Override_HNGR<meas> := FWP_PanelClip_Override_HNGB
+ 				else
+ 					FWP_PanelClip_Override_HNGR<meas> = -1
+ 				end if
+ 			end if
+ 			FWP_PanelClip_Override_HNGR<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Override_HNGR<Desc> = 'Keku: 04) Right Gap (-1 = default)'
+ 			
+ 			if this.FWP_PanelClip_Override_HNGT == null then
+ 				FWP_PanelClip_Override_HNGT<meas> = -1
+ 			end if
+ 			FWP_PanelClip_Override_HNGT<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Override_HNGT<Desc> = 'Keku: 05) Top Gap (-1 = default)'
+ 			
+ 			if this.FWP_PanelClip_Override_HNGB == null then
+ 				FWP_PanelClip_Override_HNGB<meas> = -1
+ 			end if
+ 			FWP_PanelClip_Override_HNGB<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Override_HNGB<Desc> = 'Keku: 06) Bottom Gap (-1 = default)'
+
+ 			if this.FWP_PanelClip_Override_MaxSpace_Horz == null then
+ 				FWP_PanelClip_Override_MaxSpace_Horz<meas> = 36
+ 			end if
+ 			FWP_PanelClip_Override_MaxSpace_Horz<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Override_MaxSpace_Horz<Desc> = 'Keku: 07) Max Space Horizontal'
+ 			delete FWP_PanelClip_Override_MaxSpace
+ 			
+ 			if this.FWP_PanelClip_Override_MaxSpace_Vert == null then
+ 				FWP_PanelClip_Override_MaxSpace_Vert<meas> = 36
+ 			end if
+ 			FWP_PanelClip_Override_MaxSpace_Vert<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Override_MaxSpace_Vert<Desc> = 'Keku: 08) Max Space Vertical'
+ 			
+ 			if this.FWP_PanelClip_OVLL == null then
+ 				FWP_PanelClip_OVLL<meas> = 0
+ 			end if
+ 			FWP_PanelClip_OVLL<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_OVLL<desc> = 'Keku: 09) Overlay Left Override (0=auto, 0.001 = 0)'
+ 			
+ 			if this.FWP_PanelClip_OVLR == null then
+ 				FWP_PanelClip_OVLR<meas> = 0
+ 			end if
+ 			FWP_PanelClip_OVLR<desc> = 'Keku: 10) Overlay Right Override (0=auto, 0.001 = 0)'
+ 			FWP_PanelClip_OVLR<style> = FWP_PanelClip_OptionState
+ 			
+ 			if this.FWP_PanelClip_OVLT == null then
+ 				FWP_PanelClip_OVLT<meas> = 0
+ 			end if
+ 			FWP_PanelClip_OVLT<desc> = 'Keku: 11) Overlay Top Override (0=auto, 0.001 = 0)'
+ 			FWP_PanelClip_OVLT<style> = FWP_PanelClip_OptionState
+ 			
+ 			if this.FWP_PanelClip_OVLB == null then
+ 				FWP_PanelClip_OVLB<meas> = 0
+ 			end if
+ 			FWP_PanelClip_OVLB<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_OVLB<desc> = 'Keku: 12) Overlay Bottom Override (0=auto, 0.001 = 0)'
+ 			
+ 			if this.FWP_PanelClip_Override_Outset == null then
+ 				FWP_PanelClip_Override_Outset<meas> = -1
+ 				
+ 				if this.UCS_Keku_SetOutset != null then
+ 					FWP_PanelClip_Override_Outset<meas> = UCS_Keku_SetOutset
+ 				end if
+ 			end if
+ 			FWP_PanelClip_Override_Outset<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Override_Outset<desc> = 'Keku: 13) Outset (-1 = default)'
+ 				
+ 			if this.FWP_PanelClip_Enable_LeftRight == null then
+ 				FWP_PanelClip_Enable_LeftRight<int> = '<lst>1) Both=0|2) Left Only=1|3) Right Only=2|4) None=3'
+ 			end if
+ 			FWP_PanelClip_Enable_LeftRight<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Enable_LeftRight<desc> = 'Keku: 14) Left/Right'
+ 				
+ 			if this.FWP_PanelClip_Enable_TopBottom == null then
+ 				FWP_PanelClip_Enable_TopBottom<int> = '<lst>1) Both=0|2) Top Only=1|3) Bottom Only=2|4) None=3'
+ 				FWP_PanelClip_Enable_TopBottom<int> := 3
+ 			end if
+ 			FWP_PanelClip_Enable_TopBottom<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Enable_TopBottom<desc> = 'Keku: 15) Top/Bottom'
+ 			
+ 			if this.FWP_PanelClip_ReverseFace == null then
+ 				FWP_PanelClip_ReverseFace<int> = '<lst>1) Face=0|2) Back=1'
+ 			end if
+ 			FWP_PanelClip_ReverseFace<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_ReverseFace<desc> = 'Keku: 16) Face/Back'
+ 				
+ 			if this.FWP_PanelClip_Type == null then
+ 				FWP_PanelClip_Type<int> = '<lst>1) Push/Pull=1|2) Suspension=2'
+ 				if this.UCS_Keku_SetType != null then
+ 					FWP_PanelClip_Type<int> := UCS_Keku_SetType
+ 				end if 
+ 			end if
+ 			FWP_PanelClip_Type<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Type<desc> = 'Keku: 17) Type'
+ 			if FWP_PanelClip_Type == 1 then
+ 				TEMP_PartName<text> = 'KEKU'
+ 			else
+ 				TEMP_PartName<text> = 'KEKUSUSP'
+ 			end if
+ 			
+ 			;for backwards compatibility or additional keku types- add them to the FWP_PanelClip_Type list and then add them below with _3, _4 etc.
+ 			;Can be used to force updates on old jobs by changing the material id here - if the scheduled one doesn't match it will get updated
+ 			TEMP_PanelClip_Type_MatID_1<int> := 0
+ 			TEMP_PanelClip_Type_MatID_2<int> := 0
+ 			
+ 			if this.FWP_PanelClip_Placement == null then
+ 				FWP_PanelClip_Placement<int> = '<lst>1) Ends Only=1|2) Ends/Partitions=2|3) Partitions Only=3'
+ 				if Cab.Is_Casework_Wall == 1 then
+					FWP_PanelClip_Placement<int> := 3
+				end if
+ 				
+ 				if this.UCS_Keku_SetPlacement != null then
+ 					FWP_PanelClip_Placement<int> := UCS_Keku_SetPlacement
+ 				end if
+ 				
+ 				
+ 			end if
+ 			FWP_PanelClip_Placement<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_Placement<desc> = 'Keku: 18) Placement Type'
+ 			
+ 			if FWP_PanelClip_Placement >= 2 then
+ 				;need a partition count
+ 				TEMP_Partition_Count<int> := 1
+ 				while Cab.{JONAH_InteriorName}.PT@{TEMP_Partition_Count}.X != null do 
+			 		TEMP_Partition_Count<int> += 1
+			 	end while
+			 	TEMP_Partition_Count<int> -= 1
+			 	
+			 	if this.FWP_PanelClip_Placement_PT == null then
+ 					FWP_PanelClip_Placement_PT<int> = '<lst>1) Both Sides of Partitions=1|2) Left Sides Only=2|3) Right Sides Only=3'
+ 					FWP_PanelClip_Placement_PT<style> = 1
+ 				end if                                
+ 				FWP_PanelClip_Placement_PT<Desc> = 'Keku: 19) Partition Placement'
+			 else
+			 	delete FWP_PanelClip_Placement_PT
+			 end if
+			 
+			 if this.FWP_PanelClip_MatID == null then
+ 				FWP_PanelClip_MatID<int> = 0
+ 			end if
+ 			FWP_PanelClip_MatID<style> = FWP_PanelClip_OptionState
+ 			FWP_PanelClip_MatID<desc> = 'Keku: 20) Override Material ID'
+ 			
+ 			TEMP_Edge<int> := 1
+ 			while TEMP_Edge <= 4 do
+ 				TEMP_Eval_Edge<int> := 0
+ 				
+ 				if TEMP_Edge == 1 then
+ 					if FWP_PanelClip_Enable_TopBottom == 0 or FWP_PanelClip_Enable_TopBottom == 2 then
+ 						 TEMP_Eval_Edge<int> := 1
+ 						 TEMP_Letter<text> = 'B'
+ 						 TEMP_Edge_X := 0
+ 						 TEMP_Edge_Y := 0
+ 						 TEMP_EdgeLength := DX
+ 						 TEMP_MaxSpace := FWP_PanelClip_Override_MaxSpace_Horz
+ 						 TEMP_EdgeAZ<deg> := -90
+ 					end if
+ 				else
+ 					if TEMP_Edge == 2 then
+ 						if FWP_PanelClip_Enable_LeftRight == 0 or FWP_PanelClip_Enable_LeftRight == 2 or FWP_PanelClip_Placement >= 2 then
+ 						 	TEMP_Eval_Edge<int> := 1
+ 						 	TEMP_Letter<text> = 'R'
+ 						 	TEMP_Edge_X := DX
+ 						 	TEMP_Edge_Y := 0
+ 						 	TEMP_EdgeLength := DY
+ 						 	TEMP_MaxSpace := FWP_PanelClip_Override_MaxSpace_Vert
+ 						 	TEMP_EdgeAZ<deg> := 0
+ 						end if
+ 					else
+ 						if TEMP_Edge == 3 then
+ 							if FWP_PanelClip_Enable_TopBottom == 0 or FWP_PanelClip_Enable_TopBottom == 1 then
+ 								TEMP_Eval_Edge<int> := 1
+ 								TEMP_Letter<text> = 'T'
+ 								TEMP_Edge_X := DX
+ 						 		TEMP_Edge_Y := DY
+ 						 		TEMP_EdgeLength := DX
+ 						 		TEMP_MaxSpace := FWP_PanelClip_Override_MaxSpace_Horz
+ 						 		TEMP_EdgeAZ<deg> := 90
+ 							end if
+ 						else
+ 							if TEMP_Edge == 4 then
+ 								if FWP_PanelClip_Enable_LeftRight == 0 or FWP_PanelClip_Enable_LeftRight == 1 or FWP_PanelClip_Placement >= 2 then
+		 						 	TEMP_Eval_Edge<int> := 1
+		 						 	TEMP_Letter<text> = 'L'
+		 						 	TEMP_Edge_X := 0
+ 						 			TEMP_Edge_Y := DY
+ 						 			TEMP_EdgeLength := DY
+ 						 			TEMP_MaxSpace := FWP_PanelClip_Override_MaxSpace_Vert
+ 						 			TEMP_EdgeAZ<deg> := 180
+		 						end if
+		 					end if
+		 				end if
+ 					end if
+ 				end if
+ 				
+ 				if TEMP_Eval_Edge == 1 then
+ 					;TEMP_EdgeAZ<dec> := _EDG{TEMP_Edge}AZ ; nope, don't want to deal with shapes
+ 					;the _EDG stuff actually looks to the DOR_OPEN, so we can't trust edge length/position.
+	 				
+ 					;determine overlay to use
+ 					if FWP_PanelClip_OVL{TEMP_Letter} == 0 then
+		 				TEMP_OVL := FWP_OVL{TEMP_Letter}
+		 			else
+		 				if FWP_PanelClip_OVL{TEMP_Letter} == 0.001 then
+		 					TEMP_OVL := 0
+		 				else
+		 					TEMP_OVL := FWP_PanelClip_OVL{TEMP_Letter}
+		 				end if
+		 			end if
+
+ 					;auto determine top/bottom spacing
+ 					if TEMP_Edge % 2 > 0 then
+ 						TEMP_Use_HNGB := FWP_PanelClip_Override_HNGL
+		 				TEMP_Use_HNGT := FWP_PanelClip_Override_HNGR
+		 			else
+		 				TEMP_Use_HNGB := FWP_PanelClip_Override_HNGB
+		 				TEMP_Use_HNGT := FWP_PanelClip_Override_HNGT 
+		 			end if 
+		 			
+ 					if TEMP_Use_HNGB == -1 then
+ 						TEMP_Use_HNGB := 4
+ 						if TEMP_EdgeLength < 12 then
+ 							TEMP_Use_HNGB := 2
+ 						end if
+ 					end if
+ 					if TEMP_Use_HNGT == -1 then
+ 						TEMP_Use_HNGT := 4
+ 						if TEMP_EdgeLength < 12 then
+ 							TEMP_Use_HNGT := 2
+ 						end if
+ 					end if
+ 					
+ 					if TEMP_EdgeAZ >= 90 then
+	 					;angle is high enough we need to reverse top/bottom spaces
+	 					TEMP := TEMP_Use_HNGT
+	 					TEMP_Use_HNGT := TEMP_Use_HNGB
+	 					TEMP_Use_HNGB := TEMP
+	 					delete TEMP
+	 				end if
+ 					
+ 					if FWP_PanelClip_Override_QTY == -1 then
+		 				Num_Clips<int> := 2 + trunc((TEMP_EdgeLength - TEMP_Use_HNGB - TEMP_Use_HNGT)/TEMP_MaxSpace)
+		 			else
+		 				Num_clips<int> := FWP_PanelClip_Override_QTY
+		 			end if
+		 			
+		 			TEMP_Loop_Rept<int> := 1
+		 			TEMP_Loop_Rept_End<int> := 1
+		 			
+		 			if FWP_PanelClip_Placement >= 2 then
+		 				if TEMP_Edge == 2 or TEMP_Edge == 4 then
+			 				;including partitions
+			 				TEMP_Loop_Rept_End<int> += TEMP_Partition_Count
+			 			end if
+			 			if FWP_PanelClip_Placement == 3 then
+			 				;partitions only
+			 				TEMP_Loop_Rept<int> := 2
+			 			end if
+		 			end if
+		 			while TEMP_Loop_Rept <= TEMP_Loop_Rept_End do
+		 				if TEMP_Loop_Rept > 1 then
+		 					;partition
+		 					TEMP_Instance<int> := TEMP_Loop_Rept - 1
+		 					
+		 					TEMP_Ignore_Partition<int> := 0
+		 					TEMP_State<int> := Cab.{JONAH_InteriorName}.PT@{TEMP_Instance}.AA_PanelClip_State_New
+		 					
+		 					;1 = both, 2 = left only, 3 = right only
+		 					if FWP_PanelClip_Placement_PT == 3 and TEMP_Edge == 2 then
+		 						 TEMP_Ignore_Partition<int> := 1
+		 					else
+		 						if FWP_PanelClip_Placement_PT == 2 and TEMP_Edge == 4 then
+		 							TEMP_Ignore_Partition<int> := 1
+		 						end if
+		 					end if
+							
+							;per stud override- 2 = none, 3 = left, 4 = right
+		 					if TEMP_State > 1 then
+			 					if TEMP_State == 2 then
+			 						TEMP_Ignore_Partition<int> := 1
+			 					else
+			 						if TEMP_State == 3 then
+			 							TEMP_Ignore_Partition<int> := 0
+			 							if TEMP_Edge == 4 then
+			 								TEMP_Ignore_Partition<int> := 1
+			 							end if
+			 						else
+			 							if TEMP_State == 4 then
+			 								TEMP_Ignore_Partition<int> := 0
+			 								if TEMP_Edge == 2 then
+			 									TEMP_Ignore_Partition<int> := 1
+			 								end if
+			 							end if
+			 						end if
+			 					end if
+			 				end if
+
+		 					if TEMP_Ignore_Partition == 1 then
+		 						TEMP_Edge_X := -2000
+		 					else	
+			 					TEMP_PT_X := Cab.{JONAH_InteriorName}.PT@{TEMP_Instance}.X
+			 					TEMP_PT_DZ := Cab.{JONAH_InteriorName}.PT@{TEMP_Instance}.DZ
+			 					TEMP_Is_Double<int> := 0
+			 					if Cab.{JONAH_InteriorName}.PT@{TEMP_Instance}.STYPE == 10 then
+			 						TEMP_Is_Double<int> := 1
+			 						if Cab.{JONAH_InteriorName}.PT@{TEMP_Instance}.AY == -90 then
+			 							TEMP_Is_Double_Left<int> := 1
+			 						else
+			 							TEMP_PT_X += TEMP_PT_DZ
+			 						end if
+			 					end if
+			 					
+			 					TEMP_Edge_X := -1000
+			 					
+			 					if TEMP_State == 1 then
+			 						;automatic only
+				 					if TEMP_Is_Double == 1 then
+				 						if TEMP_Is_Double_Left == 1 and TEMP_Edge == 4 then
+				 							TEMP_Edge_X := -2000
+				 						end if
+				 						if TEMP_Is_Double_Left == 0 and TEMP_Edge == 2 then
+				 							TEMP_Edge_X := -2000
+				 						end if
+				 					end if
+				 				end if
+			 					delete TEMP_Is_Double
+			 					delete TEMP_Is_Double_Left
+			 					
+			 					if TEMP_Edge_X != -2000 then
+				 					if TEMP_PT_X >= X + :X and TEMP_PT_X - TEMP_PT_DZ <= (:X + X + DX) then
+				 						;partition is behind panel
+				 						if TEMP_Edge == 2 then
+				 							if TEMP_PT_X - TEMP_PT_DZ > X + :X then
+				 								TEMP_Edge_X := TEMP_PT_X - TEMP_PT_DZ - X - :X
+				 							end if
+				 						else
+				 							if TEMP_PT_X < (:X + X + DX) then
+				 								TEMP_Edge_X := TEMP_PT_X - X - :X
+				 							end if
+				 						end if
+				 					end if
+				 				end if
+				 				delete TEMP_PT_X
+				 				delete TEMP_PT_DZ
+			 					TEMP_OVL := 0
+			 				end if
+			 				delete TEMP_Instance
+			 				delete TEMP_Ignore_Partition
+			 				delete TEMP_State
+		 				end if
+		 				
+			 			if TEMP_Edge_X > -1000 then
+				 			TEMP_Loop1<int> := 1
+				 			while TEMP_Loop1 <= Num_Clips do
+				 				dim {TEMP_PartName} as new hardware
+				 				{TEMP_PartName}.desc = 'KEKU {TEMP_Letter}'
+				 				
+				 				if FWP_PanelClip_Override_Outset == 0 then
+				 					;when trying to pull these flush sometimes you need a little extra pull by insetting them an additional small amount - models look for this parameter
+				 					{TEMP_PartName}.EXTRA_PULL<int> := 1
+				 				end if
+				 				
+				 				;check for incorrect model
+				 				if TEMP_Loop1 == 1 and TEMP_PartName == 'KEKU' then
+				 					if abs(this.KEKU.KEKU.LBOREMASTER.X - 0.579) > 0.001 or abs(this.KEKU.KEKU.LBOREMASTER.Y - 0.321) > 0.001 then
+				 						dim ERROR as new part
+				 						ERROR.visible = false
+				 						ERROR.KEKU<int> := 1
+				 						ERROR.ErrorText = 'KEKU Out of Date Model'
+				 						ERROR.OWNER = Cab
+				 					end if
+				 				end if
+				 				
+				 				;backwards compatibility
+				 				if this.TEMP_Needs_MatID_Override == null then
+				 					if this.TEMP_PanelClip_Type_MatID_{FWP_PanelClip_Type} > 0 and this.{TEMP_PartName}._M:MatID != this.TEMP_PanelClip_Type_MatID_{FWP_PanelClip_Type} then
+				 						TEMP_Needs_MatID_Override<int> := 1
+				 					else
+				 						TEMP_Needs_MatID_Override<int> := 0
+				 					end if
+				 				end if
+			 					if this.TEMP_Needs_MatID_Override == 1 then
+			 						{TEMP_PartName}.MATID = TEMP_PanelClip_Type_MatID_{FWP_PanelClip_Type}
+			 					end if
+			 					
+			 					if FWP_PanelClip_MatID > 0 then
+			 						{TEMP_PartName}.MATID := FWP_PanelClip_MatID
+			 					end if
+				 				
+				 				if FWP_PanelClip_Type == 2 and TEMP_EdgeAZ >= 90 then
+				 					;suspension
+				 					{TEMP_PartName}._MIRROR<int> := 2
+				 					{TEMP_PartName}.MATID = this.{TEMP_PartName}._M:MatID
+				 				end if
+				 				
+				 				if Num_Clips == 1 then
+				 					;center
+				 					TEMP_UseY := TEMP_EdgeLength/2
+				 				else
+				 					if TEMP_Loop1 == 1 then
+				 						;top
+				 						TEMP_UseY := TEMP_EdgeLength - TEMP_Use_HNGT
+				 					else
+				 						if TEMP_Loop1 == 2 then
+				 							TEMP_UseY := TEMP_Use_HNGB
+				 						else
+				 							;somewhere in between
+				 							TEMP_UseY := TEMP_Use_HNGB + (TEMP_EdgeLength - TEMP_Use_HNGT - TEMP_Use_HNGB)/(Num_Clips - 1)*(TEMP_Loop1 - 2)
+				 						end if
+				 					end if
+				 				end if
+				 				
+								{TEMP_PartName}.AX := -1*TEMP_EdgeAZ
+				 				{TEMP_PartName}.AY := 90
+				 				{TEMP_PartName}.AZ := 0
+				 				
+				 				;locate along edge
+								Temp_X := TEMP_Edge_X - sin(TEMP_EdgeAZ)*(TEMP_UseY)
+								Temp_Y := TEMP_Edge_Y + cos(TEMP_EdgeAZ)*(TEMP_UseY)
+								
+								;locate inside edge
+								Temp_X := Temp_X - sin(TEMP_EdgeAZ+90)*(TEMP_OVL)
+								Temp_Y := Temp_Y + cos(TEMP_EdgeAZ+90)*(TEMP_OVL)
+				 				
+				 				{TEMP_PartName}.X := TEMP_X
+				 				{TEMP_PartName}.Y := TEMP_Y
+				 				{TEMP_PartName}.Z := 0
+				 				
+				 				if FWP_PanelClip_ReverseFace == 1 then
+				 					{TEMP_PartName}.Z := DZ
+				 					
+				 					{TEMP_PartName}.AY := -90
+				 					if TEMP_EdgAZ == 0 or TEMP_EdgAZ == 180 then
+				 						{TEMP_PartName}.AX := TEMP_EdgeAZ - 180
+				 					end if
+				 				end if
+				 				
+				 				TEMP_Loop1<int> += 1
+				 			end while
+				 			delete TEMP_Loop1 
+				 		end if
+			 			TEMP_Loop_Rept<int> += 1
+			 		end while
+			 		delete TEMP_Loop_Rept
+			 		delete TEMP_Loop_Rept_End
+ 				end if
+ 				TEMP_Edge<int> += 1
+ 			end while
+ 			delete TEMP_EdgeLength
+ 			delete TEMP_Eval_Edge
+ 			delete TEMP_Edge
+ 			delete TEMP_Letter
+ 			delete TEMP_OVL
+ 			delete TEMP_X
+ 			delete TEMP_Y
+ 			delete TEMP_EdgeAZ
+ 			delete TEMP_Edge_X
+ 			delete TEMP_Edge_Y
+ 						
+ 			delete Num_Clips
+ 			delete TEMP_Use_HNGT
+ 			delete TEMP_Use_HNGB
+ 			delete TEMP_UseY
+ 			delete TEMP_PartName
+ 			delete TEMP_MaxSpace
+ 			delete TEMP_Partition_Count
+ 			
+ 			delete TEMP_PanelClip_Type_MatID_1
+ 			delete TEMP_PanelClip_Type_MatID_2
+ 		else
+ 			delete FWP_PanelClip_OptionState
+ 			delete FWP_PanelClip_Override_QTY
+ 			delete FWP_PanelClip_Override_HNGT
+ 			delete FWP_PanelClip_Override_HNGB
+ 			delete FWP_PanelClip_Override_HNGL
+ 			delete FWP_PanelClip_Override_HNGR
+ 			delete FWP_PanelClip_MATID
+ 			delete FWP_PanelClip_OVLL
+ 			delete FWP_PanelClip_OVLR
+ 			delete FWP_PanelClip_OVLT
+ 			delete FWP_PanelClip_OVLB
+ 			delete FWP_PanelClip_Override_MaxSpace_Vert
+ 			delete FWP_PanelClip_Override_MaxSpace_Horz
+ 			delete FWP_PanelClip_Override_Outset
+ 			delete FWP_PanelClip_Enable_LeftRight
+ 			delete FWP_PanelClip_Enable_TopBottom
+ 			delete FWP_PanelClip_ReverseFace
+ 			delete FWP_PanelClip_Type
+ 			delete FWP_PanelClip_Placement
+ 		end if
+ 	end if
+ 	
+ 	delete TEMP_CheckClips
+ 	
+ 	exit
+;The following parameters can be set in a UCS *ABOVE* this one to automatically trigger kekus (valid values are per their corresponding parameter here)
+;	UCS_Keku_SetOutset
+;	UCS_Keku_SetType
+;	UCS_Keku_Enable
+;	UCS_Keku_SetPlacement

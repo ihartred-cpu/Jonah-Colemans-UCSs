@@ -1,0 +1,648 @@
+
+ For Each FACE|FACE*|DOR_OPEN|TR Part
+ 	if Cab.Is_Casework_Wall == 0 then
+ 		exit
+ 	end if	
+ 		
+ 	if name == 'DOR_OPEN' then
+exit
+ 		if AA_CaseworkWall_FrameIsInside == 0 and this.SDJ == null then
+ 			SDJ = BR.DZ
+ 		end if
+ 		exit
+ 	end if
+ 	
+ 	if name == 'TR' then
+ 		;inserting/deleting cleats
+ 		if this.AA_Cleats_Modify_Insert > 0 then
+ 			TEMP_Loop1<int> := 1
+
+ 			TEMP_Inserted<int> := 0
+ 			while TEMP_Loop1 <= AA_Cleats_Number do
+ 				TEMP_Loop1<int> += 1
+ 			end while
+ 			delete TEMP_Loop1			
+ 			
+ 			if TEMP_Inserted == 1 then
+ 				AA_Cleats_Number<int> += 1
+ 			end if
+ 				
+ 			delete TEMP_Inserted	
+ 			
+ 		end if
+ 		exit
+ 	end if
+ 	
+ 	if name == 'FACE' or name == 'FACE*' then 		
+ 		;naming
+ 		TEMP<int> = {name}.TR.AA_FaceCallout_Use
+ 		desc = '{TEMP}'
+ 		delete TEMP
+ 		
+ 		;opposite override
+ 		if this.TR.AA_OppFace_Override != 'NONE' then
+ 			TEMP<int> = this.TR.AA_OppFace_Override
+ 			JONAH_FACE_Opposite<text> = '{TEMP}'
+ 			delete TEMP
+ 		end if
+ 		
+ 		Follow_FaceName<int> = this.TR.AA_FollowFace_Studs
+		Follow_FaceName<text> = '{Follow_FaceName}'
+		
+		TEMP_CLEAT_Follow_FaceName<int> = this.Follow_FaceName
+		TEMP_CLEAT_Follow_FaceName<text> = '{TEMP_CLEAT_Follow_FaceName}'
+ 		
+
+if JONAH_Has_FaCE_To_Right == 1 then
+	TEMP_Face_To_Right_FollowFace<int> = Cab.{JONAH_FACE_To_Right_Name}.TR.AA_FollowFace_Studs
+	TEMP_Face_To_Right_FollowFace<text> = '{TEMP_Face_To_Right_FollowFace}'
+end if
+ 		
+ 		
+ 		AA_Face_Has_Toe_Cleat<int> := 0
+ 		if Cab.{Follow_FaceName}.TR.AA_OutsideToe_Cleat > 0 and Cab.{Follow_FaceName}.TR.AA_OutsideToe_Height > 0 and Cab.{Follow_FaceName}.TR.AA_OutsideToe_Recess > 0 then
+ 			AA_Face_Has_Toe_Cleat<int> := 1
+ 		end if
+ 		
+ 		if Cab.{Follow_FaceName}.TR.AA_Cleats_Number > 0 or AA_Face_Has_Toe_Cleat == 1 then			
+ 			if Cab.{Follow_FaceName}.TR.RADIUS == 0 then
+ 				FACE_Radius := 0
+ 			else
+	 			FACE_Radius := Cab.{Follow_FaceName}.TR.RADIUS + Cab.{Follow_FaceName}.DZ
+		 				
+	 			circle_x := DX/2
+	 			circle_z := 0 - Sqrt(sqr(FACE_Radius) - sqr(DX/2))
+	 			if FACE_Radius < 0 then
+	 				circle_z *= -1
+				end if				
+				
+				;calculate start/end angle
+				nPi<dec> := 3.14159265358979323846264338328
+				
+				;guess I'll have to implement atan2 myself
+				TEMP_Loop_atan2<int> := 1
+				while TEMP_Loop_atan2 <= 2 do
+					if TEMP_Loop_atan2 == 1 then
+						nZ<dec> := 0 - circle_Z
+						nX<dec> := 0 - Circle_X 
+					else
+						nZ<dec> := 0 - circle_z 
+						nX<dec> := DX - circle_X 
+					end if
+					
+					if nx == 0 then
+						if nz > 0 then
+							nResult<dec> := nPi/2
+						else
+							if nZ < 0 then
+								nResult<dec> := 3.0 * nPi / 2.0
+							else
+								;no direction can be determined
+								nResult<dec> := 0
+							end if
+						end if
+					else
+						if nX < 0 then
+							nResult<dec> := ATan(nZ/nX)*nPi/180 + nPi
+						else
+							nResult<dec> :=  ATan(nZ/nx)*nPi/180
+						end if
+					end if
+					
+					while nResult < 0 do
+						nResult<dec> += (2.0 * nPi)
+					end while
+					
+					;atan returns radians, we need to convert to degrees
+					nResult<dec> *= (180/nPi) 
+					
+					if TEMP_Loop_atan2 == 1 then
+						StartAngleInDegrees<dec> := nResult
+					else
+						EndAngleInDegrees<dec> := nResult
+					end if
+				
+					TEMP_Loop_atan2<int> += 1
+				end while
+				delete nResult
+				delete nX
+				delete nZ
+				delete nPi
+				delete TEMP_Loop_atan2
+			end if			
+ 			
+
+ 			;calculate base line cleat dimensions
+ 			AA_FACE_WALLCLEAT_DY := DX - JONAH_Face_Interior_Offset_Start - JONAH_Face_Interior_Offset_End
+ 			AA_FACE_WALLCLEAT_X := JONAH_Face_Interior_Offset_Start
+
+			;fixes for conditions where CV doesn't line up the interior and face properly... WTF
+			if rprec(JONAH_Face_AY) == 225 and rprec(JONAH_FACE_TO_LEFT_AY) == 180 then
+				_CLEAT_FIX_FOR_SPECIFIC_CONDITION<int> := 1
+				AA_FACE_WALLCLEAT_X -= this.WALLCLEAT.DZ*2
+				AA_FACE_WALLCLEAT_DY += this.WALLCLEAT.DZ*2
+			end if
+			if rprec(JONAH_FACE_AY) == 180 and rprec(JONAH_FACE_TO_RIGHT_AY) == 225 then
+				_CLEAT_FIX_FOR_SPECIFIC_CONDITION<int> := 1
+				AA_FACE_WALLCLEAT_DY += this.WALLCLEAT.DZ*2
+			end if
+ 			
+ 			AA_FACE_LEFT_ADJ := 0
+ 			AA_FACE_RIGHT_ADJ := 0
+ 			
+ 			;adjustments to size for fit
+ 			if JONAH_Has_FACE_To_Left == 1 then
+				TEMP_Face_To_Left_FollowFace<int> = Cab.{JONAH_FACE_To_Left_Name}.TR.AA_FollowFace_Studs
+				TEMP_Face_To_Left_FollowFace<text> = '{TEMP_Face_To_Left_FollowFace}'
+				
+				if 1 == 2 then;JONAH_FACE_TO_LEFT_AY == JONAH_FACE_AY then
+					
+				else
+					if abs(JONAH_Face_AY - JONAH_FACE_TO_LEFT_AY) == 90 or abs(JONAH_Face_AY+360 - JONAH_FACE_TO_LEFT_AY) == 90 or abs(JONAH_Face_AY - JONAH_FACE_TO_LEFT_AY-360) == 90 then
+						;90 degree angle
+						if JONAH_Face_To_Left_Is_Inside_Corner == 0 then
+							if Cab.AA_CaseworkWall_VersionCreated < 1.8 or Cab.{TEMP_Face_To_Left_FollowFace}.TR.AA_Cleats_Number > 0 then
+								;compatibility for older walls before this behavior change was put in place
+								if JONAH_Face_To_Left_DX <= DX then
+									;then we want it to run past me
+									AA_FACE_LEFT_ADJ := -1 * this.WALLCLEAT.DZ
+								end if
+							end if
+						else
+							;inside corner
+							AA_FACE_LEFT_ADJ := JONAH_Face_Interior_Offset_Start*2 
+						end if
+					else
+						;non-90 degree, on outside corners we want to pull these away
+						if JONAH_Face_To_Left_Is_Inside_Corner == 0 then
+							TEMP_LEFT_AY_DIFF<dec> := JONAH_FACE_AY - JONAH_FACE_TO_LEFT_AY
+							TEMP_LEFT_DEDUCTION := tan(TEMP_LEFT_AY_DIFF/2)*(this.WALLCLEAT.DZ)
+							
+							if JONAH_FACE_AY > JONAH_FACE_TO_LEFT_AY or JONAH_FACE_AY == 0 then
+								TEMP_LEFT_DEDUCTION *= -1
+							end if
+							
+							AA_FACE_LEFT_ADJ := TEMP_LEFT_DEDUCTION
+							delete TEMP_LEFT_DEDUCTION
+							delete TEMP_LEFT_AY_DIFF
+						end if
+					end if
+				end if
+				
+				delete TEMP_Face_To_Left_FollowFace
+			end if
+			
+			if JONAH_Has_FACE_To_Right == 1 then
+				TEMP_Face_To_Right_FollowFace<int> = Cab.{JONAH_FACE_To_Right_Name}.TR.AA_FollowFace_Studs
+				TEMP_Face_To_Right_FollowFace<text> = '{TEMP_Face_To_Right_FollowFace}'
+				
+				if 1 == 2 then;JONAH_FACE_TO_RIGHT_AY == JONAH_FACE_AY and AA_FACE_WALLCLEAT_DY > 0 then
+						
+				else
+					if abs(JONAH_Face_AY - JONAH_FACE_TO_RIGHT_AY) == 90 or abs(JONAH_Face_AY+360 - JONAH_FACE_TO_RIGHT_AY) == 90 or abs(JONAH_Face_AY - JONAH_FACE_TO_RIGHT_AY-360) == 90 then
+						;90 degree angle
+						if  JONAH_Face_To_Right_Is_Inside_Corner == 1 then 
+							;inside corner
+							AA_FACE_RIGHT_ADJ := JONAH_Face_Interior_Offset_End*2
+						else
+							if Cab.AA_CaseworkWall_VersionCreated < 1.8 or Cab.{TEMP_Face_To_Right_FollowFace}.TR.AA_Cleats_Number > 0 then
+								;compatibility for older walls before this behavior change was put in place
+								if JONAH_FACE_TO_RIGHT_DX < DX then
+									AA_FACE_RIGHT_ADJ := -1 * this.WALLCLEAT.DZ
+								end if 
+							end if
+						end if
+					else
+						if JONAH_Face_To_Right_Is_Inside_Corner == 0 then
+							TEMP_RIGHT_AY_DIFF<dec> := JONAH_FACE_AY - JONAH_FACE_TO_RIGHT_AY
+							TEMP_RIGHT_DEDUCTION := tan(TEMP_RIGHT_AY_DIFF/2)*(this.WALLCLEAT.DZ)
+							
+							AA_FACE_RIGHT_ADJ := TEMP_RIGHT_DEDUCTION
+							delete TEMP_RIGHT_DEDUCTION
+							delete TEMP_RIGHT_AY_DIFF
+						end if
+					end if
+				end if
+				delete TEMP_Face_To_Right_FollowFace
+			end if
+			
+			AA_FACE_WALLCLEAT_DY += AA_FACE_LEFT_ADJ
+			AA_FACE_WALLCLEAT_X -= AA_FACE_LEFT_ADJ
+			AA_FACE_WALLCLEAT_DY += AA_FACE_RIGHT_ADJ
+ 			
+ 			if AA_FACE_WALLCLEAT_DY > 0 then 
+	 			TEMP_Loop1<int> := 1
+	 			if AA_Face_Has_Toe_Cleat == 1 then
+	 				;automatic toe cleating
+	 				TEMP_Loop1<int> := 0
+	 			end if
+	 			while TEMP_Loop1 <= Cab.{Follow_FaceName}.TR.AA_Cleats_Number do
+					if this.TR.AA_Cleats_NoParts == 0 and this.TR.AA_Cleats_{TEMP_Loop1}_NoPart == 0 then
+		                TEMP_CLEAT_AFF := Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_AFF_USE
+		                
+		                if 1=2 then;TEMP_CLEAT_AFF > Cab.DY - this.TR.AA_Face_TopAdjust then
+		                	;not going to put this one in
+		                	;guess that's not correct
+		                else
+			                dim WALLCLEAT as new part
+			                WALLCLEAT.IDENTIFIER<text> = 'WALLCLEAT{TEMP_Loop1}'
+			                if CAb.AA_CaseworkWall_MichaelLikesColorCoding == 1 then
+			                	WALLCLEAT._COLOR := 255+0*256+255*65536
+			                end if
+							if TEMP_Loop1 == 0 then
+								WALLCLEAT_DESC<text> = 'Toe Cleat'
+							else
+								TEMP<int> = {name}.TR.AA_FaceCallout_Use
+								WALLCLEAT_DESC<text> = '{TEMP} Cleat {TEMP_Loop1} @ {TEMP_CLEAT_AFF}'
+								delete TEMP
+							end if
+							
+							WALLCLEAT.EM_X = X
+							WALLCLEAT.EM_Y = Y
+							WALLCLEAT.EM_Z = Z
+							WALLCLEAT.EM_AX = PABSAX
+							WALLCLEAT.EM_AY = PABSAY
+							WALLCLEAT.EM_AZ = PABSAZ
+										
+							WALLCLEAT_X := AA_FACE_WALLCLEAT_X
+							WALLCLEAT_DY := AA_FACE_WALLCLEAT_DY
+							
+							WALLCLEAT_X -= (this.TR.AA_Cleats_{TEMP_Loop1}_ADJL + this.TR.AA_Cleats_ADJL)
+							WALLCLEAT_DY += (this.TR.AA_Cleats_{TEMP_Loop1}_ADJL + this.TR.AA_Cleats_ADJL)
+							WALLCLEAT_DY += (this.TR.AA_Cleats_{TEMP_Loop1}_ADJR + this.TR.AA_Cleats_ADJR)
+							
+							WALLCLEAT_Y := TEMP_CLEAT_AFF + Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Width_USE - 1/32 + Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_ADJT
+							
+							TEMP_Use_Inset := Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Inset_Use
+							
+							if TEMP_Use_Inset > 0 and Cab.AA_CaseworkWall_VersionCreated >= 2.0 then
+								;adjust for inset
+								if JONAH_Has_FACE_To_Left == 1 then
+									TEMP_LEFT_AY_DIFF<dec> := JONAH_FACE_AY - JONAH_FACE_TO_LEFT_AY
+									TEMP_LEFT_DEDUCTION := tan(TEMP_LEFT_AY_DIFF/2)*(TEMP_Use_Inset)
+									
+									if JONAH_FACE_AY > JONAH_FACE_TO_LEFT_AY or JONAH_FACE_AY == 0 then
+										TEMP_LEFT_DEDUCTION *= -1
+									end if
+									
+									WALLCLEAT_DY += TEMP_LEFT_DEDUCTION
+									WALLCLEAT_X -= TEMP_LEFT_DEDUCTION
+									delete TEMP_LEFT_DEDUCTION
+									delete TEMP_LEFT_AY_DIFF
+								end if
+								if JONAH_Has_Face_To_Right == 1 then
+									TEMP_RIGHT_AY_DIFF<dec> := JONAH_FACE_AY - JONAH_FACE_TO_RIGHT_AY
+									TEMP_RIGHT_DEDUCTION := tan(TEMP_RIGHT_AY_DIFF/2)*(TEMP_Use_Inset)
+									
+									WALLCLEAT_DY += TEMP_RIGHT_DEDUCTION
+									delete TEMP_RIGHT_DEDUCTION
+									delete TEMP_RIGHT_AY_DIFF
+								end if
+							end if
+							
+							WALLCLEAT.X := WALLCLEAT_X             
+							WALLCLEAT.Y := WALLCLEAT_Y
+							TEMP_WALLCLEAT_Z := (-1*this.BR.DZ*Cab.AA_CaseworkWall_FrameIsInside) - this.WALLCLEAT._M:DZ - TEMP_Use_Inset
+							delete TEMP_Use_Inset
+							WALLCLEAT.Z := TEMP_WALLCLEAT_Z
+							
+							WALLCLEAT_DX := Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Width_USE - 0.0625 + Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_ADJT + Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_ADJB
+							WALLCLEAT.DX := WALLCLEAT_DX
+							WALLCLEAT.DY := WALLCLEAT_DY
+							if WALLCLEAT_DY <= 0 and FACE_RADIUS == 0 then
+								WALLCLEAT.QTY := 0
+								WALLCLEAT._KILLED_BY_NEGATIVE_DY<meaS> := WALLCLEAT_DY
+							end if
+							
+							WALLCLEAT.AX := 0
+							WALLCLEAT.AZ := -90
+							WALLCLEAT.AY := 0
+							
+							WALLCLEAT.desc = '{WALLCLEAT_DESC}'
+							
+							if FACE_Radius == 0 then
+								;things that are incompatible with radius				
+								if Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Rabbet > 1 then
+									dim WALLCLEATRABBET{TEMP_Loop1} as new dadoex
+									WALLCLEATRABBET{TEMP_Loop1}.DX := Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Rabbet_Width
+									WALLCLEATRABBET{TEMP_Loop1}.DY = :DY
+									WALLCLEATRABBET{TEMP_Loop1}.DZ := Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Rabbet_Depth
+									
+									WALLCLEATRABBET{TEMP_Loop1}.X := 0
+									WALLCLEATRABBET{TEMP_Loop1}.Y := 0
+									WALLCLEATRABBET{TEMP_Loop1}.Z := 0
+									
+									WALLCLEATRABBET{TEMP_Loop1}._FACEWP := 1
+									WALLCLEATRABBET{TEMP_Loop1}.desc = 'Wall Cleat Rabbet'
+									
+									if Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Rabbet == 3 then
+										;bottom
+										WALLCLEATRABBET{TEMP_Loop1}.X = :DX - Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Rabbet_Width 
+									end if
+									
+									WALLCLEATRABBET{TEMP_Loop1}.AX := 0
+									WALLCLEATRABBET{TEMP_Loop1}.AY := 0
+									WALLCLEATRABBET{TEMP_Loop1}.AZ := 0
+									
+									
+									INSTANCE<int> := 1
+									while this.WALLCLEAT@{INSTANCE}.IDENTIFIER != 'WALLCLEAT{TEMP_Loop1}' do
+										INSTANCE<INT> += 1
+									end while
+									WALLCLEATRABBET{TEMP_Loop1}.OWNER = WALLCLEAT@{INSTANCE}
+									delete INSTANCE
+								end if
+								
+								TEMP_Count_BreakPoint<int> := 0
+								if this.TR.AA_Cleats_{TEMP_Loop1}_Breaks_Count > 0 then
+									;splitting this into multiple
+									TEMP_Count_BreakPoint<int> := this.TR.AA_Cleats_{TEMP_Loop1}_Breaks_Count 
+									TEMP_Loop_CreateBreakPoints<int> := 1
+									while TEMP_Loop_CreateBreakPoints <= TEMP_Count_BreakPoint do
+										TEMP_Break{TEMP_Loop_CreateBreakPoints}_Start := this.TR.AA_Cleats_{TEMP_Loop1}_Breaks_From_{TEMP_Loop_CreateBreakPoints}
+										TEMP_Break{TEMP_Loop_CreateBreakPoints}_End := TEMP_Break{TEMP_Loop_CreateBreakPoints}_Start + this.TR.AA_Cleats_{TEMP_Loop1}_Breaks_Width_{TEMP_Loop_CreateBreakPoints}
+										
+										TEMP_Loop_CreateBreakPoints<int> += 1
+									end while
+									delete TEMP_Loop_CreateBreakPoints
+								else
+									;specified from and to take precedence
+									if this.TR.AA_Cleats_Break > 0 then
+										;splitting this into 2
+										TEMP_Count_BreakPoint<int> := 1
+										TEMP_Break1_Start := this.TR.AA_Cleats_Break
+										TEMP_Break1_End := this.TR.AA_Cleats_Break
+									end if
+								end if
+								
+								;basically after these blocks below WALLCLEAT will no longer refer to the first dim'd actual wall cleat, so be careful
+								if this.TEMP_Count_BreakPoint > 0 then
+									TEMP_Loop_BreakPoint<int> := 1
+									while TEMP_Loop_BreakPoint <= TEMP_Count_BreakPoint do
+										if TEMP_Break{TEMP_Loop_BReakpoint}_Start > 0 and TEMP_Break{TEMP_Loop_BReakpoint}_End > 0 and TEMP_Break{TEMP_Loop_BReakpoint}_Start < WALLCLEAT_DY+WALLCLEAT_X and TEMP_Break{TEMP_Loop_BReakpoint}_End >= TEMP_Break{TEMP_Loop_BReakpoint}_Start then
+											if TEMP_Loop_BreakPoint == 1 then
+												if TEMP_Break{TEMP_Loop_BreakPoint}_Start - WALLCLEAT_X > 0 then
+													WALLCLEAT.DY := TEMP_Break{TEMP_Loop_BreakPoint}_Start - WALLCLEAT_X
+												else
+													WALLCLEAT.QTY := 0
+												end if
+												WALLCLEAT.desc<text> = '{WALLCLEAT_DESC} - 1'
+											end if
+			
+											;this cleat is actually the one after the break space
+											TEMP_Next<int> := TEMP_Loop_BreakPoint + 1
+											dim WALLCLEAT as new part  
+											if CAb.AA_CaseworkWall_MichaelLikesColorCoding == 1 then
+							                	WALLCLEAT._COLOR := 255+0*256+255*65536
+							                end if
+											WALLCLEAT.desc = '{WALLCLEAT_DESC} - {TEMP_Next}'
+											WALLCLEAT.X := TEMP_Break{TEMP_Loop_BreakPoint}_End
+											WALLCLEAT.Y := WALLCLEAT_Y
+											WALLCLEAT.Z := TEMP_WALLCLEAT_Z
+											
+											WALLCLEAT.DX := WALLCLEAT_DX  
+											
+											if this.TEMP_Break{TEMP_Next}_Start == null then
+												;last one
+												SUB_WALLCLEAT_DY := WALLCLEAT_DY - this.TEMP_Break{TEMP_Loop_BreakPoint}_End + WALLCLEAT_X
+											else
+												SUB_WALLCLEAT_DY := this.TEMP_Break{TEMP_Next}_Start - this.TEMP_Break{TEMP_Loop_BreakPoint}_End
+											end if
+											
+											WALLCLEAT.DY := SUB_WALLCLEAT_DY
+											WALLCLEAT.BREAK_STARTX := this.TEMP_Break{TEMP_Loop_BreakPoint}_Start
+											WALLCLEAT.BREAK_STARTX_NEXT := this.TEMP_Break{TEMP_Next}_Start
+											WALLCLEAT.BREAK_ENDX := this.TEMP_Break{TEMP_Loop_BreakPoint}_End
+											if SUB_WALLCLEAT_DY < 0 then
+												WALLCLEAT.QTY := 0
+											end if
+											delete SUB_WALLCLEAT_DY
+												 
+											WALLCLEAT.AX := 0
+											WALLCLEAT.AY := 0
+											WALLCLEAT.AZ := -90
+										end if
+											    
+										delete TEMP_Break{TEMP_Loop_BreakPoint}_Start
+										delete TEMP_Break{TEMP_Loop_BreakPoint}_End
+										TEMP_Loop_BreakPoint<int> += 1
+									end while
+									delete TEMP_Loop_BreakPoint
+								end if
+								delete TEMP_Count_BreakPoint
+							else		
+								TEMP_Strut_Pos := this.TR.AA_Cleats_{TEMP_Loop1}_Strut_Position_USE
+								TEMP_Strut_Width :=  this.TR.AA_Cleats_{TEMP_Loop1}_Strut_Width
+								if TEMP_Strut_Width <= 0 then
+									TEMP_Strut_Width := 1.5
+								end if
+
+								;calculate center point
+								TEMP_CleatRadius := FACE_Radius - (this.BR.DZ*Cab.AA_CaseworkWall_FrameIsInside) - this.WALLCLEAT._M:DZ - Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Inset_USE
+								if Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 3 then
+									;Strut Only
+									WALLCLEAT.QTY := 0
+									TEMP_CleatRadius += this.WALLCLEAT._M:DZ
+									TEMP_Strut_Pos := -2
+								end if
+								WALLCLEAT.CLEAT_RADIUS := TEMP_CleatRadius
+								
+								;adjust start/end angles for face adjustments
+								nPi<dec> := 3.14159265358979323846264338328
+								StartAngleInDegrees_ADJ<dec> := ((this.TR.AA_Cleats_{TEMP_Loop1}_ADJL + this.TR.AA_Cleats_ADJL)/TEMP_CleatRadius) * (180/nPi)
+								EndAngleInDegrees_ADJ<dec> := ((this.TR.AA_Cleats_{TEMP_Loop1}_ADJR + this.TR.AA_Cleats_ADJR)/TEMP_CleatRadius) * (180/nPi)
+							    
+							    USE_StartAngleInDegrees<dec> := StartAngleInDegrees + StartAngleInDegrees_ADJ
+							    USE_EndAngleInDegrees<dec> := EndAngleInDegrees - EndAngleInDegrees_ADJ
+							    
+								delete StartAngleInDegrees_ADJ
+								delete EndAngleInDegrees_ADJ
+								
+								;calculate new start/end points given inset and adjustments
+								if FACE_Radius > 0 then					
+									TEMP_Radius_Multiplier<int> := 1
+								else
+									TEMP_Radius_Multiplier<int> := -1
+								end if
+								TEMP_WALLCLEAT_X := circle_X + cos(USE_StartAngleInDegrees)*(TEMP_CleatRadius * TEMP_Radius_Multiplier)
+								TEMP_WALLCLEAT_Z := circle_z + sin(USE_StartAngleInDegrees)*(TEMP_CleatRadius * TEMP_Radius_Multiplier)
+								TEMP_End_X := circle_X + cos(USE_EndAngleInDegrees)*(TEMP_CleatRadius * TEMP_Radius_Multiplier)
+								TEMP_End_Z := circle_z + sin(USE_EndAngleInDegrees)*(TEMP_CleatRadius * TEMP_Radius_Multiplier)
+								
+								TEMP_Strut_Start_X := circle_X + cos(USE_StartAngleInDegrees)*((TEMP_CleatRadius-TEMP_Strut_Width) * TEMP_Radius_Multiplier) 
+								TEMP_Strut_Start_Z := circle_z + sin(USE_StartAngleInDegrees)*((TEMP_CleatRadius-TEMP_Strut_Width) * TEMP_Radius_Multiplier)
+								TEMP_Strut_End_X := circle_X + cos(USE_EndAngleInDegrees)*((TEMP_CleatRadius-TEMP_Strut_Width) * TEMP_Radius_Multiplier)
+								TEMP_Strut_End_Z := circle_z + sin(USE_EndAngleInDegrees)*((TEMP_CleatRadius-TEMP_Strut_Width) * TEMP_Radius_Multiplier)     
+								
+		;TEMP_Strut_Outer_Start_X := circle_X + cos(USE_StartAngleInDegrees)*((TEMP_CleatRadius) * TEMP_Radius_Multiplier) 
+		;TEMP_Strut_Outer_Start_Z := circle_z + sin(USE_StartAngleInDegrees)*((TEMP_CleatRadius) * TEMP_Radius_Multiplier)
+		;TEMP_Strut_Outer_End_X := circle_X + cos(USE_EndAngleInDegrees)*((TEMP_CleatRadius) * TEMP_Radius_Multiplier)
+		;TEMP_Strut_Outer_End_Z := circle_z + sin(USE_EndAngleInDegrees)*((TEMP_CleatRadius) * TEMP_Radius_Multiplier)
+								
+								;Set AX as difference between two points
+								;AGAIN!!!! I'll have to implement atan2 myself
+								
+								TEMP_Loop_Atan2<int> := 1
+								while TEMP_Loop_Atan2 <= 2 do
+									if TEMP_Loop_Atan2 == 1 then
+										nZ<dec> := TEMP_END_Z - TEMP_WALLCLEAT_Z
+										nX<dec> := TEMP_End_X - TEMP_WALLCLEAT_X 
+									else
+										nZ<dec> := TEMP_Strut_End_Z - TEMP_Strut_Start_Z
+										nX<dec> := TEMP_Strut_End_X - TEMP_Strut_Start_X 
+									end if
+								
+									if nx == 0 then
+										if nz > 0 then
+											nResult<dec> := nPi/2
+										else
+											if nZ < 0 then
+												nResult<dec> := 3.0 * nPi / 2.0
+											else
+												;no direction can be determined
+												nResult<dec> := 0
+											end if
+										end if
+									else
+										if nX < 0 then
+											nResult<dec> := ATan(nZ/nX)*nPi/180 + nPi
+										else
+											nResult<dec> :=  ATan(nZ/nx)*nPi/180
+										end if
+									end if
+									
+									while nResult < 0 do
+										nResult<dec> += (2.0 * nPi)
+									end while
+									
+									;atan returns radians, we need to convert to degrees
+									nResult<dec> *= (180/nPi) 
+									
+									if TEMP_Loop_Atan2 == 1 then
+										WALLCLEAT.AX := nResult
+									else
+										STRUT_ANGLE_DEGREES<deg> := -90 - nResult
+									end if
+								
+									TEMP_Loop_Atan2<int> += 1
+								end while
+								delete TEMP_Loop_Atan2
+														
+								delete nResult
+								delete nX
+								delete nZ
+								delete nPi
+								
+								WALLCLEAT.X := TEMP_WALLCLEAT_X
+								WALLCLEAT.Z := TEMP_WALLCLEAT_Z
+			
+								WALLCLEAT_RADIUS_DY := Sqrt(sqr(TEMP_End_X - TEMP_WALLCLEAT_X)+sqr(TEMP_End_Z - TEMP_WALLCLEAT_Z))
+								WALLCLEAT.DY := WALLCLEAT_RADIUS_DY
+								
+								if Cab.AA_CaseworkWall_SendRadiusCleatsToCNC == 0 then
+									WALLCLEAT._NOCNC<int> := 1 ;we don't let these go to CNC
+								end if
+								
+								;record for debugging
+								WALLCLEAT.USE_EndStartInDegrees<dec> := USE_EndStartInDegrees
+								WALLCLEAT.USE_EndAngleInDegrees<dec> := USE_EndAngleInDegrees
+								WALLCLEAT.TEMP_Strut_Start_X := TEMP_Strut_Start_X
+								WALLCLEAT.TEMP_Strut_Start_Z := TEMP_Strut_Start_Z
+								WALLCLEAT.TEMP_Strut_End_X := TEMP_Strut_End_X
+								WALLCLEAT.TEMP_Strut_End_Z := TEMP_Strut_End_Z
+								
+								if this.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 2 or this.TR.AA_Cleats_{TEMP_Loop1}_Strut_State_USE == 3 then
+									dim BO as new part
+									BO.desc = '{WALLCLEAT_DESC} Strut'
+									;BO._NOCNC := 1
+									BO._EDG1NPC := 1
+									BO._EDG2NPC := 1
+									BO._EDG3NPC := 1
+									BO._EDG4NPC := 1
+									
+									BO.X := TEMP_Strut_Start_X
+									if TEMP_Strut_Pos == -1 then
+										;center
+										BO.Y := TEMP_CLEAT_AFF + Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Width_USE/2 - this.WALLCLEAT.DZ/2
+									else
+										if TEMP_Strut_Pos == -2 then
+											;bottom
+											BO.Y := TEMP_CLEAT_AFF
+										else
+											if TEMP_Strut_Pos == -3 then
+												;top
+												BO.Y := TEMP_CLEAT_AFF + Cab.{Follow_FaceName}.TR.AA_Cleats_{TEMP_Loop1}_Width_USE - this.WALLCLEAT.DZ
+											else
+												BO.Y := TEMP_CLEAT_AFF + TEMP_Strut_Pos
+											end if
+										end if
+									end if
+									BO.Z := TEMP_Strut_Start_Z
+									
+									BO.DX := TEMP_Strut_Width
+									
+									INNER_CHORD_LENGTH := Sqrt(sqr(TEMP_Strut_End_X - TEMP_Strut_Start_X)+sqr(TEMP_Strut_End_Z - TEMP_Strut_Start_Z))
+									BO.DY := INNER_CHORD_LENGTH
+									;OUTER_CHORD_LENGTH := Sqrt(sqr(TEMP_Strut_Outer_End_X - TEMP_Strut_Outer_Start_X)+sqr(TEMP_Strut_Outer_End_Z - TEMP_Strut_Outer_Start_Z)) 
+									
+									;BO.INSIDERADIUS := TEMP_CleatRadius-(TEMP_Strut_Width*TEMP_Radius_Multiplier)
+									;BO.OUTSIDERADIUS := TEMP_CleatRadius
+									;BO.CHORDLENGTH := INNER_CHORD_LENGTH 
+									;BO.OFFSET := TEMP_Strut_Width
+									;if INNER_CHORD_LENGTH > OUTER_CHORD_LENGTH then
+									;	BO.DY := INNER_CHORD_LENGTH
+									;else
+									;	BO.DY := OUTER_CHORD_LENGTH
+									;end if
+									;BO.LibPart = 'DES Moines Custom Cabinets\Casework Walls\RADIUSCLEAT'
+																		
+									BO.AX := -90
+									BO.AY := STRUT_ANGLE_DEGREES
+									BO.AZ := 0
+									
+									BO.RAXIS := 1
+									BO.RADIUS := TEMP_CleatRadius - TEMP_Strut_Width
+								end if
+								
+								delete TEMP_Strut_Start_X
+								delete TEMP_Strut_Start_Z
+								delete TEMP_Strut_End_X
+								delete TEMP_Strut_End_Z
+								
+								delete nResult
+								delete TEMP_Radius_Multiplier
+								delete TEMP_WALLCLEAT_X
+								delete TEMP_WALLCLEAT_Z
+								delete TEMP_END_X
+								delete TEMP_END_Z
+								
+								delete USE_StartAngleInDegrees
+								delete USE_EndAngleInDegrees
+								
+								delete WALLCLEAT_RADIUS_DY
+							
+								WALLCLEAT.RADIUS := TEMP_CleatRadius 
+								WALLCLEAT.RAXIS := Cab.{Follow_FaceName}.TR.RAXIS
+								
+								delete TEMP_CleatRadius
+								delete TEMP_WALLCLEAT_Z
+								delete TEMP_CLEAT_AFF
+								delete WALLCLEAT_DESC
+								delete TEMP_Strut_Width
+								delete TEMP_Strut_Pos
+							end if
+						end if
+					end if
+					TEMP_Loop1<int> += 1
+				end while
+				delete TEMP_Loop1
+				delete WALLCLEAT_X
+				delete WALLCLEAT_Y
+				delete WALLCLEAT_DX
+				delete WALLCLEAT_DY
+				delete circle_x
+				delete circle_z
+			end if
+		end if
+ 		exit
+ 	end if
