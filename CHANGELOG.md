@@ -151,36 +151,13 @@
 - `jonah-shelf-standards-rev17.txt` now has five independently verified results (items 2, 5, 6, 7, plus
   the fixed-shelves limitation) and one permanently declined (item 3). Items 4, 9, 10 remain open.
 
-## 2026-07-31 — Item 10 marked won't-test
+## 2026-08-01 — Item 10 marked won't-test
 
 - TESTING.md item 10 (Bill Crouch's tool-catalog-specific depth report, and the unresolved "top plate
   within cleat's space" casework-wall gap) marked as permanently declined by the user — both are niche
   edge cases with no clear repro path on this shop's setup, left as known gaps to deal with if/when
   actually hit rather than chased preemptively.
 - Items 4 and 9 remain the only open test items.
-
-## 2026-08-01 — Proofread pass: synced docs/*.md against README/CHANGELOG/TESTING.md
-
-- Found via a full proofreading/cross-check pass (prose + technical facts, checked against the
-  cabinet-vision skill's own already-synced copies of these same write-ups): `docs/shelf-standards-jonah.md`
-  and `docs/notch-construction-jonah.md` had fallen out of date relative to this repo's own test results,
-  to the point of giving advice the repo's own testing had already superseded.
-- `docs/shelf-standards-jonah.md`: added the confirmed fixed-shelves-only limitation; added the Round 3
-  root-cause finding (the `JCS_Use_ShelfStd` block misplaced outside `OBJECT == 17`) to the `OBJECT`
-  dispatch section; marked the "1 CNC file" workaround and its two ordering observations as verified
-  (TESTING.md #6, #7); documented the Revision 22 Centerline Route fix in the "Operation type" section
-  (TESTING.md #5); rewrote "Open questions" to reflect what's resolved, declined (items 3, 4), or still
-  open; and removed the leftover "flagged as read from a collapsed capture" hedge, which contradicted the
-  file's own opening line about the clean re-copy.
-- `docs/notch-construction-jonah.md`: replaced the "treat the filed script as broken... until proven
-  otherwise" instruction — contradicted by this repo's own TESTING.md #8 result — with the verified
-  CV2025 outcome (regression does not reproduce here with the shipped default), and noted Bill Crouch's
-  report as permanently declined (TESTING.md #10).
-- `docs/casework-walls-jonah.md`: added a footnote to the 13-script stack table explaining why
-  `…-10-studs-and-stud-dadoes.txt`'s filed line count (1,339) doesn't match the table's bundle-derived
-  `1328` — the CV2025-PATCH comments added on top of it, not a data error.
-- No changes to any script `.txt` files or to `README.md`/`TESTING.md` in this pass — those were checked
-  and found accurate against the repo's own state.
 
 ## 2026-08-01 — Clean copy/paste supersedes the collapsed-line-break capture
 
@@ -193,8 +170,99 @@
   declaration really is absent from the original (matching the real "Use of Undefined" error hit during
   testing) and that the Centerline Route bug (`dim ... as new line`, `DX := 0`) is original, not a
   reconstruction artifact.
-- Removed now-obsolete "reconstructed from a mangled/collapsed-line-break paste" and "verify against a
-  clean export" language from `jonah-shelf-standards-rev17.txt`'s header comment and revision history,
+- Removed now-obsolete "reconstructed from a collapsed-line-break paste" and "verify against a clean
+  export" language from `jonah-shelf-standards-rev17.txt`'s header comment and revision history,
   README.md, TESTING.md, and `docs/shelf-standards-jonah.md` — that verification is now done.
 - Reworded "worth stealing" to "worth learning from" / "worth absorbing" in `docs/casework-walls-jonah.md`
   and `docs/shelf-standards-jonah.md`.
+
+## 2026-08-01 — Amended test-result mentions to CV2025.4; fixed stale status section
+
+- This shop's installed version is CV2025.4, not just "CV2025" generically. Amended every mention of a
+  real, confirmed test result (shelf-standards items 2/5/6/7, notch-construction item 8, and the
+  casework-wall CV2025.3 fix's not-yet-tested note) across README.md, TESTING.md, and
+  `docs/casework-walls-jonah.md` to say CV2025.4 specifically. Left generic/forward-looking "CV2025"
+  mentions (advice for other installs, the CV2025.3 forum regression's own name, the `CV2025-PATCH`
+  comment tag) unchanged, since those aren't claims about what was actually tested here.
+- Fixed README.md's "What was changed" item #2: it read "Verified against real CV output" (missing the
+  version entirely) instead of matching the other bullets' phrasing.
+- Rewrote README.md's stale "CV2025 status" intro, which still said "None of this has been run or tested
+  on CV2025" despite two scripts having since been verified — now states the real status up front.
+
+## 2026-08-02 — Folded in cross-check findings from the cabinet-vision skill's own deep technique write-up
+
+The user maintains a separate, much deeper technique write-up of the same scripts inside a Claude skill
+(`cabinet-vision`), built independently of this repo. Cross-checking the two against each other surfaced
+a few concrete facts this repo was missing — none of them change any fix's correctness, but they change
+how a couple of "verified" claims should be read, and they're worth having on file:
+
+- **`jonah-shelf-standards-rev17.txt` is currently *disabled* in this shop's own live UCS Manager**,
+  per a screenshot of the "User Created Standards" window (entry named "JCS Shelf Standards," description
+  "Jonah's Shelf Standards REV 17," `Enabled` checkbox unchecked). This doesn't contradict any test
+  result above — items 2/5/6/7 were verified by testing the script directly, not by relying on whatever
+  is currently switched on in the shop's day-to-day UCS Manager list — but it means the *production*
+  install isn't currently running this script even after Revision 22, and nobody here knows why it's off.
+  Don't assume disabled means abandoned or superseded; the disable predates this pack's existence and
+  the reason isn't recorded anywhere. Added as a caveat to README.md's shelf-standards entry.
+- **A revision-numbering discrepancy in the original, pre-existing before this repo touched anything:**
+  the file header says `REV 17`, but the shipped revision history at the foot of the file runs
+  **Revision 2 through Revision 18** (17 listed entries — there's no "Revision 1," presumably an unlisted
+  original baseline), and the length-type choice list does carry a `6) Wizard Size (Centered)` entry
+  matching Revision 18's own history note. So the Revision 18 work is in the body while the title still
+  says 17. This repo's own Revisions 19-22 continue that numbering on top of 18, not 17 — worth being
+  precise about when citing a revision number to Jonah Coleman or anyone else who has the original file.
+- **The `;operations only from here on down` comment (line 19 of the clean copy) is itself misleading,
+  independent of the Revision 21 placement bug.** Revision 21 fixed a *reconstruction* bug where this
+  block had drifted outside `if OBJECT == 17 ... end if`. But in Jonah Coleman's real, original source the
+  block sits correctly *inside* that `if`, followed immediately by more part-level work (resolving the
+  Automatic sentinel, the disabled-cleanup exit, and two more part-level attribute publishes) — none of
+  which are operations, despite the comment's wording. The real Part/Operation boundary is the `end if`
+  seven lines later. Not a functional bug — the code runs fine either way — but worth flagging for anyone
+  reading the script cold, since the comment reads as a boundary marker and isn't quite one.
+- **Open question, not yet answered by any test session:** what is cabinet attribute `_CB:525` (read
+  bare, from part context, to detect horizontal grain — see the "Length derived from the line-bore, and
+  the horizontal-grain switch" section this shop's skill write-up carries) called in CV's own UI, and is
+  the numeric ID stable across versions? Like every other `_CB:NNN`/`TOOLID`/`ConstID` value in this
+  corpus, it's install-specific and shouldn't be reused without checking — added to TESTING.md as a
+  standing open item, not urgent enough to chase on its own.
+
+None of these required touching any script file or re-running a test — they're documentation-only
+corrections and additions, folded into README.md and TESTING.md.
+
+## 2026-08-02 — Reconciled docs updated from the cabinet-vision skill's own write-up
+
+- User updated README.md, CHANGELOG.md, TESTING.md, and the three `docs/*.md` write-ups in a separate
+  chat by syncing content from the `cabinet-vision` skill's own deeper technique documentation (the
+  cross-check findings logged in the entry above). That sync carried over a few of the skill's own
+  conventions that don't match this repo's established verbiage rules.
+- Fixed reintroduced violations: "mangled paste"/"the mangled file" wording in
+  `docs/shelf-standards-jonah.md` (reworded to "collapsed-line-break paste" framing, matching this
+  repo's standing convention); "worth stealing" reverted back from "worth learning from"/"worth
+  absorbing" in both `docs/shelf-standards-jonah.md` and `docs/casework-walls-jonah.md`; and a
+  "## Videos" section listing the six screencast.com links that had reappeared in
+  `docs/casework-walls-jonah.md`, contradicting the earlier explicit removal (see the "Removed
+  screencast video-link content" entry above) — removed again.
+- Adopted the rest of the synced content as-is: it's legitimate new cross-check material (script
+  disabled in the live UCS Manager, revision-numbering discrepancy, misleading comment note, `_CB:525`
+  open question, Bill Crouch/CV2023+-DS-origin corroboration) with no other rule violations.
+- Added `LICENSE` (MIT) and `.gitattributes` (line-ending normalization), also carried over from that
+  sync — standard repo hygiene, no content concerns.
+- Left `docs/*.md`'s cross-references to skill-only paths (`examples/`, `full-docs/`, `standard-ucs.md`,
+  etc., which don't exist in this repo's `scripts/`/`source-threads/` layout) unchanged for now — flagged
+  to the user as a separate open question rather than silently rewritten.
+
+## 2026-08-02 — Normalized skill-only path references in the docs
+
+- Follow-up to the entry above: user confirmed the skill-only path references should be rewritten to
+  match this repo's actual layout rather than left pointing at the `cabinet-vision` skill's own folders.
+- In `docs/shelf-standards-jonah.md`, `docs/casework-walls-jonah.md`, and `docs/notch-construction-jonah.md`:
+  rewrote every `examples/<script>.txt` reference to its real path under `scripts/<subdir>/`, and every
+  `full-docs/nexus-thread-*.txt` reference to `source-threads/nexus-thread-*.txt`.
+- Rewrote `examples/README.md` references to point at this repo's own `README.md` (Authorship section) or
+  the relevant `CHANGELOG.md` entry, depending on context.
+- Reworded references to skill-only docs that have no equivalent in this repo at all — `standard-ucs.md`,
+  `parameter-glossary.md`, `SKILL.md`, `ucs-breakdown.txt`, `internal-part-names.md`,
+  `object-intelligence.md`, `catalog-export-format.md`, and the skill-only example `linebore-attributes.txt`
+  (never packaged here) — to explicitly say "the cabinet-vision skill's [doc]" instead of presenting them
+  as broken local links.
+- No content claims changed, only how the cross-references are phrased.

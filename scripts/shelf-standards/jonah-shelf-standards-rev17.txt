@@ -4,9 +4,9 @@
 ;   1) Part visual does not work with "1 cnc file" through boring on partitions/dividers.
 ;See history at bottom of UCS
 
-;CV2025-PATCH (this repo, not Jonah Coleman's, applied when reconstructing this file from the collapsed-line-break
-;paste captured in full-docs/jonah-shelf-standards-rev17-raw.txt -- see README.md "What was changed" for the
-;full list). Two fixes applied below:
+;CV2025-PATCH (this repo, not Jonah Coleman's -- see full-docs/jonah-shelf-standards-rev17-raw.txt for the
+;unmodified original this is patched from, and README.md "What was changed" for the full list). Two fixes
+;applied below:
 ;  1) Added the missing "Public ucs_ShelfStd" declaration (the part-level "Automatic" override read this
 ;     UCS-level default but nothing ever declared it, so Automatic resolved against a non-existent parameter).
 ;     REV 20 correction: the first attempt at this fix declared it before the "For Each" loop, which CV
@@ -17,10 +17,9 @@
 ;     that the rest of the script actually declares and writes, instead of the never-declared Size1/Size1_MatID.
 ;     REV 21 correction: this fix and the ucs_ShelfStd Public declaration had ALSO been placed outside the
 ;     "if OBJECT == 17 then ... end if" block that computes and stores JCS_Use_ShelfStd on the part -- moved
-;     back inside, matching the raw paste exactly. This was the actual cause of "part attributes look right
-;     but nothing ever gets created," confirmed against real CV output. See TESTING.md #2 for the full story.
-;This is a line-break reconstruction from a mangled paste, not a byte-exact export -- verify against a clean
-;UCS Manager export before trusting exact whitespace/comment placement.
+;     back inside, matching the original source exactly. This was the actual cause of "part attributes look
+;     right but nothing ever gets created," confirmed against real CV output. See TESTING.md #2 for the full
+;     story.
 
 For Each LU|LF|S_LSE|RU|RF|S_RSE|PT|S_DIV|L?VBORE Part
 
@@ -39,7 +38,7 @@ For Each LU|LF|S_LSE|RU|RF|S_RSE|PT|S_DIV|L?VBORE Part
 		;meant JCS_Use_ShelfStd was never actually stored on the part, so ":JCS_Use_ShelfStd" below always
 		;read null and every operation exited immediately, silently creating nothing. Confirmed against real
 		;CV output: part-level attributes appeared fine, but no dado/visual ever appeared. Moved back inside
-		;OBJECT == 17, matching the raw paste exactly. See TESTING.md #2.
+		;OBJECT == 17, matching the original source exactly. See TESTING.md #2.
 		Public ucs_ShelfStd<int> = '<lst>Disabled=0|Enabled=1' ;Shelf Standards: UCS default (used when a part is set to Automatic)
 		JCS_Use_ShelfStd<int> := JCS_ShelfStd_Use
 		if JCS_Use_ShelfStd == -1 then
@@ -502,7 +501,6 @@ exit
 ;       Revision 19 (CV2025-PATCH, this repo, not Jonah Coleman's)
 ;               Added the missing "Public ucs_ShelfStd" UCS-level default declaration.
 ;               Fixed "less than smallest size" fallback to read the zero-padded Size01/Size01_MatID names.
-;               Reconstructed from a collapsed-line-break paste -- verify against a clean export. See README.md.
 ;       Revision 20 (CV2025-PATCH, this repo, not Jonah Coleman's)
 ;               Fix for Revision 19: "Public ucs_ShelfStd" was declared before the "For Each" loop, which CV
 ;               rejects with "Use of Undefined (ucs_ShelfStd)" (confirmed against real CV output, see TESTING.md
@@ -511,11 +509,12 @@ exit
 ;       Revision 21 (CV2025-PATCH, this repo, not Jonah Coleman's)
 ;               Fix for Revision 19/20: the ucs_ShelfStd Public declaration and the JCS_Use_ShelfStd
 ;               computation block had also been placed AFTER "if OBJECT == 17 then ... end if" closed, instead
-;               of inside it as the raw paste actually has it. That meant JCS_Use_ShelfStd was never stored on
-;               the part, so every operation's ":JCS_Use_ShelfStd == 0" check read null and exited immediately
-;               -- part-level attributes looked correct, but nothing was ever created. Confirmed against real
-;               CV output (LFVBORE/LRVBORE present, JCS_ShelfStd_* attributes correct, zero dado/visual
-;               created). Moved the block back inside OBJECT == 17, matching the raw paste exactly.
+;               of inside it as the original source actually has it. That meant JCS_Use_ShelfStd was never
+;               stored on the part, so every operation's ":JCS_Use_ShelfStd == 0" check read null and exited
+;               immediately -- part-level attributes looked correct, but nothing was ever created. Confirmed
+;               against real CV output (LFVBORE/LRVBORE present, JCS_ShelfStd_* attributes correct, zero
+;               dado/visual created). Moved the block back inside OBJECT == 17, matching the original source
+;               exactly.
 ;       Revision 22 (CV2025-PATCH, this repo, not Jonah Coleman's)
 ;               Fix for the Revision 10 "Centerline Route" option (ucs_Operation_Type == 2), confirmed still
 ;               broken against real CV2025 output: a line/route did appear in the assembly view, but nothing

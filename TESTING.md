@@ -1,5 +1,8 @@
 # CV2025 test plan — everything untested/unverified in this pack
 
+This shop runs **CV2025.4** — every "verified against real CV output" result below was confirmed on that
+specific version, not CV2025 generically.
+
 **Status (2026-07-31): items 2, 6, and 7 verified on `jonah-shelf-standards-rev17.txt`** — dados are
 controllable end-to-end (item 2), both default and through-bore dados nest correctly (item 6), and the
 forward/reverse dado pair fires correctly, confirming `S_EXTND` placement is intentional, not a bug
@@ -11,6 +14,14 @@ so nothing ever nested; now nests correctly. **Item 3 won't be tested** (user do
 standards day-to-day, won't touch assembly-wizard config to check it). **Item 10 also won't be tested**
 (both sub-items are niche edge cases with no clear repro path — left as known gaps to deal with if/when
 actually hit). Items 4 and 9 remain open, available to pick up later, not currently being pursued.
+
+**Note added 2026-08-02:** cross-checking against the user's separate `cabinet-vision` skill write-up
+of these same scripts surfaced one caveat worth reading before trusting the "verified" line above at
+face value: `jonah-shelf-standards-rev17.txt` is currently *disabled* in this shop's live UCS Manager
+(confirmed by screenshot). The verification itself is sound — it was done by running the script
+directly — but the production install isn't currently running the fixed version day-to-day. See
+README.md's "What was changed" and "CV2025 status" sections for the full note, and item 11 below for a
+new, genuinely open question that same cross-check surfaced.
 
 Written for someone who hasn't built or tested a UCS in CV before. Section 0 covers the mechanics
 you'll reuse for every item below; the numbered items are the actual things to check, ordered
@@ -101,13 +112,13 @@ shelves to the interior (see 0d — confirmed working, `Front Line Bore (LFVBORE
 **Round 3 result — the real bug:** with `L?VBORE` operations present and `JCS_ShelfStd_Use = 1`,
 `JCS_ShelfStd_LengthType = 3`, `JCS_ShelfStd_Length_Over = -1` all showing correctly on `Unfinished
 Left End (LU)`, still **no dado, no visual part, nothing created.** Root cause, found by re-checking
-the raw paste directly rather than trusting my own reconstruction: the `;operations only from here on
-down` block — which computes and *stores* `JCS_Use_ShelfStd` on the part so operations can read it
-back via `:JCS_Use_ShelfStd` — had been placed *after* `if OBJECT == 17 then ... end if` closed in my
-reconstruction, instead of inside it as the raw paste actually has it. That meant the value was never
-stored on the part, so every operation's `:JCS_Use_ShelfStd == 0` check read null/undefined and exited
-immediately — explaining exactly what was seen: correct part attributes, zero downstream effect. Fixed
-in Revision 21 by moving the block back inside `OBJECT == 17`, matching the raw paste exactly.
+the original source directly: the `;operations only from here on down` block — which computes and
+*stores* `JCS_Use_ShelfStd` on the part so operations can read it back via `:JCS_Use_ShelfStd` — had
+been placed *after* `if OBJECT == 17 then ... end if` closed in the patched version, instead of inside
+it as the original source actually has it. That meant the value was never stored on the part, so every
+operation's `:JCS_Use_ShelfStd == 0` check read null/undefined and exited immediately — explaining
+exactly what was seen: correct part attributes, zero downstream effect. Fixed in Revision 21 by moving
+the block back inside `OBJECT == 17`, matching the original source exactly.
 
 **Round 4 result — verified.** With Revision 21, dados are controllable on an adjustable-shelf end. User
 confirmed overall correctness and isn't testing every remaining function individually — this closes out
@@ -115,11 +126,6 @@ item 2 as the baseline "does the script work at all" check. One real, confirmed 
 the way: **it doesn't work on fixed shelves** — see the note in 0d above (only adjustable shelves
 generate the `L?VBORE` operations this script needs, so a fixed shelf's end/partition has nothing for
 it to act on; this is consistent with the feature's purpose, not a bug to fix).
-
-- **If it fires now:** mark the whole patch verified in README.md — this closes out item 2.
-- **If it still doesn't fire:** screenshot the Object Tree + attribute panel again and I'll dig
-  further — at this point I'd want to re-verify the reconstruction line-by-line against the raw paste
-  rather than guess again.
 
 ## 3. 🔧 Does entry "6) Wizard Size (Centered)" work without an explicit `=6`? — ❌ WON'T TEST
 
@@ -149,7 +155,7 @@ still resolves a size.
 
 ## 5. 🧱 Route vs. Dado bug (Rev 10) — does `ucs_Operation_Type = Centerline Route` still come out as a dado? — ✅ FIXED AND VERIFIED (Revision 22)
 
-**Result: confirmed broken, root cause found, fixed, and confirmed fixed against real CV2025 output.**
+**Result: confirmed broken, root cause found, fixed, and confirmed fixed against real CV2025.4 output.**
 With `ucs_Operation_Type` set to "Centerline Route", CV produced a line in the assembly view, but the
 operation never appeared on the CAM Reports/nest list — nothing to machine. Not the bug Revision 10's
 own comment described ("gets dim'd as a dado even if set to route") — the object was never a dado, it
@@ -165,15 +171,15 @@ object type this shop's own casework-wall scripts use for a real machined slot (
 of 0, and extended the centerline-to-corner X/Y offset (previously dado-only) to both branches so the
 now-wider route stays centered on the shelf-standard line instead of shifting a half-width off it.
 
-**User confirmed fixed** — Centerline Route now nests correctly on CV2025. No further action needed here.
+**User confirmed fixed** — Centerline Route now nests correctly on CV2025.4. No further action needed here.
 
 ## 6. 🧱🏭 "Generate 2 CNC files" bug (Rev 7) — is `TEMP_Fix_For_1_CNC_File` still needed? — ✅ VERIFIED WORKING
 
 **Result: confirmed both ways** — default (non-through) dados nest correctly, and the through-bore case
 (dado depth equal to the part's own thickness, where the script's `TEMP_Fix_For_1_CNC_File` workaround
-kicks in) also nests correctly. The shipped script produces correct nesting output as-is on CV2025.
+kicks in) also nests correctly. The shipped script produces correct nesting output as-is on CV2025.4.
 
-Left genuinely open, lower priority: whether CV2025 would *also* handle the through-bore case correctly
+Left genuinely open, lower priority: whether CV2025.4 would *also* handle the through-bore case correctly
 on its own, without the workaround (i.e. whether the workaround is now dead weight vs. still load-bearing)
 wasn't specifically isolated — that would mean temporarily disabling `TEMP_Fix_For_1_CNC_File` and
 re-checking, which isn't worth doing since the current behavior is already correct either way.
@@ -181,7 +187,7 @@ re-checking, which isn't worth doing since the current behavior is already corre
 ## 7. 🧱🏭 `S_EXTND := true` on the forward op — copy-paste slip or intentional? — ✅ CONFIRMED FIRES CORRECTLY
 
 **Result: confirmed correct as shipped.** Both the forward dado and the reverse-face dado fire and
-extend correctly on CV2025 — `S_EXTND := true` on the forward op is intentional, not a copy-paste slip.
+extend correctly on CV2025.4 — `S_EXTND := true` on the forward op is intentional, not a copy-paste slip.
 No change needed; nothing in the script should be touched here.
 
 ## 8. 🧱 `JCS_NotchConstruction_CV2023Plus_DSOrigin` — the flag I added, highest-stakes item — ✅ CONFIRMED NOT NEEDED
@@ -227,6 +233,16 @@ This is a bigger lift — it needs the full 12-script casework-wall stack import
 
 **Declined:** both are super-niche edge cases with no clear repro path on this shop's setup. Left as
 known gaps to deal with if/when actually hit, not something to chase preemptively.
+
+## 11. 🔧 What is cabinet attribute `_CB:525` called in CV's UI? — OPEN, added 2026-08-02
+
+`jonah-shelf-standards-rev17.txt` reads `_CB:525` bare, from part context, to detect horizontal-grain
+panels (the switch that swaps which dimension bounds a through/stop dado — see Revision 17's own history
+entry, "Support for horizontal grain panels"). Surfaced by cross-checking against the user's separate
+`cabinet-vision` skill write-up, which flagged this as still-unconfirmed there too. Like every other
+`_CB:NNN`/`TOOLID`/`ConstID` value in this corpus, the number is install- or version-specific and
+shouldn't be assumed portable. Not urgent — the script works whether or not anyone knows the UI label —
+but worth checking next time someone's in the Assembly Manager wizard near a horizontal-grain setting.
 
 ---
 

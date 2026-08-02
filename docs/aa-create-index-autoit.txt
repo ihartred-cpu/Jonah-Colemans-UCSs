@@ -1,0 +1,248 @@
+########## CAPTURE NOTE — added when filing, NOT part of the recovered source ##########
+#
+# Source:   "6445.Create Index.zip", supplied by the user 2026-07-30. The archive held
+#           exactly one file: "Create Index.exe", 761,856 bytes.
+#             md5    0a60518d098e01f0a3c8a5bf2be9522b
+#             sha256 12356a79a00c1bf68b03f75e76fb8b5e975e9f2afa31e7b9c5a1e4aece50fce2
+#           PE32+ GUI x86-64, 3 sections, UPX-packed, PE timestamp 2022-10-04 21:00:37 UTC.
+#           Inside: a compiled AutoIt v3 script (resource magic "AU3!EA06").
+#
+# Recovery: (1) upx -d  -> 1,327,104-byte unpacked PE, 6 sections
+#           (2) autoit-ripper 1.2.0, EA06 -> script.au3, 1,011,921 bytes / 21,334 lines
+#           Reproducible from the hashes above; nothing was guessed.
+#
+# What is here: lines 1-5 and 21,143-21,334 of that recovered script, byte-identical to
+#           what the decompiler emitted. That is the whole of the author-written program:
+#           the AutoIt3Wrapper #Region header, one AutoItSetOption call, the helper
+#           EM_ExpandListView, Func MAIN, and the MAIN() call.
+#
+# What was left out and why: lines 6-21,142 are stock AutoIt UDF library code pulled in by
+#           #include (GUIConstants, GUIListView, GUIListBox, WinAPI, Misc, ...) — 1,386 Func
+#           definitions, ~988 KB, containing nothing about Cabinet Vision. It was read, not
+#           skipped: every network, shell, registry and file-delete call in the recovered
+#           script sits inside one of those unused library functions, and MAIN calls none of
+#           them. The program does no network I/O, writes no files, and touches no registry.
+#           It is dropped here only to keep the skill from doubling in size for zero content.
+#
+# Decompiler artifacts — the original .au3 did NOT look like this:
+#           * all identifiers are upper-cased; comments are gone entirely
+#           * negative numbers print as unsigned 32-bit, so read "+ 4294967295" as -1,
+#             "+ 4294967246" as -50, "+ 4294966296" as -1000, "+ 4294967283" as -13
+#           * spacing around operators and parentheses is the decompiler's, not the author's
+#           Do not cite this file for the author's formatting or naming style.
+#
+# Author:   Jonah Coleman, confirmed by the user: "this is jonah's as well."
+#           No author is named anywhere in the binary, so this skill's standing default
+#           would have made it the user's. What pointed elsewhere was the build path on
+#           line 2 — an Architectural Arts network share, matching the "AA" fingerprint the
+#           user gave for Jonah Coleman. Note there is no AA_ identifier anywhere in the code;
+#           the share name alone was the signal. See references/examples/README.md.
+#
+# Line endings: the verbatim region below is CRLF, exactly as autoit-ripper recovered it.
+#           This capture note is LF. Do not open this file with an editor that normalizes
+#           line endings for the whole file - it silently strips the CRs from the recovered
+#           source and breaks byte-level fidelity against the original. Rebuild by
+#           concatenating the note with the untouched recovered bytes instead of editing
+#           in place.
+#
+# Curated write-up of what this reveals about CV: references/ui-automation.md
+########## END CAPTURE NOTE — verbatim recovered source begins below ##########
+
+#Region
+#AutoIt3Wrapper_Outfile_x64=\\aadsmfp1\Engineering\Create Index.exe
+#AutoIt3Wrapper_UseUpx=y
+#AutoIt3Wrapper_UseX64=y
+#EndRegion
+
+AutoItSetOption ( "WinTitleMatchMode" , 2 )
+Func EM_EXPANDLISTVIEW ( ByRef $LISTVIEW , $START_COLUMN = 0 , $END_COLUMN = 0 )
+	If IsHWnd ( $LISTVIEW ) Or $LISTVIEW > 0 Then
+		Dim $LOOP1 , $LAST_COLUMN , $SIZE1 , $SIZE2
+		$LAST_COLUMN = _GUICTRLLISTVIEW_GETCOLUMNCOUNT ( $LISTVIEW ) + 4294967295
+		If $END_COLUMN > 0 And $END_COLUMN < $LAST_COLUMN Then
+			$LAST_COLUMN = $END_COLUMN
+		EndIf
+		$LAST_COLUMN_EXPAND_ME = + 4294967295
+		$LAST_COLUMN_EXPAND_ME = $LAST_COLUMN
+		Dim $COLUMNS_TO_HIDE_ARRAY [ 1 ]
+		For $LOOP1 = $START_COLUMN To $LAST_COLUMN
+			$COLUMN_IS_HIDDEN = False
+			For $LOOP_HIDDEN_COLUMNS = 1 To $COLUMNS_TO_HIDE_ARRAY [ 0 ]
+				$COLUMN_IS_HIDDEN = False
+				If $LOOP1 = $COLUMNS_TO_HIDE_ARRAY [ $LOOP_HIDDEN_COLUMNS ] Then
+					$COLUMN_IS_HIDDEN = True
+					_GUICTRLLISTVIEW_HIDECOLUMN ( $LISTVIEW , $LOOP1 )
+					ExitLoop
+				EndIf
+			Next
+			If Not $COLUMN_IS_HIDDEN Then
+				_GUICTRLLISTVIEW_SETCOLUMNWIDTH ( $LISTVIEW , $LOOP1 , $LVSCW_AUTOSIZE_USEHEADER )
+				If $LOOP1 <> $LAST_COLUMN_EXPAND_ME Then
+					$SIZE1 = _GUICTRLLISTVIEW_GETCOLUMNWIDTH ( $LISTVIEW , $LOOP1 )
+					_GUICTRLLISTVIEW_SETCOLUMNWIDTH ( $LISTVIEW , $LOOP1 , $LVSCW_AUTOSIZE )
+					If 1 Then
+						$SIZE2 = _GUICTRLLISTVIEW_GETCOLUMNWIDTH ( $LISTVIEW , $LOOP1 )
+						If $SIZE1 > $SIZE2 Then
+							_GUICTRLLISTVIEW_SETCOLUMNWIDTH ( $LISTVIEW , $LOOP1 , $LVSCW_AUTOSIZE_USEHEADER )
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		Next
+	EndIf
+EndFunc
+Func MAIN ( )
+	$GUI_WIDTH = 400
+	$GUI_HEIGHT = 400
+	$GUI = GUICreate ( "Make Index" , $GUI_WIDTH , $GUI_HEIGHT , @DesktopWidth - $GUI_WIDTH , @DesktopHeight - $GUI_HEIGHT + 4294967246 , BitOR ( $WS_POPUP , $WS_CAPTION , $WS_SYSMENU ) )
+	GUISetState ( )
+	WinSetOnTop ( $GUI , "" , True )
+	$ACTION_LABEL = GUICtrlCreateLabel ( "Press Insert To Begin Transferring..." , 20 , 0 , $GUI_WIDTH + 4294967256 , 25 )
+	$EXTRACT_NUMBERS_CHECKBOX = GUICtrlCreateCheckbox ( "Extract Numbers" , 20 , 20 , $GUI_WIDTH + 4294967256 , 25 )
+	GUICtrlSetState ( $EXTRACT_NUMBERS_CHECKBOX , $GUI_CHECKED )
+	$FIRST_ITEM_OF_SERIES_CHECKBOX = GUICtrlCreateCheckbox ( "Only First Item of Series" , 20 , 40 , $GUI_WIDTH + 4294967256 , 25 )
+	GUICtrlSetState ( $FIRST_ITEM_OF_SERIES_CHECKBOX , $GUI_CHECKED )
+	$LISTVIEW = GUICtrlCreateListView ( "Number|Sheet Name" , 20 , 90 , $GUI_WIDTH + 4294967256 , $GUI_HEIGHT + 4294967186 )
+	$SET_COLUMN_WIDTHS = True
+	$HWND_EDIT_SHEETS_LAST = 0
+	$ISPRESSED_DLL = DllOpen ( "User32.dll" )
+	$G_TSTRUCT = DllStructCreate ( $TAGPOINT )
+	$SELECTED_INDEX_LAST = + 4294966296
+	$MODE = 0
+	While 1 = 1
+		If _ISPRESSED ( "2d" , $ISPRESSED_DLL ) Then
+			If $MODE = 0 Then
+				$MODE = 1
+				GUICtrlSetData ( $ACTION_LABEL , "Transferring on clicks..." )
+				$TRANSFER_COLUMN = 0
+			Else
+				$MODE = 0
+				GUICtrlSetData ( $ACTION_LABEL , "Press Insert To Begin Transferring..." )
+			EndIf
+			While _ISPRESSED ( "2d" , $ISPRESSED_DLL )
+			WEnd
+		EndIf
+		$SELECTED_INDEX = Number ( _GUICTRLLISTVIEW_GETSELECTEDINDICES ( $LISTVIEW , False ) )
+		If $SELECTED_INDEX <> $SELECTED_INDEX_LAST Then
+			$TRANSFER_COLUMN = 0
+			$SELECTED_INDEX_LAST = $SELECTED_INDEX
+		EndIf
+		If _ISPRESSED ( "01" , $ISPRESSED_DLL ) Then
+			If $MODE = 1 And $SELECTED_INDEX > + 4294967295 Then
+				DllStructSetData ( $G_TSTRUCT , "x" , MouseGetPos ( 0 ) )
+				DllStructSetData ( $G_TSTRUCT , "y" , MouseGetPos ( 1 ) )
+				$HWND_UNDER_MOUSE = _WINAPI_WINDOWFROMPOINT ( $G_TSTRUCT )
+				If $HWND_UNDER_MOUSE = $GUI Then
+				Else
+					If WinGetTitle ( $HWND_UNDER_MOUSE , "" ) = "Drawings" Then
+						$HWND_SOLID = WinGetHandle ( "Solid" )
+						If $HWND_SOLID = 0 Then $HWND_SOLID = WinGetHandle ( " CABINET VISION" )
+						If $HWND_SOLID > 0 Then
+							$HCTRL = ControlGetHandle ( $HWND_SOLID , "" , "Edit2" )
+							$TRANSFER_TEXT = _GUICTRLLISTVIEW_GETITEMTEXT ( $LISTVIEW , $SELECTED_INDEX , $TRANSFER_COLUMN )
+							Send ( "{tab}" )
+							$TIMER = TimerInit ( )
+							While TimerDiff ( $TIMER ) < 2000 And ControlCommand ( $HWND_SOLID , "" , $HCTRL , "IsVisible" ) = 0
+							WEnd
+							If ControlCommand ( $HWND_SOLID , "" , $HCTRL , "IsVisible" ) = 1 Then
+								$TIMER = TimerInit ( )
+								While TimerDiff ( $TIMER ) < 2000 And ControlGetText ( $HWND_SOLID , "" , $HCTRL ) <> $TRANSFER_TEXT
+									ControlSend ( $HWND_SOLID , "" , $HCTRL , "WAIT" , 1 )
+									ControlSetText ( $HWND_SOLID , "" , $HCTRL , "" )
+									ControlSend ( $HWND_SOLID , "" , $HCTRL , $TRANSFER_TEXT , 1 )
+								WEnd
+								ControlSend ( $HWND_SOLID , "" , $HCTRL , "{enter}" )
+								$TRANSFER_COLUMN += 1
+								If $TRANSFER_COLUMN = 2 Then
+									$TRANSFER_COLUMN = 0
+									If Not ( GUICtrlGetState ( $EXTRACT_NUMBERS_CHECKBOX ) = $GUI_CHECKED ) Then
+										$TRANSFER_COLUMN = 1
+									EndIf
+									$FIRST_ITEM_OF_SERIES = False
+									If GUICtrlRead ( $FIRST_ITEM_OF_SERIES_CHECKBOX ) = $GUI_CHECKED Then
+										$FIRST_ITEM_OF_SERIES = True
+									EndIf
+									_GUICTRLLISTVIEW_SETITEMSELECTED ( $LISTVIEW , $SELECTED_INDEX , False , False )
+									$AGAIN = True
+									While $AGAIN And $SELECTED_INDEX < _GUICTRLLISTVIEW_GETITEMCOUNT ( $LISTVIEW ) + 4294967295
+										$AGAIN = False
+										_GUICTRLLISTVIEW_SETITEMSELECTED ( $LISTVIEW , $SELECTED_INDEX + 1 )
+										$SELECTED_INDEX += 1
+										If $FIRST_ITEM_OF_SERIES Then
+											$PREV_SHEET_NUMBER = _GUICTRLLISTVIEW_GETITEMTEXT ( $LISTVIEW , $SELECTED_INDEX + 4294967295 , 0 )
+											$SHEET_NUMBER = _GUICTRLLISTVIEW_GETITEMTEXT ( $LISTVIEW , $SELECTED_INDEX , 0 )
+											If Number ( $PREV_SHEET_NUMBER ) > 0 And Int ( $PREV_SHEET_NUMBER ) = Int ( $SHEET_NUMBER ) Then
+												$AGAIN = True
+											EndIf
+										EndIf
+									WEnd
+									_GUICTRLLISTVIEW_ENSUREVISIBLE ( $LISTVIEW , $SELECTED_INDEX )
+								EndIf
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+			While _ISPRESSED ( "01" , $ISPRESSED_DLL )
+			WEnd
+		EndIf
+		If $SET_COLUMN_WIDTHS Then
+			EM_EXPANDLISTVIEW ( $LISTVIEW )
+			$SET_COLUMN_WIDTHS = False
+		EndIf
+		$HWND_EDIT_SHEETS = WinGetHandle ( "Drawing Sheets" )
+		If $HWND_EDIT_SHEETS > 0 Then
+			If $HWND_EDIT_SHEETS <> $HWND_EDIT_SHEETS_LAST Then
+				_GUICTRLLISTVIEW_BEGINUPDATE ( $LISTVIEW )
+				_GUICTRLLISTVIEW_DELETEALLITEMS ( $LISTVIEW )
+				$EXTRACT_NUMBER = False
+				If GUICtrlRead ( $EXTRACT_NUMBERS_CHECKBOX ) = $GUI_CHECKED Then
+					$EXTRACT_NUMBER = True
+				EndIf
+				WinActivate ( $HWND_EDIT_SHEETS )
+				$HCTRL = ControlGetHandle ( $HWND_EDIT_SHEETS , "" , "ListBox1" )
+				For $LOOP1 = 0 To _GUICTRLLISTBOX_GETCOUNT ( $HCTRL ) + 4294967295
+					$ITEM_TEXT = _GUICTRLLISTBOX_GETTEXT ( $HCTRL , $LOOP1 )
+					$ITEM_NUMBER = ""
+					$ITEM_NAME = $ITEM_TEXT
+					If $EXTRACT_NUMBER And StringLen ( $ITEM_NAME ) > 2 Then
+						If StringIsDigit ( StringLeft ( $ITEM_NAME , 1 ) ) Or StringIsDigit ( StringMid ( $ITEM_NAME , 2 , 1 ) ) Then
+							$SLICE_POINT = 2
+							While $SLICE_POINT <= StringLen ( $ITEM_NAME ) And Not StringIsAlpha ( StringMid ( $ITEM_NAME , $SLICE_POINT , 1 ) )
+								$SLICE_POINT += 1
+							WEnd
+							If $SLICE_POINT < StringLen ( $ITEM_NAME ) Then
+								$ITEM_NUMBER = StringLeft ( $ITEM_NAME , $SLICE_POINT + 4294967295 )
+								$ITEM_NAME = StringTrimLeft ( $ITEM_NAME , $SLICE_POINT + 4294967295 )
+								$START = 1
+								While $START <= StringLen ( $ITEM_NUMBER ) And ( StringIsAlNum ( StringMid ( $ITEM_NUMBER , $START , 1 ) ) Or StringMid ( $ITEM_NUMBER , $START , 1 ) = "." )
+									$START += 1
+								WEnd
+								If $START < StringLen ( $ITEM_NUMBER ) Then
+									$ITEM_NUMBER = StringLeft ( $ITEM_NUMBER , $START + 4294967295 )
+								EndIf
+							EndIf
+						EndIf
+					EndIf
+					$INDEX = _GUICTRLLISTVIEW_INSERTITEM ( $LISTVIEW , $ITEM_NUMBER )
+					_GUICTRLLISTVIEW_SETITEMTEXT ( $LISTVIEW , $INDEX , $ITEM_NAME , 1 )
+				Next
+				$HWND_EDIT_SHEETS_LAST = $HWND_EDIT_SHEETS
+				_GUICTRLLISTVIEW_SETITEMSELECTED ( $LISTVIEW , 0 , True )
+				ControlClick ( $HWND_EDIT_SHEETS , "" , "Button5" )
+				WinActivate ( $GUI )
+				_GUICTRLLISTVIEW_ENDUPDATE ( $LISTVIEW )
+			EndIf
+		EndIf
+		$MSG = GUIGetMsg ( )
+		Switch $MSG
+		Case $GUI_EVENT_CLOSE
+			ExitLoop
+		Case $EXTRACT_NUMBERS_CHECKBOX
+			$HWND_EDIT_SHEETS = + 4294967295
+		EndSwitch
+	WEnd
+	DllClose ( $ISPRESSED_DLL )
+	Exit
+EndFunc
+MAIN ( )

@@ -1,0 +1,169 @@
+########## CAPTURE NOTE — added when filing, NOT part of the recovered source ##########
+#
+# Source:   "CV_Multiple_Operations_Copier.zip", supplied by the user as a bare upload
+#           (no accompanying instruction text). The archive held exactly one file:
+#           "CV_Multiple_Operations_Copier.exe", 415,375 bytes.
+#             md5    a05c0c9123fda8ac83052d1ac754e8bb
+#             sha256 b8f02903a374442943383ebb7f80841ff5805f4d47c0aad4b10e9637b9557c2f
+#           PE32 GUI x86 (32-bit), 3 sections, UPX-packed. PE header timestamp
+#           2010-03-07 16:08:39 UTC; the AutoIt resource's own embedded file-creation
+#           timestamp (read by the decompiler, see below) is 2010-05-17 18:52:38 UTC —
+#           roughly two months later. Both are recorded; which one reflects when the
+#           *code* was actually written is not established, and the gap is not resolved
+#           here rather than guessed at.
+#
+# Recovery: (1) upx -d  -> 760,975-byte unpacked PE32, 4 sections
+#           (2) autoit-ripper 1.2.0 (EA06)  -> script.au3, 7,443 lines
+#           Reproducible from the hashes above; nothing was guessed. Ran the ripper
+#           against both the packed and unpacked exe as a cross-check — byte-identical
+#           script.au3 either way (md5 18658e5dd889abb62412c2211529978e).
+#
+# Authorship: not asserted by a credit line or a variable-namespace fingerprint (this
+#           tool has neither — no AA_/FWP_/JCS_ prefix anywhere, since it works on raw
+#           clipboard text and XML, not CV parameters). It is attributed to Jonah Coleman
+#           on a different signal: the decompiler recovered the original temp-file path
+#           the AutoIt runtime used while compiling, C:\Users\JONAHC~1\AppData\Local\
+#           Temp\aut7F46.tmp — an 8.3-truncated Windows username of "JONAHC..." on the
+#           machine that built this exe. That is about as close to a direct signature
+#           as this skill has found on an uncredited file.
+#
+# What is here: lines 1-4 (the #AutoIt3Wrapper header) and lines 7322-7443 of the
+#           recovered 7,443-line script, byte-identical to what the decompiler emitted.
+#           That is the whole of the author-written program: four Global declarations,
+#           Func MYEXIT, Func CLEAR, Func PASTE, Func MAIN, and the MAIN() call.
+#
+# What was left out and why: lines 5-7321 are stock AutoIt UDF library code pulled in
+#           by #include (GUIConstants, WinAPI, Misc, GUIListView, Clipboard, Array,
+#           ...) — the same class of boilerplate documented in
+#           aa-create-index-autoit.txt's capture note, confirmed here by function-name
+#           scan (no AA_/FWP_/JCS_ token, no "cabinet"/"solid"/"aadsmfp" string, no
+#           control-automation call outside the four Funcs kept above). Dropped for the
+#           same reason: it is real, but it is not about Cabinet Vision, and keeping it
+#           would roughly double the size of this file for zero content.
+##########################################################################################
+
+#Region
+#AutoIt3Wrapper_outfile=CV_Multiple_Operations_Copier.exe
+#AutoIt3Wrapper_UseX64=n
+#EndRegion
+Global $GUI
+Global $GUI_CURRENT_OPERATIONS_LISTVIEW
+Global $LAST_CLIP
+Global $XML [ 10 ] [ 2 ]
+Func MYEXIT ( )
+	Exit
+EndFunc
+Func CLEAR ( )
+	$CURRENT_OPERATIONS = ""
+	$OPERATIONS_COUNT = 0
+	TrayTip ( "Clear Operations" , "Memory cleared." , 25 )
+EndFunc
+Func PASTE ( )
+	$PASTE_TEXT = ""
+	$SELECTED_INDICES_ARRAY = _GUICTRLLISTVIEW_GETSELECTEDINDICES ( $GUI_CURRENT_OPERATIONS_LISTVIEW , True )
+	For $LOOP1 = 1 To $SELECTED_INDICES_ARRAY [ 0 ]
+		$INDEX = $SELECTED_INDICES_ARRAY [ $LOOP1 ]
+		$TEMP_TEXT = ""
+		For $LOOP2 = 1 To UBound ( $XML ) - 1
+			If $XML [ $LOOP2 ] [ 0 ] = $INDEX + 1 Then
+				$TEMP_TEXT = $XML [ $LOOP2 ] [ 1 ]
+				ExitLoop
+			EndIf
+		Next
+		If $TEMP_TEXT <> "" Then
+			If $LOOP1 <> $SELECTED_INDICES_ARRAY [ 0 ] Then
+				$TEMP_TEXT = StringReplace ( $TEMP_TEXT , "</operations>" , "" )
+			EndIf
+			If $PASTE_TEXT <> "" Then
+				$LOCATION = StringInStr ( $TEMP_TEXT , "<operations>" )
+				$TEMP_TEXT = StringTrimLeft ( $TEMP_TEXT , $LOCATION + 11 )
+			EndIf
+			$PASTE_TEXT &= $TEMP_TEXT
+			ClipPut ( $PASTE_TEXT )
+		Else
+			MsgBox ( 0 , "Critical Error" , "Failed to find XML for index: " & $LOOP1 )
+		EndIf
+	Next
+	_CLIPBOARD_SETDATA ( $PASTE_TEXT , $CF_TEXT )
+	$LAST_CLIP = _CLIPBOARD_GETDATA ( $CF_TEXT )
+EndFunc
+Func MAIN ( )
+	$GUI_LEFT = Default
+	$GUI_TOP = Default
+	$GUI_WIDTH = 500
+	$GUI_HEIGHT = 250
+	$GUI = GUICreate ( "CV Multiple Operations Copier" , $GUI_WIDTH , $GUI_HEIGHT , $GUI_LEFT , $GUI_TOP )
+	WinSetOnTop ( $GUI , "" , True )
+	$GUI_CURRENT_OPERATIONS_LISTVIEW = _GUICTRLLISTVIEW_CREATE ( $GUI , "Name|Description" , 20 , 20 , $GUI_WIDTH - 40 , $GUI_HEIGHT - 100 , BitOR ( $LVS_REPORT , $LVS_SHOWSELALWAYS ) )
+	_GUICTRLLISTVIEW_SETEXTENDEDLISTVIEWSTYLE ( $GUI_CURRENT_OPERATIONS_LISTVIEW , BitOR ( $LVS_EX_FULLROWSELECT , $LVS_EX_SUBITEMIMAGES ) )
+	$CLEAR_SELECTED_BUTTON = GUICtrlCreateButton ( "Clear Selected" , 20 , $GUI_HEIGHT - 80 , 100 , 50 )
+	$PASTE_SELECTED_BUTTON = GUICtrlCreateButton ( "Combine Selected" , $GUI_WIDTH - 120 , $GUI_HEIGHT - 80 , 100 , 50 )
+	$DEBUG_BUTTON = GUICtrlCreateButton ( "Debug" , $GUI_WIDTH - 100 , $GUI_HEIGHT - 25 , 100 , 25 )
+	GUISetState ( )
+	_CLIPBOARD_SETDATA ( "" , $CF_TEXT )
+	$LAST_CLIP = ""
+	While 1 = 1
+		$TEST = _CLIPBOARD_GETDATA ( $CF_TEXT )
+		If $TEST <> $LAST_CLIP Then
+			$LAST_CLIP = $TEST
+			If StringInStr ( $TEST , "<operations>" ) Then
+				$OPERATION_NAME = ""
+				$OPERATION_DESCRIPTION = ""
+				$TEMP_LOCATION = StringInStr ( $TEST , "<operation name=" )
+				If $TEMP_LOCATION > 0 Then
+					$TEMP_LOCATION += 17
+					While StringMid ( $TEST , $TEMP_LOCATION , 1 ) <> """"
+						$OPERATION_NAME &= StringMid ( $TEST , $TEMP_LOCATION , 1 )
+						$TEMP_LOCATION += 1
+					WEnd
+					$TEMP_LOCATION += 15
+					While StringMid ( $TEST , $TEMP_LOCATION , 1 ) <> """"
+						$OPERATION_DESCRIPTION &= StringMid ( $TEST , $TEMP_LOCATION , 1 )
+						$TEMP_LOCATION += 1
+					WEnd
+				EndIf
+				$INDEX = _GUICTRLLISTVIEW_INSERTITEM ( $GUI_CURRENT_OPERATIONS_LISTVIEW , $OPERATION_NAME )
+				_GUICTRLLISTVIEW_SETITEMTEXT ( $GUI_CURRENT_OPERATIONS_LISTVIEW , $INDEX , $OPERATION_DESCRIPTION , 1 )
+				_GUICTRLLISTVIEW_SETCOLUMNWIDTH ( $GUI_CURRENT_OPERATIONS_LISTVIEW , 0 , $LVSCW_AUTOSIZE )
+				_GUICTRLLISTVIEW_SETCOLUMNWIDTH ( $GUI_CURRENT_OPERATIONS_LISTVIEW , 1 , $LVSCW_AUTOSIZE )
+				$PLACED = False
+				For $LOOP1 = 1 To UBound ( $XML ) - 1
+					If Number ( $XML [ $LOOP1 ] [ 0 ] ) = 0 Then
+						$PLACED = True
+						ExitLoop
+					EndIf
+				Next
+				If Not $PLACED Then
+					ReDim $XML [ UBound ( $XML ) * 2 ] [ 2 ]
+				EndIf
+				$XML [ $LOOP1 ] [ 0 ] = $INDEX + 1
+				$XML [ $LOOP1 ] [ 1 ] = $TEST
+			EndIf
+		EndIf
+		$MSG = GUIGetMsg ( )
+		If $MSG <> 0 Then
+			Switch $MSG
+			Case $GUI_EVENT_CLOSE
+				ExitLoop
+			Case $DEBUG_BUTTON
+				_ARRAYDISPLAY ( $XML )
+			Case $CLEAR_SELECTED_BUTTON
+				$SELECTED_INDICES_ARRAY = _GUICTRLLISTVIEW_GETSELECTEDINDICES ( $GUI_CURRENT_OPERATIONS_LISTVIEW , True )
+				For $LOOP1 = 1 To $SELECTED_INDICES_ARRAY [ 0 ]
+					$INDEX = $SELECTED_INDICES_ARRAY [ $LOOP1 ]
+					For $LOOP2 = 1 To UBound ( $XML ) - 1
+						If $XML [ $LOOP2 ] [ 0 ] = $INDEX + 1 Then
+							$XML [ $LOOP2 ] [ 0 ] = 0
+							$XML [ $LOOP2 ] [ 1 ] = 0
+							ExitLoop
+						EndIf
+					Next
+				Next
+				_GUICTRLLISTVIEW_DELETEITEMSSELECTED ( $GUI_CURRENT_OPERATIONS_LISTVIEW )
+			Case $PASTE_SELECTED_BUTTON
+				PASTE ( )
+			EndSwitch
+		EndIf
+	WEnd
+EndFunc
+MAIN ( )
