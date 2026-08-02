@@ -21,6 +21,7 @@ scripts/
   miterfold/              jonah-miterfold.txt
   visible-part-splits/    jonah-visible-part-splits.txt
   overlay-calculations/   jonah-overlay-calculations.txt
+                           jonah-overlay-calculations-19ucs-raw.txt   (earlier bundle revision, kept for provenance)
   tools/                  two recovered AutoIt tool sources: aa-create-index-autoit.txt,
                            jonah-multiple-operations-copier-autoit.txt (not UCS -- compiled Win32 tools)
 docs/                     curated technique/defect write-ups for the three largest systems

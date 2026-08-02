@@ -15,7 +15,7 @@ The `.ucs` records in the bundle carry the whole UCS Manager row, so stack posit
 | 1 | `25.ucs` | `scripts/casework-walls/jonah-casework-wall-01-cab-before-build.txt` | 373 | **1** | 141 | CAB Before Build |
 | 2 | `115.ucs` | `…-02-faces-interiors-1of2.txt` | 112 | 0 | 248 | Faces and Interiors (1/2) |
 | 3 | `125.ucs` | `…-03-faces-interiors-2of2.txt` | 101 | 0 | 248 | Faces and Interiors (2/2) |
-| 4 | `19.ucs` | **not filed — see below** | 188 | 0 | 137 | FWP: DOR/DWR Overlays |
+| 4 | `19.ucs` | `scripts/overlay-calculations/jonah-overlay-calculations-19ucs-raw.txt` | 187 | 0 | 137 | FWP: DOR/DWR Overlays |
 | 5 | `20.ucs` | `…-04-fwp-door-drawer-fronts.txt` | 298 | 0 | 0 | FWP: Door/Drawer Fronts |
 | 6 | `136.ucs` | `…-05-face-control-1-cleat-delete.txt` | 70 | 0 | 137 | Casework Walls (1/7) - Face Control 1, WALLCLEAT D… |
 | 7 | `84.ucs` | `…-06-face-control-2.txt` | 1568 | 0 | 137 | Casework Walls (2/7) - Face Control 2 |
@@ -28,7 +28,7 @@ The `.ucs` records in the bundle carry the whole UCS Manager row, so stack posit
 
 Two scripts are Apply-Before-Build (`Order` 1 and 9). Ordering is otherwise load-bearing and unenforced: `117.ucs` line 1 is just a comment, `;This should be before any other part level UCS`, and nothing in CV checks it — yet it ships at position 13. That contradiction is in the source as delivered; don't read the comment as describing the shipped stack.
 
-**`19.ucs` is deliberately not filed.** It is an *earlier* revision of the already-filed `scripts/overlay-calculations/jonah-overlay-calculations.txt` — 17 diff lines, and the filed copy (204 lines) is the newer one, carrying a `DOOR_IS_STILE_AND_RAIL` / `DOR.DOORSTYLEID` block and `{JONAH_Interior_Split_Above_Path}.PCTR` lines that the bundle's 187-line version lacks. So the filed copy post-dates 2018-08-08. Refiling the older text would have created a third copy of a script this pack already stores twice (see the CHANGELOG.md entry on the unnamed overlay-calculations duplicate).
+**`19.ucs` is filed as a raw provenance copy, not as the working script.** It is an *earlier* revision of the already-filed `scripts/overlay-calculations/jonah-overlay-calculations.txt` — 17 diff lines, and the filed working copy (204 lines) is the newer one, carrying a `DOOR_IS_STILE_AND_RAIL` / `DOR.DOORSTYLEID` block and `{JONAH_Interior_Split_Above_Path}.PCTR` lines (both commented out in the newer copy) that this 187-line bundle version lacks entirely. So the working copy post-dates 2018-08-08, and `19.ucs` — filed at `scripts/overlay-calculations/jonah-overlay-calculations-19ucs-raw.txt` — is kept purely for provenance, the same `-raw` pairing pattern used for `jonah-shelf-standards-rev17-raw.txt`. This is a different situation from the unnamed duplicate removed earlier (see the CHANGELOG.md entry on that): that was an uncredited, indistinguishable copy with no provenance value, where this is a named, dated bundle revision that documents what the script looked like at the point Jonah Coleman shipped it.
 
 ## Setup chain — Jonah Coleman's own installation instructions
 

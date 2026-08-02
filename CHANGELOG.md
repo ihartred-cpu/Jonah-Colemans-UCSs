@@ -266,3 +266,18 @@ corrections and additions, folded into README.md and TESTING.md.
   (never packaged here) — to explicitly say "the cabinet-vision skill's [doc]" instead of presenting them
   as broken local links.
 - No content claims changed, only how the cross-references are phrased.
+
+## 2026-08-02 — File the casework-wall stack's `19.ucs` as a raw provenance copy
+
+- User supplied the actual text of `19.ucs` ("FWP: DOR/DWR Overlays," Order 4 in the casework-wall stack),
+  previously undocumented in this repo beyond a note that it existed but wasn't filed.
+- Filed it at `scripts/overlay-calculations/jonah-overlay-calculations-19ucs-raw.txt` — confirmed by diff
+  to be an earlier revision of the already-filed `jonah-overlay-calculations.txt` (187 lines vs. 204;
+  missing the `DOOR_IS_STILE_AND_RAIL`/`DOR.DOORSTYLEID` block and the `{JONAH_Interior_Split_Above_Path}.PCTR`
+  line, both of which exist commented-out in the newer copy). Filed as a `-raw` provenance copy, the same
+  pairing pattern used for `jonah-shelf-standards-rev17-raw.txt`, not as a second working copy.
+- This is a different case from the unnamed overlay-calculations duplicate removed earlier (see the
+  2026-07-31 entry above): that was an uncredited, indistinguishable copy; this is a named, dated bundle
+  revision with real provenance value.
+- Updated `docs/casework-walls-jonah.md`'s stack table and the "`19.ucs` is deliberately not filed" note
+  (now describes it as filed for provenance, not withheld) and `README.md`'s structure listing.
