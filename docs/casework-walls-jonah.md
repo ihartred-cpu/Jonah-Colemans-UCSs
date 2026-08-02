@@ -28,6 +28,8 @@ The `.ucs` records in the bundle carry the whole UCS Manager row, so stack posit
 
 Two scripts are Apply-Before-Build (`Order` 1 and 9). Ordering is otherwise load-bearing and unenforced: `117.ucs` line 1 is just a comment, `;This should be before any other part level UCS`, and nothing in CV checks it — yet it ships at position 13. That contradiction is in the source as delivered; don't read the comment as describing the shipped stack.
 
+The `Lines` column describes the original bundle content, not necessarily the file as filed in this repo today: `…-10-studs-and-stud-dadoes.txt` is filed at 1,339 lines, 11 longer than the 1,328 in this table, because the CV2025-PATCH header comment and inline patch comments (see below) were added on top of it. Every other file in the table is filed exactly one line *shorter* than the table's `Lines` value (a trailing-newline counting artifact, not a real discrepancy) — wall-10 is the one script whose filed line count has actually grown beyond that baseline, and the growth is entirely the applied patch.
+
 **`19.ucs` is deliberately not filed.** It is an *earlier* revision of the already-filed `jonah-overlay-calculations.txt` — 17 diff lines, and the filed copy (204 lines) is the newer one, carrying a `DOOR_IS_STILE_AND_RAIL` / `DOR.DOORSTYLEID` block and `{JONAH_Interior_Split_Above_Path}.PCTR` lines that the bundle's 187-line version lacks. So the filed copy post-dates 2018-08-08.
 
 ## Setup chain — Jonah Coleman's own installation instructions
@@ -85,7 +87,7 @@ end if
 
 Radius cleats are excluded from CNC behind a user flag — `122.ucs:542-543`: `if Cab.AA_CaseworkWall_SendRadiusCleatsToCNC == 0 then` / `WALLCLEAT._NOCNC<int> := 1 ;we don't let these go to CNC`.
 
-## Verified techniques worth stealing
+## Verified techniques worth learning from
 
 Each of these was checked line-by-line against the filed source. They are general classic-UCS technique, not casework-wall-specific, and several are the only known example in this skill.
 

@@ -1,8 +1,6 @@
 # Jonah Coleman's Shelf Standards UCS — techniques, defects, and what it settles
 
-Source: `full-docs/jonah-shelf-standards-rev17-raw.txt`, supplied by the user 2026-07-31. Author: Jonah Coleman — the header names him, and the commented library path `FWP\Hardware Visuals\Shelf Standard` plus the `JCS_` parameter prefix both match his known fingerprint (see `examples/README.md` on prefixes).
-
-**Read the capture note before quoting line numbers: there are none.** The paste arrived with its line breaks collapsed into runs of spaces — the forum copy/paste mangling Jonah Coleman himself warns about in `full-docs/nexus-thread-notch-construction-rev12.txt` ("Yep use internet explorer"). Because a UCS `;comment` runs to end of line, reconstructing the breaks would mean guessing where a trailing comment ends and the next statement begins, so the script is filed verbatim in `full-docs/` rather than byte-exact in `examples/`. **Every citation in this file is therefore by construct, not by line.** If a clean copy ever turns up — exported from UCS Manager, or re-copied in a browser that preserves breaks — it belongs in the examples/ folder as jonah-shelf-standards.txt and this file's citations can be tightened.
+Source: `full-docs/jonah-shelf-standards-rev17-raw.txt`, supplied by the user, a clean copy/paste with line breaks intact. Author: Jonah Coleman — the header names him, and the commented library path `FWP\Hardware Visuals\Shelf Standard` plus the `JCS_` parameter prefix both match his known fingerprint (see `examples/README.md` on prefixes).
 
 **Revision numbering:** header says REV 17, the revision history at the foot runs through Revision 18 ("Add wizard sizes (centered)"), and the length-type choice list does carry a `6) Wizard Size (Centered)` entry — so the Revision 18 work is in the body while the title still says 17. Recorded, not resolved.
 
@@ -32,6 +30,8 @@ end if
 
 So `LFVBORE`/`LRVBORE` are front and rear vertical line-bores, with anything else matching the wildcard treated as a mid bore. That last `else` is a catch-all, not a name — don't read a third literal name out of it.
 
+**Confirmed limitation, not a bug: this entire class of script only ever fires on adjustable shelves.** Real CV2025 testing (TESTING.md item 2, round 2) confirmed CV only generates the `L?VBORE` operations this `For Each` filter depends on when the interior has *adjustable* shelves — a fixed shelf never produces a line-bore operation, so a shelf-standards script has nothing to act on for a fixed-shelf end/partition. This lines up with the feature's actual purpose (shelf standards are pilaster strips for adjustable clips specifically), so it's not something to fix — but it's worth documenting explicitly, because the failure mode (no error, nothing happens) looks identical to a real bug until you check what kind of shelf triggered it.
+
 ## The technique that makes it interesting: one script, two object levels, dispatched on `OBJECT`
 
 The single most reusable thing here is the opening dispatch. The same `For Each` body handles both the *part* and the *operations on that part*, and `OBJECT` is what tells them apart:
@@ -49,7 +49,9 @@ end if
 ;operations only from here on down
 ```
 
-`;parts` is Jonah Coleman's own comment, and `;operations only from here on down` is his too. That makes this a **third and fourth independent attestation of `OBJECT == 17` meaning a Part** — it already appears in `examples/jonah-visible-part-splits.txt` and `examples/jonah-casework-wall-12-radius-blank-panel-inset-fix.txt` — and, unusually, one where the author labels the branch himself rather than leaving the code to imply it. The caution in `standard-ucs.md` about `OBJECT` codes being empirically observed rather than published still stands; what strengthens is specifically 17-as-Part, and what's genuinely new is the **use** of it: a part-name filter that includes operation names yields both levels, and `OBJECT` is the discriminator. That is a cheaper structure than the two-script split the corpus otherwise favours.
+`;parts` is Jonah Coleman's own comment, and `;operations only from here on down` is his too. **The block this repo's own patch history got wrong (Revision 19/20) is exactly the one that comment sits closest to:** the `JCS_Use_ShelfStd` computation that stores the resolved enable/disable value onto the part (so the operations below can read it back via `:JCS_Use_ShelfStd`) belongs *inside* the `if OBJECT == 17 ... end if` block, matching the original source. An earlier revision of this repo's patched copy placed it *after* that block closed instead — which meant `JCS_Use_ShelfStd` was never actually stored on the part, so every operation's `:JCS_Use_ShelfStd == 0` check read null and exited immediately. Part-level attributes looked correct; nothing downstream ever fired. This was caught by real CV2025 testing (TESTING.md #2, round 3) and fixed in Revision 21 by moving the block back inside `OBJECT == 17`, matching the original source exactly. Worth calling out because it's a case where the two-level dispatch is easy to reproduce wrong from memory or from a reflowed paste — the placement relative to the closing `end if` is the entire bug.
+
+That makes this a **third and fourth independent attestation of `OBJECT == 17` meaning a Part** — it already appears in `examples/jonah-visible-part-splits.txt` and `examples/jonah-casework-wall-12-radius-blank-panel-inset-fix.txt` — and, unusually, one where the author labels the branch himself rather than leaving the code to imply it. The caution in `standard-ucs.md` about `OBJECT` codes being empirically observed rather than published still stands; what strengthens is specifically 17-as-Part, and what's genuinely new is the **use** of it: a part-name filter that includes operation names yields both levels, and `OBJECT` is the discriminator. That is a cheaper structure than the two-script split the corpus otherwise favours.
 
 Note the addressing shift across the boundary. Inside the `OBJECT == 17` branch the attributes are written bare (`JCS_ShelfStd_Use<int> = …`) and probed with `this.` (`if this.JCS_ShelfStd_Use == null then`). Below it, the same value is read with a single leading colon (`:JCS_Use_ShelfStd`, `:JCS_ShelfStd_Length_Over`) because the operation's parent *is* the part.
 
@@ -101,7 +103,7 @@ This script demonstrates that more thoroughly than anything else in the corpus. 
 - **Conditionally**, inside `if TEMP_UCS_Dado_LengthType == 2 or TEMP_UCS_Dado_LengthType == 3 then` — the "less than smallest" behaviour list and all thirty `ucs_Use_Sizes_SizeNN` / `_MatID` parameters. They only exist when a set-sizes mode is selected.
 - **Far down the body, mid-flow** — `Public ucs_Operation_Type` immediately before the `dim`, and `Public ucs_ToolID_For_Dado` immediately before the TOOLID assignment, each declared at its point of use.
 
-The conditional block is the one worth stealing: it keeps a thirty-parameter table out of the UCS parameter list entirely unless the user has chosen a mode that needs it. The cost is that the parameters vanish when the mode changes, so a value typed under one mode is not guaranteed to survive a round trip through another.
+The conditional block is the one worth absorbing: it keeps a thirty-parameter table out of the UCS parameter list entirely unless the user has chosen a mode that needs it. The cost is that the parameters vanish when the mode changes, so a value typed under one mode is not guaranteed to survive a round trip through another.
 
 Both `<lst>` spellings appear, in one script: quoted (`= '<lst>1) Automatic=-1|…'`) on the part attributes, and bare with a trailing comment (`Public ucs_Dado_Display_Visual<int> = <lst>False=0|True=1 ;Display a part visual`) on the Publics. The trailing comment after a bare `<lst>` is the comment-as-prompt convention — the text after `;` becomes the parameter's UI label.
 
@@ -191,16 +193,16 @@ An operation whose depth equals the part's own thickness has become a through op
 ShelfStandardDadoReverse.X := :DX - (X - ucs_Dado_Width/2)
 ```
 
-The visual part also gets `QTY := 2` in this case, since a through condition means a standard on each face. Revision 7's history entry dates the workaround and calls it "a work-around for CV bug where 'generate 2 cnc files' doesn't work" — so this is a CV defect being papered over in user code, and worth checking whether it still reproduces before copying the complexity.
+The visual part also gets `QTY := 2` in this case, since a through condition means a standard on each face. Revision 7's history entry dates the workaround and calls it "a work-around for CV bug where 'generate 2 cnc files' doesn't work" — so this is a CV defect being papered over in user code.
+
+**Confirmed still working on real CV2025 (TESTING.md #6):** both the default (non-through) and through-bore cases nest correctly on this shop's install as shipped. Left genuinely open, lower priority: whether CV2025 would also handle the through-bore case correctly without the workaround — that would mean isolating and disabling `TEMP_Fix_For_1_CNC_File` and re-testing, which isn't worth doing since current behavior is already correct either way.
 
 The header records a limitation the workaround does not cover: *"Part visual does not work with '1 cnc file' through boring on partitions/dividers."*
 
-**Two ordering observations, flagged as read from a collapsed capture rather than confirmed:**
+**Two ordering observations:**
 
-- `TEMP_Use_FACEWP` is *read* in the block above but only *assigned* much later (`if _FACEWP > 0 then TEMP_Use_FACEWP := _FACEWP`), and it is `delete`d at the end of the script. So the reverse-face decision appears to test a parameter that has no value yet on this pass. It resolves to the same answer either way when `_FACEWP` is 2, which may be why it has never surfaced.
-- Inside the block that otherwise configures `ShelfStandardDadoReverse`, the through-dado case sets `ShelfStandardDado.S_EXTND := true` — the *forward* operation. Given every neighbouring line targets the reverse op, this looks like a copy-paste slip, but extending the forward op could also be intentional. Not tested.
-
-Both are the kind of claim that needs the real line breaks to state firmly. Recorded here so a future clean copy can settle them.
+- `TEMP_Use_FACEWP` is *read* in the block above but only *assigned* much later (`if _FACEWP > 0 then TEMP_Use_FACEWP := _FACEWP`), and it is `delete`d at the end of the script. So the reverse-face decision appears to test a parameter that has no value yet on this pass. It resolves to the same answer either way when `_FACEWP` is 2, which may be why it has never surfaced. Not independently tested — the CV2025 verification above confirms the workaround's output, not this specific ordering question.
+- Inside the block that otherwise configures `ShelfStandardDadoReverse`, the through-dado case sets `ShelfStandardDado.S_EXTND := true` — the *forward* operation. Given every neighbouring line targets the reverse op, this looked like a copy-paste slip. **Confirmed intentional, not a slip (TESTING.md #7):** real CV2025 testing showed both the forward and reverse-face dados fire and extend correctly as shipped — no change needed.
 
 ## Neutralizing the host instead of deleting it
 
@@ -227,7 +229,9 @@ else
 end if
 ```
 
-Two operation classes behind one identifier, with the route branch distinguished downstream by `DX := 0` (a route has no width; a dado does). Revision 10's history entry records that this **does not actually work**: *"currently does not work due to bug in CV, somehow it gets dim'd as a dado even if it is set to route."* Undated relative to any CV version, and unresolved in the history through Revision 18 — so if a `dim … as new line` in a conditional comes out as a dado, that's a known CV behaviour with a decade of provenance, not new breakage. Worth probing on a current install.
+Two operation classes behind one identifier, with the route branch distinguished downstream by `DX := 0` (a route has no width; a dado does). Revision 10's history entry records that this **does not actually work**: *"currently does not work due to bug in CV, somehow it gets dim'd as a dado even if it is set to route."*
+
+**Confirmed broken, root cause found, fixed, and confirmed fixed against real CV2025 output (TESTING.md #5; Revision 22).** Setting `ucs_Operation_Type` to Centerline Route produced a line in the assembly view, but the operation never appeared on the CAM Reports/nest list — nothing to machine. This was not the bug Revision 10's own comment described ("gets dim'd as a dado even if set to route"): the object was never a dado, it just was never a real machinable operation. Two layered bugs, not one: (1) the route branch used `dim ShelfStandardDado as new line` — `line` is a non-cutting visual/dimension object in CV's object model, not a machinable operation type, unlike the dado branch's `Dadoex` — and (2) its width was hardcoded to `ShelfStandardDAdo.DX := 0` (also a case typo on the variable name), so it had no cutting geometry either way. Fixed in Revision 22 by switching the route branch to `dim ShelfStandardDado as new route` with `_RCUT := 1` — the same object type this shop's own casework-wall scripts use for a real machined slot (`WireChaseRectangle`, `REMOVABLEPANEL`) — giving it the same real `DX` width as the dado branch instead of 0, and extending the centerline-to-corner X/Y offset (previously dado-only) to both branches so the now-wider route stays centered on the shelf-standard line instead of shifting a half-width off it. Centerline Route now nests correctly.
 
 For the dado case the centerline is shifted by half the width using the part's own rotation, the same `sin`/`cos` projection style the rest of Jonah Coleman's code uses in the absence of an `atan2`:
 
@@ -271,9 +275,9 @@ The 18-entry history is unusually informative about CV itself, not just the scri
 
 ## Open questions this raises
 
-- Does CV normalize `Size1` to `Size01`? If it does, the fallback defect above evaporates. Cheap to probe.
-- Does entry `6. Wizard Size (Centered)` without an `=6` receive an implicit value in a bare `<lst>`?
-- Does the `dim … as new line` / comes-out-as-dado bug from Revision 10 still reproduce on a current install?
-- Does the "generate 2 CNC files" bug from Revision 7 still reproduce, or is the whole `TEMP_Fix_For_1_CNC_File` apparatus now dead weight?
-- What is cabinet attribute `525` called in the UI, and is it stable across versions?
-- Is `ucs_ShelfStd` declared in the user's installed copy (i.e. is the missing `Public` a paste casualty or a real omission)?
+- **Still open, low priority (TESTING.md #4):** Does CV normalize `Size1` to `Size01`? The fix doesn't depend on the answer either way, since the shipped file already uses the padded names — skip unless curious.
+- **Permanently declined by the user (TESTING.md #3):** Does entry `6. Wizard Size (Centered)` without an `=6` receive an implicit value in a bare `<lst>`? Not a "pause," a real "won't happen" — the user doesn't use shelf standards day-to-day and isn't willing to touch assembly-wizard configuration just to check it.
+- **Resolved (TESTING.md #5):** the `dim … as new line` / route-never-nests bug from Revision 10 was confirmed still present on CV2025, root-caused, fixed in Revision 22, and confirmed fixed — see the Operation Type section above.
+- **Resolved (TESTING.md #6):** the "generate 2 CNC files" bug's `TEMP_Fix_For_1_CNC_File` workaround is confirmed still needed and correct on CV2025 for both the default and through-bore cases. Whether the underlying CV bug it guards against is itself now fixed (making the apparatus removable) remains untested — that would require disabling the workaround and re-checking, not attempted.
+- What is cabinet attribute `525` called in the UI, and is it stable across versions? Still open.
+- **Resolved:** `ucs_ShelfStd` is confirmed genuinely undeclared in the original source, not a paste casualty — the clean re-copy (2026-08-01) matches the earlier reconstruction here line-for-line in control flow and variable names, confirming this was a real omission in the script as authored.

@@ -158,3 +158,43 @@
   edge cases with no clear repro path on this shop's setup, left as known gaps to deal with if/when
   actually hit rather than chased preemptively.
 - Items 4 and 9 remain the only open test items.
+
+## 2026-08-01 — Proofread pass: synced docs/*.md against README/CHANGELOG/TESTING.md
+
+- Found via a full proofreading/cross-check pass (prose + technical facts, checked against the
+  cabinet-vision skill's own already-synced copies of these same write-ups): `docs/shelf-standards-jonah.md`
+  and `docs/notch-construction-jonah.md` had fallen out of date relative to this repo's own test results,
+  to the point of giving advice the repo's own testing had already superseded.
+- `docs/shelf-standards-jonah.md`: added the confirmed fixed-shelves-only limitation; added the Round 3
+  root-cause finding (the `JCS_Use_ShelfStd` block misplaced outside `OBJECT == 17`) to the `OBJECT`
+  dispatch section; marked the "1 CNC file" workaround and its two ordering observations as verified
+  (TESTING.md #6, #7); documented the Revision 22 Centerline Route fix in the "Operation type" section
+  (TESTING.md #5); rewrote "Open questions" to reflect what's resolved, declined (items 3, 4), or still
+  open; and removed the leftover "flagged as read from a collapsed capture" hedge, which contradicted the
+  file's own opening line about the clean re-copy.
+- `docs/notch-construction-jonah.md`: replaced the "treat the filed script as broken... until proven
+  otherwise" instruction — contradicted by this repo's own TESTING.md #8 result — with the verified
+  CV2025 outcome (regression does not reproduce here with the shipped default), and noted Bill Crouch's
+  report as permanently declined (TESTING.md #10).
+- `docs/casework-walls-jonah.md`: added a footnote to the 13-script stack table explaining why
+  `…-10-studs-and-stud-dadoes.txt`'s filed line count (1,339) doesn't match the table's bundle-derived
+  `1328` — the CV2025-PATCH comments added on top of it, not a data error.
+- No changes to any script `.txt` files or to `README.md`/`TESTING.md` in this pass — those were checked
+  and found accurate against the repo's own state.
+
+## 2026-08-01 — Clean copy/paste supersedes the collapsed-line-break capture
+
+- User supplied a fresh copy/paste of `jonah-shelf-standards-rev17` with line breaks intact, superseding
+  the old collapsed-line-break paste `jonah-shelf-standards-rev17-raw.txt` was filed from.
+- Replaced `jonah-shelf-standards-rev17-raw.txt` with the new clean, unmodified original (CRLF normalized
+  to LF only) and updated its capture note accordingly.
+- Confirmed the new clean copy matches the prior reconstruction line-for-line in control flow and
+  variable names (only whitespace/indentation style differs) — including confirming the `ucs_ShelfStd`
+  declaration really is absent from the original (matching the real "Use of Undefined" error hit during
+  testing) and that the Centerline Route bug (`dim ... as new line`, `DX := 0`) is original, not a
+  reconstruction artifact.
+- Removed now-obsolete "reconstructed from a mangled/collapsed-line-break paste" and "verify against a
+  clean export" language from `jonah-shelf-standards-rev17.txt`'s header comment and revision history,
+  README.md, TESTING.md, and `docs/shelf-standards-jonah.md` — that verification is now done.
+- Reworded "worth stealing" to "worth learning from" / "worth absorbing" in `docs/casework-walls-jonah.md`
+  and `docs/shelf-standards-jonah.md`.
