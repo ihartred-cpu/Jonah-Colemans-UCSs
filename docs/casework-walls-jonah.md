@@ -1,6 +1,8 @@
 # Casework Walls — Jonah Coleman's Millwork Walls UCS stack
 
-A 13-script classic-UCS system that turns a single CV assembly into a framed millwork wall — reception walls, die walls, partition walls — with studs, plates, cleats, faces, removable panels and CNC-ready machining, driven entirely from the plan-view shape. It is the largest single UCS system this skill has seen: 5,492 lines across 13 scripts, versioned by its own author as `AA_CaseworkWall_Version` 2.8.
+A 13-script classic-UCS system that turns a single CV assembly into a framed millwork wall — reception walls, die walls, partition walls — with studs, plates, cleats, faces, removable panels and CNC-ready machining, driven entirely from the plan-view shape. It is the largest single UCS system this pack has seen: 5,492 lines across 13 scripts, versioned by its own author as `AA_CaseworkWall_Version` 2.8.
+
+**Why this author's scripts are worth reading closely.** A few habits recur across this whole pack and make Jonah Coleman's code unusually legible for classic UCS: he narrates in first person rather than writing terse abbreviations — comments explain *why* something is done, flag known CV bugs and workarounds by name, and occasionally admit "don't know why it doesn't work" rather than leaving a mechanism to be reverse-engineered; every file carries a disciplined, append-only revision history at the end, dating and describing each change instead of leaving version drift implicit; and a consistent internal namespacing convention (`JONAH_`, `AA_`, `FWP_`, `JCS_`) makes ownership, employer context, and rough vintage identifiable at a glance across otherwise-unrelated scripts. The practical upshot for this write-up: where a technique or a defect is described below, it's frequently because the code itself says so, not because it was inferred.
 
 **Provenance and date.** The system arrived as `1106.JONAH Rocks Millwork Walls Revision 3.pkg`, a CV catalog-export bundle (70 files, 83,222,698 bytes uncompressed, internally dated 2018-08-08, md5 `57d229ee1335854480ac6241aacb0b20`), posted by Jonah Coleman to the Hexagon Nexus thread "Jonah's Millwork Walls Revision 3 (reception walls, die walls, etc)". The bundle plus roughly eight years of replies is preserved verbatim at `source-threads/nexus-thread-1106-jonah-rocks-millwork-walls.txt`; all 13 script bodies are filed byte-exact under `scripts/casework-walls/jonah-casework-wall-*.txt`. Everything below is verified against those files — where the write-up states a mechanism the source doesn't establish, it says so.
 
@@ -15,7 +17,7 @@ The `.ucs` records in the bundle carry the whole UCS Manager row, so stack posit
 | 1 | `25.ucs` | `scripts/casework-walls/jonah-casework-wall-01-cab-before-build.txt` | 373 | **1** | 141 | CAB Before Build |
 | 2 | `115.ucs` | `…-02-faces-interiors-1of2.txt` | 112 | 0 | 248 | Faces and Interiors (1/2) |
 | 3 | `125.ucs` | `…-03-faces-interiors-2of2.txt` | 101 | 0 | 248 | Faces and Interiors (2/2) |
-| 4 | `19.ucs` | `scripts/overlay-calculations/jonah-overlay-calculations-19ucs-raw.txt` | 187 | 0 | 137 | FWP: DOR/DWR Overlays |
+| 4 | `19.ucs` | `scripts/overlay-calculations/jonah-overlay-calculations-19ucs.txt` | 187 | 0 | 137 | FWP: DOR/DWR Overlays |
 | 5 | `20.ucs` | `…-04-fwp-door-drawer-fronts.txt` | 298 | 0 | 0 | FWP: Door/Drawer Fronts |
 | 6 | `136.ucs` | `…-05-face-control-1-cleat-delete.txt` | 70 | 0 | 137 | Casework Walls (1/7) - Face Control 1, WALLCLEAT D… |
 | 7 | `84.ucs` | `…-06-face-control-2.txt` | 1568 | 0 | 137 | Casework Walls (2/7) - Face Control 2 |
@@ -27,8 +29,6 @@ The `.ucs` records in the bundle carry the whole UCS Manager row, so stack posit
 | 13 | `117.ucs` | `…-12-radius-blank-panel-inset-fix.txt` | 126 | 0 | 137 | FIX FOR RADIUS BLANK PANELS NOT INSETTING |
 
 Two scripts are Apply-Before-Build (`Order` 1 and 9). Ordering is otherwise load-bearing and unenforced: `117.ucs` line 1 is just a comment, `;This should be before any other part level UCS`, and nothing in CV checks it — yet it ships at position 13. That contradiction is in the source as delivered; don't read the comment as describing the shipped stack.
-
-**`19.ucs` is filed as a raw provenance copy, not as the working script.** It is an *earlier* revision of the already-filed `scripts/overlay-calculations/jonah-overlay-calculations.txt` — 17 diff lines, and the filed working copy (204 lines) is the newer one, carrying a `DOOR_IS_STILE_AND_RAIL` / `DOR.DOORSTYLEID` block and `{JONAH_Interior_Split_Above_Path}.PCTR` lines (both commented out in the newer copy) that this 187-line bundle version lacks entirely. So the working copy post-dates 2018-08-08, and `19.ucs` — filed at `scripts/overlay-calculations/jonah-overlay-calculations-19ucs-raw.txt` — is kept purely for provenance, the same `-raw` pairing pattern used for `jonah-shelf-standards-rev17-raw.txt`. This is a different situation from the unnamed duplicate removed earlier (see the CHANGELOG.md entry on that): that was an uncredited, indistinguishable copy with no provenance value, where this is a named, dated bundle revision that documents what the script looked like at the point Jonah Coleman shipped it.
 
 ## Setup chain — Jonah Coleman's own installation instructions
 
@@ -87,7 +87,7 @@ Radius cleats are excluded from CNC behind a user flag — `122.ucs:542-543`: `i
 
 ## Verified techniques worth learning from
 
-Each of these was checked line-by-line against the filed source. They are general classic-UCS technique, not casework-wall-specific, and several are the only known example in this skill.
+Each of these was checked line-by-line against the filed source. They are general classic-UCS technique, not casework-wall-specific, and several are the only known example in this pack.
 
 ### The probe part — create a part solely to read a value CV won't otherwise expose
 
@@ -117,7 +117,7 @@ exit
 
 ### `FaceCopyOperation` — a zero-size operation as a clipboard carrier
 
-This is the mechanism behind the thread's copy/paste-face-information trick, and it appears nowhere else in this skill. A `line` operation of size zero is created purely so the user has something to copy in the part editor's report view. `84.ucs:43-64`:
+This is the mechanism behind the thread's copy/paste-face-information trick, and it appears nowhere else in this pack. A `line` operation of size zero is created purely so the user has something to copy in the part editor's report view. `84.ucs:43-64`:
 
 ```
 ;preserve copy-able face info
@@ -279,11 +279,11 @@ if this._EDGWP > 0 then
 
 ### CV 2025.3 regression: `_EDGWP` is no longer a reliable "is this part shaped" test, and it broke exactly this stack
 
-**Provenance: a Hexagon Nexus thread the user shared as two screenshots, no accompanying instruction text — mined per this pack's standing convention. The discussion text is transcribed with confidence; the three inline code screenshots were cross-checked line-for-line against `scripts/casework-walls/jonah-casework-wall-10-studs-and-stud-dadoes.txt`, already on file here, and match it exactly** (lines 30, 78-98, and 361-367 of that file, allowing for the poster's own disclaimer that he'd edited his copy so his line numbers wouldn't match). That independent byte-match is why this is published as a confirmed finding rather than an OCR guess — screenshot-derived code is normally the least trustworthy source this skill accepts, but here the code is verifiable against a file already on file.
+**Provenance: a Hexagon Nexus thread the user shared as two screenshots, no accompanying instruction text — mined per this pack's standing convention. The discussion text is transcribed with confidence; the three inline code screenshots were cross-checked line-for-line against `scripts/casework-walls/jonah-casework-wall-10-studs-and-stud-dadoes.txt`, already on file here, and match it exactly** (lines 30, 78-98, and 361-367 of that file, allowing for the poster's own disclaimer that he'd edited his copy so his line numbers wouldn't match). That independent byte-match is why this is published as a confirmed finding rather than an OCR guess — screenshot-derived code is normally the least trustworthy source this pack accepts, but here the code is verifiable against a file already on file.
 
 **The thread: "`_EDGWP` now used instead of `_FACEWP` on non-shaped parts - intentional?"** (Wes Shimwell, CV 2025 forum). Adding a partition with a dado into the top or bottom, then checking the `PTDADO` object in the Object Tree: in prior CV versions the working-plane parameter came back as `_FACEWP`; in **2025.3** it comes back as `_EDGWP` instead — even on a part that was never shaped. **Toby Richards' reply carries a green "Verified Answer" checkmark** (elevated credibility, not just community speculation): this is a side effect of a new CV feature letting a UCS dim a connection *per edge* (`_EDGWP = 1` rather than `_FACEWP = 3`), which makes `_EDGWP` meaningful on parts that were never shaped. **His fix, stated directly: to test whether a part is actually shaped, use `_SHPEDGCNT > 0` instead of `_EDGWP == 0`.**
 
-**This is not a hypothetical for this pack — it breaks the exact idiom this stack relies on.** `scripts/casework-walls/jonah-casework-wall-10-studs-and-stud-dadoes.txt:30` reads `if this._EDGWP == 0 then ;not shaped` (see the `_EDGWP`-as-edge-index section above for the working code this guards). On 2025.3 that condition can now be false on an unshaped part, changing which branch runs. Per the cabinet-vision skill's own parameter reference, `_SHPEDGCNT` (its `standard-ucs.md` and `parameter-glossary.md`) already exists as the shape-count parameter — Toby Richards' fix is exactly the swap that skill's own glossary entry for `_EDGWP`/`_FACEWP` needs, and it has been added there.
+**This is not a hypothetical for this pack — it breaks the exact idiom this stack relies on.** `scripts/casework-walls/jonah-casework-wall-10-studs-and-stud-dadoes.txt:30` reads `if this._EDGWP == 0 then ;not shaped` (see the `_EDGWP`-as-edge-index section above for the working code this guards). On 2025.3 that condition can now be false on an unshaped part, changing which branch runs. `_SHPEDGCNT` is the shape-count parameter — Toby Richards' fix is exactly the swap the `_EDGWP`/`_FACEWP` idiom needs here.
 
 **Wes Shimwell's own reported workaround, for this specific shop's casework walls, is narrower than a general fix and shouldn't be copied as one:** "just commented out the lines that check if it's shaped because we never manually shape our studs." That works only because his shop's studs are never shaped — it is not the general `_SHPEDGCNT > 0` fix Toby gave, and porting "just delete the shape check" into a script whose parts *can* be shaped would silently break the shaped case.
 
@@ -299,7 +299,7 @@ DY -= TEMP_TopAdjust
 delete TEMP_TopAdjust
 ```
 
-Read plainly, `TEMP_TopAdjust` should be exactly `0` when no face is lowered, making `DY -= TEMP_TopAdjust` a no-op. In practice a value that *reads* as `0` in the sidebar can carry residual floating-point error from whatever upstream chain computed `AA_Face_TopAdjust`, and subtracting that near-zero-but-not-quite-zero value shaved 0.012mm off the part's `DY` — small enough to look correct in the model, large enough to break the geometric-contact test a downstream top-plate dado operation depends on (see mental model #4 and `_NORM` in the cabinet-vision skill's own write-up: an operation that isn't in real contact with its neighbor doesn't fire). This is the same underlying hazard `rprec()` exists to guard against elsewhere in this stack (see "There is no `atan2`, and `rprec()` exists because floats don't compare," above) — a value that *should* be zero after arithmetic is not guaranteed to actually equal zero. If a `DY -=`/`+=` adjustment by a computed value that's "supposed to be zero" is ever suspected of silently killing a downstream operation, `rprec()` the adjustment (or compare it with a small tolerance) before applying it, rather than trusting it to be exactly zero when it should be.
+Read plainly, `TEMP_TopAdjust` should be exactly `0` when no face is lowered, making `DY -= TEMP_TopAdjust` a no-op. In practice a value that *reads* as `0` in the sidebar can carry residual floating-point error from whatever upstream chain computed `AA_Face_TopAdjust`, and subtracting that near-zero-but-not-quite-zero value shaved 0.012mm off the part's `DY` — small enough to look correct in the model, large enough to break the geometric-contact test a downstream top-plate dado operation depends on (an operation that isn't in real contact with its neighbor doesn't fire). This is the same underlying hazard `rprec()` exists to guard against elsewhere in this stack (see "There is no `atan2`, and `rprec()` exists because floats don't compare," above) — a value that *should* be zero after arithmetic is not guaranteed to actually equal zero. If a `DY -=`/`+=` adjustment by a computed value that's "supposed to be zero" is ever suspected of silently killing a downstream operation, `rprec()` the adjustment (or compare it with a small tolerance) before applying it, rather than trusting it to be exactly zero when it should be.
 
 **Neither fix from this thread has been applied to the verbatim source filed in this pack** — per the standing provenance rule, `scripts/casework-walls/jonah-casework-wall-10-studs-and-stud-dadoes.txt` is never edited to reflect a fix, even a confirmed one. If a user asks to actually fix this stack for a 2025.3+ install, the two changes are: swap the `_EDGWP == 0` shape test for `_SHPEDGCNT > 0` at line 30 (and anywhere else in the 13-script stack the same idiom recurs — not independently re-checked here), and guard the `DY -= TEMP_TopAdjust` line with a tolerance or `rprec()` rather than deleting it outright, since deleting it (as Wes did) means a genuinely lowered face no longer adjusts height at all.
 
@@ -348,7 +348,7 @@ if this.CABNO == null and :OBJECT != 10 and :OBJECT != 37 then
     …
 ```
 
-So a null `CABNO` combined with a parent that is neither 10 nor 37 means "freshly pulled from the library," and the script uses that to wipe its own version stamps and start clean. **The codes themselves are unpublished and these are the author's labels, not a lookup table** — see the standing caution about `OBJECT` codes in the cabinet-vision skill's `standard-ucs.md`. What the pattern establishes is the *technique*: parent object class is usable as a provenance discriminator, letting one script distinguish a copy from a library placement from an edit-in-place.
+So a null `CABNO` combined with a parent that is neither 10 nor 37 means "freshly pulled from the library," and the script uses that to wipe its own version stamps and start clean. **The codes themselves are unpublished and these are the author's labels, not a lookup table** — treat any `OBJECT` code as empirically observed, not documented by CV. What the pattern establishes is the *technique*: parent object class is usable as a provenance discriminator, letting one script distinguish a copy from a library placement from an edit-in-place.
 
 ## Traps — things that read wrong on first pass
 
@@ -356,7 +356,7 @@ So a null `CABNO` combined with a parent that is neither 10 nor 37 means "freshl
 
 **A later `dim` of the same base name rebinds the bare identifier.** See the author's own warning above. Any code between the first `dim` and a later one is reading a different object than code after it.
 
-**`for each` is case-insensitive, and a census that ignores that will be wrong.** A case-sensitive `grep -c 'For Each'` over these 13 scripts reports four with zero matches; the real split is 9 `For Each` / 6 `for each`. Separately, a count of 2 in a file does not mean two loops — in this stack both such cases are **comments containing the phrase** (`;calculate overlays for each door/drawer opening` in `19.ucs`, `;Single for each cab BEFORE BUILD` in `25.ucs`). With that corrected, the skill's existing rule holds across all 37 real production scripts now on file: **exactly one real `for each` per script, always the first executable line, never terminated.**
+**`for each` is case-insensitive, and a census that ignores that will be wrong.** A case-sensitive `grep -c 'For Each'` over these 13 scripts reports four with zero matches; the real split is 9 `For Each` / 6 `for each`. Separately, a count of 2 in a file does not mean two loops — in this stack both such cases are **comments containing the phrase** (`;calculate overlays for each door/drawer opening` in `19.ucs`, `;Single for each cab BEFORE BUILD` in `25.ucs`). With that corrected, the same rule holds across all 37 real production scripts in this corpus: **exactly one real `for each` per script, always the first executable line, never terminated.**
 
 **Parameter arrays are emulated, and adding a field means editing three scripts.** See the next section; the author's own capitalised warning is at `84.ucs:539`.
 
@@ -406,7 +406,7 @@ if Cab.ConstID == 20 or Cab.ConstID == 28 or Cab.ConstID == 36 or this.Is_Casewo
 
 It is consumed in `116`, `117`, `119`, `120`, `122`, `136` and `137` — and, importantly, in already-filed material this bundle had nothing to do with: `scripts/keku-panel-clips/jonah-keku-panel-clips.txt:190` reads `if Cab.Is_Casework_Wall == 1 then FWP_PanelClip_Placement<int> := 3`. That independently corroborates the thread's claim that "this UCS integrates tightly with my KEKU clips UCS and my miterfolding UCS."
 
-**This line also closes a question the skill previously flagged as unverified: `Cab.ConstID` does return an ID from the `Construction` / Construction-Method table.** The bundle ships `20.ccm` = Construction Method **"Casework Wall"**, and `Package.lst` independently records that entry as extension `ccm`, display name `Construction Method: Casework Wall`, plain name `Casework Wall`, object ID `20`. Three-way agreement inside one self-consistent source: the filename numeral, the manifest's object ID, and the author's own runtime test. See the cabinet-vision skill's catalog-export-format write-up.
+**This line also closes a question this pack previously flagged as unverified: `Cab.ConstID` does return an ID from the `Construction` / Construction-Method table.** The bundle ships `20.ccm` = Construction Method **"Casework Wall"**, and `Package.lst` independently records that entry as extension `ccm`, display name `Construction Method: Casework Wall`, plain name `Casework Wall`, object ID `20`. Three-way agreement inside one self-consistent source: the filename numeral, the manifest's object ID, and the author's own runtime test.
 
 **The caveat survives the confirmation.** IDs `28` and `36` are tested by the same line and those construction methods are *not* in the bundle, so `ConstID` values remain **install-specific** — exactly as already recorded for `ToolID`. Never port a `ConstID` literal between installs.
 

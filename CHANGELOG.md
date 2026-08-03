@@ -25,9 +25,9 @@
 - Deleted `scripts/overlay-calculations/overlays-calculation.txt` (the uncredited, unnamed copy of
   `jonah-overlay-calculations.txt`) and all mentions of the duplicate pair.
 
-## 2026-07-31 — CV 2025.3 casework-wall fix, from a skill update
+## 2026-07-31 — CV 2025.3 casework-wall fix
 
-- The cabinet-vision skill's reference material was updated and surfaced a confirmed CV 2025.3 regression
+- Further reference review surfaced a confirmed CV 2025.3 regression
   (Hexagon Nexus forum, Verified Answer): `_EDGWP` can no longer be trusted as an "is this part shaped"
   test, breaking the shape check in `jonah-casework-wall-10-studs-and-stud-dadoes.txt`.
 - Applied both fixes the forum thread's Verified Answer recommends: swapped the `_EDGWP == 0` shape test
@@ -189,12 +189,12 @@
 - Rewrote README.md's stale "CV2025 status" intro, which still said "None of this has been run or tested
   on CV2025" despite two scripts having since been verified — now states the real status up front.
 
-## 2026-08-02 — Folded in cross-check findings from the cabinet-vision skill's own deep technique write-up
+## 2026-08-02 — Folded in cross-check findings from a separate technique write-up
 
-The user maintains a separate, much deeper technique write-up of the same scripts inside a Claude skill
-(`cabinet-vision`), built independently of this repo. Cross-checking the two against each other surfaced
-a few concrete facts this repo was missing — none of them change any fix's correctness, but they change
-how a couple of "verified" claims should be read, and they're worth having on file:
+The user maintains a separate, much deeper technique write-up of the same scripts, built independently
+of this repo. Cross-checking the two against each other surfaced a few concrete facts this repo was
+missing — none of them change any fix's correctness, but they change how a couple of "verified" claims
+should be read, and they're worth having on file:
 
 - **`jonah-shelf-standards-rev17.txt` is currently *disabled* in this shop's own live UCS Manager**,
   per a screenshot of the "User Created Standards" window (entry named "JCS Shelf Standards," description
@@ -221,7 +221,7 @@ how a couple of "verified" claims should be read, and they're worth having on fi
   reading the script cold, since the comment reads as a boundary marker and isn't quite one.
 - **Open question, not yet answered by any test session:** what is cabinet attribute `_CB:525` (read
   bare, from part context, to detect horizontal grain — see the "Length derived from the line-bore, and
-  the horizontal-grain switch" section this shop's skill write-up carries) called in CV's own UI, and is
+  the horizontal-grain switch" section of `docs/shelf-standards-jonah.md`) called in CV's own UI, and is
   the numeric ID stable across versions? Like every other `_CB:NNN`/`TOOLID`/`ConstID` value in this
   corpus, it's install-specific and shouldn't be reused without checking — added to TESTING.md as a
   standing open item, not urgent enough to chase on its own.
@@ -229,12 +229,12 @@ how a couple of "verified" claims should be read, and they're worth having on fi
 None of these required touching any script file or re-running a test — they're documentation-only
 corrections and additions, folded into README.md and TESTING.md.
 
-## 2026-08-02 — Reconciled docs updated from the cabinet-vision skill's own write-up
+## 2026-08-02 — Reconciled docs updated from a separate technique write-up
 
 - User updated README.md, CHANGELOG.md, TESTING.md, and the three `docs/*.md` write-ups in a separate
-  chat by syncing content from the `cabinet-vision` skill's own deeper technique documentation (the
-  cross-check findings logged in the entry above). That sync carried over a few of the skill's own
-  conventions that don't match this repo's established verbiage rules.
+  chat by syncing content from that separate deeper technique documentation (the cross-check findings
+  logged in the entry above). That sync carried over a few of that other source's own conventions that
+  don't match this repo's established verbiage rules.
 - Fixed reintroduced violations: "mangled paste"/"the mangled file" wording in
   `docs/shelf-standards-jonah.md` (reworded to "collapsed-line-break paste" framing, matching this
   repo's standing convention); "worth stealing" reverted back from "worth learning from"/"worth
@@ -247,24 +247,23 @@ corrections and additions, folded into README.md and TESTING.md.
   open question, Bill Crouch/CV2023+-DS-origin corroboration) with no other rule violations.
 - Added `LICENSE` (MIT) and `.gitattributes` (line-ending normalization), also carried over from that
   sync — standard repo hygiene, no content concerns.
-- Left `docs/*.md`'s cross-references to skill-only paths (`examples/`, `full-docs/`, `standard-ucs.md`,
-  etc., which don't exist in this repo's `scripts/`/`source-threads/` layout) unchanged for now — flagged
-  to the user as a separate open question rather than silently rewritten.
+- Left `docs/*.md`'s cross-references to that other source's own paths (`examples/`, `full-docs/`,
+  `standard-ucs.md`, etc., which don't exist in this repo's `scripts/`/`source-threads/` layout)
+  unchanged for now — flagged to the user as a separate open question rather than silently rewritten.
 
-## 2026-08-02 — Normalized skill-only path references in the docs
+## 2026-08-02 — Normalized external path references in the docs
 
-- Follow-up to the entry above: user confirmed the skill-only path references should be rewritten to
-  match this repo's actual layout rather than left pointing at the `cabinet-vision` skill's own folders.
+- Follow-up to the entry above: user confirmed the external path references should be rewritten to
+  match this repo's actual layout rather than left pointing at that other source's own folders.
 - In `docs/shelf-standards-jonah.md`, `docs/casework-walls-jonah.md`, and `docs/notch-construction-jonah.md`:
   rewrote every `examples/<script>.txt` reference to its real path under `scripts/<subdir>/`, and every
   `full-docs/nexus-thread-*.txt` reference to `source-threads/nexus-thread-*.txt`.
-- Rewrote `examples/README.md` references to point at this repo's own `README.md` (Authorship section) or
-  the relevant `CHANGELOG.md` entry, depending on context.
-- Reworded references to skill-only docs that have no equivalent in this repo at all — `standard-ucs.md`,
-  `parameter-glossary.md`, `SKILL.md`, `ucs-breakdown.txt`, `internal-part-names.md`,
-  `object-intelligence.md`, `catalog-export-format.md`, and the skill-only example `linebore-attributes.txt`
-  (never packaged here) — to explicitly say "the cabinet-vision skill's [doc]" instead of presenting them
-  as broken local links.
+- Rewrote references that had pointed at that other source's own `README.md` to point at this repo's
+  own `README.md` (Authorship section) or the relevant `CHANGELOG.md` entry, depending on context.
+- Removed references to documentation that has no equivalent in this repo at all — a parameter glossary,
+  a syntax reference, an internal-part-names lookup, an object-intelligence write-up, a catalog-export-format
+  write-up, and an example script (`linebore-attributes.txt`) never packaged here — either dropping the
+  pointer entirely or rephrasing the sentence to stand on its own without it.
 - No content claims changed, only how the cross-references are phrased.
 
 ## 2026-08-02 — File the casework-wall stack's `19.ucs` as a raw provenance copy
@@ -281,3 +280,33 @@ corrections and additions, folded into README.md and TESTING.md.
   revision with real provenance value.
 - Updated `docs/casework-walls-jonah.md`'s stack table and the "`19.ucs` is deliberately not filed" note
   (now describes it as filed for provenance, not withheld) and `README.md`'s structure listing.
+
+## 2026-08-02 — Promote 19.ucs, drop resolved provenance notes, add an authorship note
+
+- Renamed `scripts/overlay-calculations/jonah-overlay-calculations-19ucs-raw.txt` to
+  `jonah-overlay-calculations-19ucs.txt` and dropped the raw/provenance framing around it in
+  `docs/casework-walls-jonah.md` and `README.md` — it's now simply the filed script for stack position 4,
+  same as every other numbered entry in that table.
+- Removed the paragraph below the stack table in `docs/casework-walls-jonah.md` that explained `19.ucs`'s
+  relationship to `jonah-overlay-calculations.txt`; no longer needed once the file is presented plainly.
+- Removed the shelf-standards write-up's collapsed-line-break provenance note (`docs/shelf-standards-jonah.md`)
+  — the clean re-copy replaced the mangled paste back on 2026-08-01 and the note had already marked itself
+  superseded; no longer worth carrying.
+- Added a short authorship note to the top of `docs/casework-walls-jonah.md` on why Jonah Coleman's scripts
+  are worth reading closely (first-person in-code narration, disciplined revision histories, consistent
+  namespacing) — purely about coding habits, no biographical content.
+- Removed the shelf-standards write-up's "confirmed literally installed" note (the screenshot-sourced
+  paragraph about the UCS Manager entry and its disabled checkbox) — the underlying fact is already on
+  record in README.md and TESTING.md, so it didn't need repeating here too.
+
+## 2026-08-02 — Removed all cross-references to outside reference material
+
+- Per a new standing rule (anything intended for this public repo carries no reference to the private
+  tooling or other reference material this shop also keeps), removed every remaining pointer to material
+  outside this repo across README.md, CHANGELOG.md, TESTING.md, and all three `docs/*.md` write-ups.
+- These were almost all attribution phrases ("cross-checked against a separate write-up," "per that other
+  source") rather than substantive claims — the underlying facts (script disabled in the UCS Manager,
+  revision-numbering discrepancy, misleading comment, `_CB:525` open question, CV 2025.3 regression) are
+  unchanged and stated directly on this repo's own authority.
+- One paragraph in README.md's "Source provenance" section existed only to describe that outside material
+  and was removed entirely rather than reworded, since it had no content once the pointer was gone.

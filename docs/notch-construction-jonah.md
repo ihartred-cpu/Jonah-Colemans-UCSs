@@ -12,9 +12,9 @@ The file header says **Revision 12** and `;This UCS can only be used with versio
 
 **This script has a forum-reported, previously unfixed CV2023 breakage — now with one real data point against it.** Eric@bloomsburydesign.com, roughly two years before capture: the **drawer stretcher origin moved**, from Top Back Left in CV11 to Bottom Front Right in CV2023, so the extended drawer stretcher now sticks out the left side of the cabinet. No reply to that post is present in the capture, and no newer revision is referenced anywhere in it. The general lesson generalises past this script: a part-origin change between CV majors silently reverses the sign of every position expression written against it, and nothing errors.
 
-**Direct corroboration this is a real, live concern in this shop's own install, from a screenshot of the UCS Manager's Public Variables pane** (see the cabinet-vision skill's `standard-ucs.md` for the full context of that screenshot): with this exact script selected, its public parameters include **`CV2023+ DS origin compensation (untested) = False`** — a toggle whose name reads as a direct attempt to compensate for the drawer-stretcher-origin regression above (`DS` most plausibly "Drawer Stretcher," matching the failure mode Eric reported). This confirms someone (the user or Jonah Coleman) took the CV2023 regression seriously enough to add a compensation switch to the script rather than leaving it purely as a forum report, and confirms that switch defaults to **off** (`False`) in this install.
+**Direct corroboration this is a real, live concern in this shop's own install, from a screenshot of the UCS Manager's Public Variables pane:** with this exact script selected, its public parameters include **`CV2023+ DS origin compensation (untested) = False`** — a toggle whose name reads as a direct attempt to compensate for the drawer-stretcher-origin regression above (`DS` most plausibly "Drawer Stretcher," matching the failure mode Eric reported). This confirms someone (the user or Jonah Coleman) took the CV2023 regression seriously enough to add a compensation switch to the script rather than leaving it purely as a forum report, and confirms that switch defaults to **off** (`False`) in this install.
 
-**Updated 2026-07-31, from real click-testing on this shop's own CV2025.4 install: the regression does not reproduce with the switch left at its shipped default (off).** With no compensation applied, an "entire interior"-sized drawer stretcher stayed correctly within the interior frame — it did not stick out the wrong side. This is a genuinely useful data point, but read it precisely: it shows the forum-reported regression is **not universal across CV2025 installs/builds**, not that Eric's report was wrong or that the compensation switch is unnecessary everywhere. **Confirmed not needed on this install, per the `jonah-coleman-cv-source` git pack's closeout:** the flag stays in the script, still off by default, in case a different CV2025.4 build/config ever hits the forum symptom — but nothing further to test here. Whether the compensation switch itself does anything when turned on remains untested (its own name still says `(untested)`); the switch's logic wasn't exercised, only the default (off) path. If a user on modern CV *does* hit the drawer-stretcher symptom, don't assume a workaround is needed by default — check the real cabinet first — but if it does show up, this parameter is still the first thing to point them at, and flipping it is still untested.
+**Updated 2026-07-31, from real click-testing on this shop's own CV2025.4 install: the regression does not reproduce with the switch left at its shipped default (off).** With no compensation applied, an "entire interior"-sized drawer stretcher stayed correctly within the interior frame — it did not stick out the wrong side. This is a genuinely useful data point, but read it precisely: it shows the forum-reported regression is **not universal across CV2025 installs/builds**, not that Eric's report was wrong or that the compensation switch is unnecessary everywhere. **Confirmed not needed on this install, per this repo's own closeout:** the flag stays in the script, still off by default, in case a different CV2025.4 build/config ever hits the forum symptom — but nothing further to test here. Whether the compensation switch itself does anything when turned on remains untested (its own name still says `(untested)`); the switch's logic wasn't exercised, only the default (off) path. If a user on modern CV *does* hit the drawer-stretcher symptom, don't assume a workaround is needed by default — check the real cabinet first — but if it does show up, this parameter is still the first thing to point them at, and flipping it is still untested.
 
 **Two other unresolved reports in the thread**, both left hanging, both worth recognising if they recur:
 
@@ -27,13 +27,13 @@ The file header says **Revision 12** and `;This UCS can only be used with versio
 
 > I did a lot of work at one point on a version that could handle arbitrary angles, and lost that work in an unfortunate accident involving my wiz_Data.wdb file. It is *not* easy.
 
-Two things to take from that. Arbitrary-angle notching **exists nowhere** — don't go looking for a version that handles it, and don't assume it's a small extension. And `wiz_Data.wdb` is named here as **the file that holds UCS source** — losing it lost the work. It is the only mention of that filename anywhere in this skill, and it is the reason UCS scripts should be exported and version-controlled outside CV rather than lived in.
+Two things to take from that. Arbitrary-angle notching **exists nowhere** — don't go looking for a version that handles it, and don't assume it's a small extension. And `wiz_Data.wdb` is named here as **the file that holds UCS source** — losing it lost the work. It is the reason UCS scripts should be exported and version-controlled outside CV rather than lived in.
 
 Mark Sams' partial workaround, for the record: he got the dado in the *partition* to follow the angle, but not the one in the fixed shelf, and finished the job by editing each part by hand.
 
 ## Closed: what `CO` is
 
-The cabinet-vision skill's `standard-ucs.md` has carried `Cab.Interior.CO` as an **open question** — attested only in one of the user's own scripts, absent from that skill's `internal-part-names.md` and `object-intelligence.md`, guessed at as "most likely the interior core/opening region node." This script settles it. Lines 93-107:
+`Cab.Interior.CO` has been an **open question** in this pack — attested only in one of the user's own scripts, guessed at as "most likely the interior core/opening region node." This script settles it. Lines 93-107:
 
 ```
 TEMP_Loop1<int> := 1
@@ -52,7 +52,7 @@ end while
 
 **`CO` is the sectioning / cut-out opening object, and it is an indexed collection** — `CO@1`, `CO@2`, … enumerable in exactly the same way as any repeated part, terminated by `.PID > 0` failing. It carries `ID`, `PID`, `X`, `Y`, `DX`, `DY`. The author's own comment on the block is `;identify parent CO`, and the match key is `CO@{n}.ID == PARID` — so **`PARID` on a part is the `ID` of the `CO` that contains it**, and walking the collection to find the matching `ID` is how you get from a part to its own opening's geometry. `CO@1` is used separately as the *outermost* opening: lines 110-118 compute how far to extend a part by comparing the part's own parent CO against `CO@1`.
 
-Both halves of the old guess were right — it is the opening region node — but the addressable-collection behaviour and the `PARID` link are new, and they are what make it usable. The caution in the cabinet-vision skill's `standard-ucs.md` about confirming on a real cabinet before writing new code still applies to the *specific fields* the user's own script reads (`CO.DZ` in particular is not exercised here); it no longer applies to the question of what `CO` is.
+Both halves of the old guess were right — it is the opening region node — but the addressable-collection behaviour and the `PARID` link are new, and they are what make it usable. Any new code should still confirm the *specific fields* the user's own script reads on a real cabinet (`CO.DZ` in particular is not exercised here); the open question was only ever about what `CO` is, and that part is now settled.
 
 ## Public parameters, and the comment-as-prompt convention
 
@@ -166,7 +166,7 @@ NotchMaster.S_MORTR := -1*(JCS_NotchConstruction_OversizeDado/2)
 
 `_FACEWP` on the face-worked dado, `_EDGWP` on the edge-worked master — the two working-plane parameters used as a matched pair, one per operation type. And **`S_MORTL`/`S_MORTR` set negative widens the slot**, half the oversize off each side; the Casework Wall stack uses the identical sign convention to hit a specific bit diameter (`casework-walls-jonah.md`). Both operations get a `desc`, which is what makes them identifiable in the part editor's report view later.
 
-`ABS()` is attested here (`TEMP_Diff_Z := ABS(Z - CHECK_PART_Z)`) — one of the few built-in functions this skill has a real usage for.
+`ABS()` is attested here (`TEMP_Diff_Z := ABS(Z - CHECK_PART_Z)`) — one of the few built-in functions this corpus has a real usage for.
 
 ## Two bugs in the shipped source, and one language gotcha
 
@@ -196,4 +196,4 @@ So the rule needs widening rather than correcting: **he consistently namespaces,
 
 **Jonah Coleman's own use of it** goes well beyond the obvious: "I even do this now where I have a 2 door 2 drawer base with a partition- send the partition all the way to the top and use notch construction to put the drawer stretcher all the way across. And for cubbies... oh my god."
 
-**Training, per Hexagon.** Chip Martin's answer to "is there a UCS for Dummies?" was the eLearning courses **Object Intelligence Complete** and **User Created Standards Complete** — the only named CV training resources in this skill.
+**Training, per Hexagon.** Chip Martin's answer to "is there a UCS for Dummies?" was the eLearning courses **Object Intelligence Complete** and **User Created Standards Complete** — the only named CV training resources on record here.

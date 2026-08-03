@@ -21,7 +21,7 @@ scripts/
   miterfold/              jonah-miterfold.txt
   visible-part-splits/    jonah-visible-part-splits.txt
   overlay-calculations/   jonah-overlay-calculations.txt
-                           jonah-overlay-calculations-19ucs-raw.txt   (earlier bundle revision, kept for provenance)
+                           jonah-overlay-calculations-19ucs.txt   (Order 4 in the casework-wall stack)
   tools/                  two recovered AutoIt tool sources: aa-create-index-autoit.txt,
                            jonah-multiple-operations-copier-autoit.txt (not UCS -- compiled Win32 tools)
 docs/                     curated technique/defect write-ups for the three largest systems
@@ -86,13 +86,12 @@ habit (`JCS_` = his own initials, `FWP_` = Fletcher Wood Products, `AA_` = Archi
      Item 3 won't be tested (not a shelf-standards user, won't touch assembly-wizard config to check it) —
      Item 10 also won't be tested (niche edge cases with no clear repro path) — see TESTING.md for what
      else is still open (items 4, 9).
-   - **Caveat, added 2026-08-02, cross-checked against the user's separate `cabinet-vision` skill
-     write-up of the same script: this script is currently *disabled* in this shop's live UCS Manager**
+   - **Caveat, added 2026-08-02: this script is currently *disabled* in this shop's live UCS Manager**
      (confirmed by a screenshot of the "User Created Standards" window — entry "JCS Shelf Standards,"
      `Enabled` checkbox unchecked). This doesn't undermine the verification above — testing was done by
      running the script directly, not by relying on what's switched on day-to-day — but the production
      install isn't currently running it even after Revision 22, and why it's off isn't recorded anywhere
-     in either this repo or the skill. Worth asking about before assuming this fix is live in production.
+     in this repo. Worth asking about before assuming this fix is live in production.
    - **Revision-numbering note, also added 2026-08-02:** the original file's header says `REV 17`, but its
      own shipped revision history runs **Revision 2 through Revision 18** — the Revision 18 work (adding
      the `6) Wizard Size (Centered)` list entry) is already in the body while the title still says 17.
@@ -157,9 +156,3 @@ this repo is which of the above actually held up and which didn't.
 
 Full provenance, dating, and technique write-ups are in `docs/`. Raw forum thread captures (setup instructions,
 known-issue reports, and the author's own explanations) are in `source-threads/`.
-
-A separate, independently-maintained deep technique write-up of these same scripts lives in the user's
-`cabinet-vision` Claude skill (outside this repo). It goes well beyond bug-tracking into full language and
-structure analysis, and it's where the "currently disabled in the Manager," revision-numbering, and
-`_CB:525` notes above came from — cross-checking that write-up against this pack's own docs periodically is
-worth doing, since the two are maintained independently and can drift.
