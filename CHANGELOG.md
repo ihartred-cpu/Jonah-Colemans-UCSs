@@ -309,3 +309,39 @@ corrections and additions, folded into README.md and TESTING.md.
 - Added a short paragraph to README.md's "Source provenance" section quoting this — it's direct,
   author-confirmed motivation for why this repo exists (version-controlling copies that otherwise only
   ever lived as whatever got pasted into a forum post).
+
+## 2026-08-03 — Fold in the cabinet-vision skill's object-type reference material
+
+- After the user updated the `cabinet-vision` skill, checked its docs against this pack's own and found no
+  factual deltas in the three technique write-ups — but did find two genuinely new, officially-published
+  reference tables the skill had ingested from Hexagon's own CV help, unrelated to the numeric `OBJECT`
+  variable this pack's docs already treat as unpublished/empirical: the confirmed `For Each`/`Dim` valid
+  `<ObjectType>` keyword lists, and the `ASM_CLASS_*`/`ASM_TYPE_*` Assembly Class/Type constants.
+- Added `docs/cv-object-reference.md` with both tables, plus an explicit note distinguishing them from the
+  numeric `OBJECT` variable so the two don't get conflated in future reading.
+- Cross-referenced the new file from `docs/shelf-standards-jonah.md` and `docs/casework-walls-jonah.md`
+  wherever they discuss `OBJECT`/`For Each`, and added it to README.md's structure listing and Source
+  provenance section.
+
+## 2026-08-03 — OBJECT and CLASS turn out to have published lookup tables after all
+
+- User supplied a fresh export of the `cabinet-vision` skill and asked to check this pack's docs against
+  it. Diffed the three technique write-ups line-for-line against the skill's copies: no factual deltas
+  there. But the skill's `parameter-glossary.md` had been updated with genuinely new material this pack
+  didn't have: a published numeric `OBJECT` code table (1-62, from Hexagon's own documentation) and a
+  published numeric `CLASS` code table (1-21), plus a Hexagon-staff-verified Nexus forum thread (82060)
+  confirming `OBJECT`, `CLASS`, and `TYPE` are three unrelated systems despite reading similarly.
+- Added both tables to `docs/cv-object-reference.md`, which previously only had the named `<ObjectType>`
+  keyword lists and `ASM_CLASS_*`/`ASM_TYPE_*` constants — this pack's `OBJECT` caveats predate the
+  published table's discovery, so the file now says so explicitly up top.
+- Updated the `OBJECT == 17` claim in `docs/shelf-standards-jonah.md`: still correct, now confirmed by the
+  published table rather than just empirically observed across four scripts.
+- Updated two claims in `docs/casework-walls-jonah.md` that don't cleanly match the published table's
+  official labels: `OBJECT == 15` ("the level the author names Face") — table says `15` = Subassembly, not
+  Face; reconciled as the author's informal name for a cabinet-internal Subassembly structure, distinct
+  from CV's separate top-level Wall Face (`OBJECT == 5`). And `OBJECT == 10`/`OBJECT == 37` (the author's
+  own "copied"/"pulled from library" provenance labels) — table says `10` = Cabinet, `37` = Order; recorded
+  a plausible but independently-unverified technical mechanism (these checks read the *parent's* type) and
+  kept the author's own practical labels as the confirmed behavior.
+- No changes needed to `docs/notch-construction-jonah.md` — it doesn't reference the numeric `OBJECT`
+  variable.

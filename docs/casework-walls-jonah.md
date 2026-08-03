@@ -199,7 +199,7 @@ if :::OBJECT == 15 or ::OBJECT == 15 then
     end if
 ```
 
-Used later as `{AA_Colons_To_Face}.TR.AA_FaceCallout_Use` (`119.ucs:272`). The pattern generalises: **if `{}` interpolation happens before parsing, anything textual can be computed — including addressing operators.** Incidentally this pins one `OBJECT` code with unusual confidence: the level at which `OBJECT == 15` is the level the author names "Face."
+Used later as `{AA_Colons_To_Face}.TR.AA_FaceCallout_Use` (`119.ucs:272`). The pattern generalises: **if `{}` interpolation happens before parsing, anything textual can be computed — including addressing operators.** Incidentally this pins one `OBJECT` code with unusual confidence: the level at which `OBJECT == 15` is the level the author names "Face." **Cross-checked against Hexagon's own published `OBJECT` table (`cv-object-reference.md`): `15`'s official label is Subassembly, not Face** — not necessarily a conflict, since this test is two/three levels up from a part inside a cabinet's Case/Interior/Face structure, not CV's separate top-level "Wall Face" concept (`OBJECT == 5`). Treat "the level he calls Face" as the author's own informal name for what he's addressing, and `15` = Subassembly as the confirmed official label — see `cv-object-reference.md` for the full reconciliation.
 
 ### Storing a whole object path in a text parameter as a pointer
 
@@ -348,7 +348,7 @@ if this.CABNO == null and :OBJECT != 10 and :OBJECT != 37 then
     …
 ```
 
-So a null `CABNO` combined with a parent that is neither 10 nor 37 means "freshly pulled from the library," and the script uses that to wipe its own version stamps and start clean. **The codes themselves are unpublished and these are the author's labels, not a lookup table** — see the standing caution about `OBJECT` codes in the cabinet-vision skill's `standard-ucs.md`. What the pattern establishes is the *technique*: parent object class is usable as a provenance discriminator, letting one script distinguish a copy from a library placement from an edit-in-place.
+So a null `CABNO` combined with a parent that is neither 10 nor 37 means "freshly pulled from the library," and the script uses that to wipe its own version stamps and start clean. **Update, 2026-08-03: `OBJECT` does now have a published lookup table (`cv-object-reference.md`), and it doesn't hand these two codes the author's own labels outright** — `10`'s official label is Cabinet, `37`'s is Order, not "copied"/"pulled from library." These checks read `:OBJECT` — the *parent's* type, one level up — so `:OBJECT == 10` literally means "my immediate parent is a Cabinet" and `:OBJECT == 37` means "my immediate parent is an Order." That's a plausible technical mechanism behind the author's practical observation (e.g. a freshly copied operation may sit transiently parented directly under the Cabinet; an object not yet pulled into a real Order may read some other parent type instead of `37`), but this pack hasn't independently verified that specific mechanism against a real cabinet — treat the author's own "copied"/"library" comments as the confirmed practical behavior, and the Cabinet/Order explanation as a plausible *why*, not a verified one. See `cv-object-reference.md` for the full table and this same reconciliation. What the pattern establishes regardless of the exact mechanism: parent object type is usable as a provenance discriminator, letting one script distinguish a copy from a library placement from an edit-in-place.
 
 ## Traps — things that read wrong on first pass
 

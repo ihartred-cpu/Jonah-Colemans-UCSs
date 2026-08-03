@@ -24,7 +24,9 @@ scripts/
                            jonah-overlay-calculations-19ucs.txt   (Order 4 in the casework-wall stack)
   tools/                  two recovered AutoIt tool sources: aa-create-index-autoit.txt,
                            jonah-multiple-operations-copier-autoit.txt (not UCS -- compiled Win32 tools)
-docs/                     curated technique/defect write-ups for the three largest systems
+docs/                     curated technique/defect write-ups for the three largest systems, plus
+                           cv-object-reference.md (general `For Each`/`Dim` object-type and Assembly
+                           Class/Type reference, folded in from the cabinet-vision skill)
 source-threads/           the two Hexagon Nexus forum threads these scripts came from, captured verbatim
 ```
 
@@ -162,7 +164,10 @@ A separate, independently-maintained deep technique write-up of these same scrip
 `cabinet-vision` Claude skill (outside this repo). It goes well beyond bug-tracking into full language and
 structure analysis, and it's where the "currently disabled in the Manager," revision-numbering, and
 `_CB:525` notes above came from — cross-checking that write-up against this pack's own docs periodically is
-worth doing, since the two are maintained independently and can drift.
+worth doing, since the two are maintained independently and can drift. One general-purpose piece has since
+been folded in outright rather than just cross-checked: `docs/cv-object-reference.md`, the officially-published
+`For Each`/`Dim` object-type keyword lists and Assembly Class/Type constants from Hexagon's own CV help,
+which apply to this pack's scripts as much as to anything else in classic UCS.
 
 **Why bother version-controlling someone else's forum scripts at all.** A separate Hexagon Nexus thread
 ("Jonah I want to see a list of the UCSs you have shared!") makes the case better than this repo can:

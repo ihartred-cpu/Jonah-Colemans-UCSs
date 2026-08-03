@@ -15,12 +15,13 @@ standards day-to-day, won't touch assembly-wizard config to check it). **Item 10
 (both sub-items are niche edge cases with no clear repro path — left as known gaps to deal with if/when
 actually hit). Items 4 and 9 remain open, available to pick up later, not currently being pursued.
 
-**Note added 2026-08-02:** a further reference review of these same scripts surfaced one caveat worth
-reading before trusting the "verified" line above at face value: `jonah-shelf-standards-rev17.txt` is
-currently *disabled* in this shop's live UCS Manager (confirmed by screenshot). The verification itself
-is sound — it was done by running the script directly — but the production install isn't currently
-running the fixed version day-to-day. See README.md's "What was changed" and "CV2025 status" sections
-for the full note, and item 11 below for a new, genuinely open question that same review surfaced.
+**Note added 2026-08-02:** cross-checking against the user's separate `cabinet-vision` skill write-up
+of these same scripts surfaced one caveat worth reading before trusting the "verified" line above at
+face value: `jonah-shelf-standards-rev17.txt` is currently *disabled* in this shop's live UCS Manager
+(confirmed by screenshot). The verification itself is sound — it was done by running the script
+directly — but the production install isn't currently running the fixed version day-to-day. See
+README.md's "What was changed" and "CV2025 status" sections for the full note, and item 11 below for a
+new, genuinely open question that same cross-check surfaced.
 
 Written for someone who hasn't built or tested a UCS in CV before. Section 0 covers the mechanics
 you'll reuse for every item below; the numbered items are the actual things to check, ordered
@@ -237,11 +238,11 @@ known gaps to deal with if/when actually hit, not something to chase preemptivel
 
 `jonah-shelf-standards-rev17.txt` reads `_CB:525` bare, from part context, to detect horizontal-grain
 panels (the switch that swaps which dimension bounds a through/stop dado — see Revision 17's own history
-entry, "Support for horizontal grain panels"). Surfaced by a further reference review, which flagged this
-as still-unconfirmed there too. Like every other `_CB:NNN`/`TOOLID`/`ConstID` value in this corpus, the
-number is install- or version-specific and shouldn't be assumed portable. Not urgent — the script works
-whether or not anyone knows the UI label — but worth checking next time someone's in the Assembly Manager
-wizard near a horizontal-grain setting.
+entry, "Support for horizontal grain panels"). Surfaced by cross-checking against the user's separate
+`cabinet-vision` skill write-up, which flagged this as still-unconfirmed there too. Like every other
+`_CB:NNN`/`TOOLID`/`ConstID` value in this corpus, the number is install- or version-specific and
+shouldn't be assumed portable. Not urgent — the script works whether or not anyone knows the UI label —
+but worth checking next time someone's in the Assembly Manager wizard near a horizontal-grain setting.
 
 ---
 
