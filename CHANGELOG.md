@@ -345,3 +345,60 @@ corrections and additions, folded into README.md and TESTING.md.
   kept the author's own practical labels as the confirmed behavior.
 - No changes needed to `docs/notch-construction-jonah.md` — it doesn't reference the numeric `OBJECT`
   variable.
+
+## 2026-08-03 — Added `docs/external-sync-rules.md`
+
+- User asked for the accumulated rules from syncing with the `cabinet-vision` skill written up, since this
+  has now happened a half-dozen times across this session with the same handful of recurring judgment
+  calls (house style wins, path rewrites, fold-in vs. cross-reference, reconciling discrepancies rather
+  than picking a winner, the verification workflow).
+- Added `docs/external-sync-rules.md` covering all of it, drawn from the actual CHANGELOG history of prior
+  sync passes rather than written from scratch. Cross-referenced from README.md's Source provenance
+  section and added to the structure listing.
+
+## 2026-08-03 — Linked the "no canonical list ever existed" thread
+
+- User located the real URL for the "Jonah I want to see a list of the UCSs you have shared!" Nexus thread
+  (a web-search attempt earlier hadn't been able to find it — the community forum's individual discussion
+  threads aren't indexed the way Hexagon's public documentation-center pages are). Added the link to
+  README.md's Source provenance section.
+
+## 2026-08-04 — Filed the Blum Tandembox script; trimmed the README's Source provenance section
+
+- User uploaded `5504.Jonah Blum Tandembox.pkg`, a CV Setup Package bundle (`Package.lst` + a `77.ucs`
+  script plus supporting materials/finishes/textures/parts) — same bundle format as the earlier "Jonah
+  Rocks Millwork Walls Revision 3" package. `77.ucs` ("Blum Tandembox New," UCS ID 77) is credited
+  "Revised by Jonah Coleman (JonahC@ArchitecturalArts.com)" over an original by Javier Salazar/David
+  Herrejón (translated by Chip Martin) — a graphic/machining generator for the Blum Tandembox drawer
+  system (Series M/N).
+- Extracted the script's `Code` field (1,079 lines) and filed it as
+  `scripts/blum-tandembox/jonah-blum-tandembox-77ucs.txt`, added to README's structure listing. Per user
+  instruction, parked as-is with no dedicated `docs/*.md` write-up (noted "typ." in the listing) — the
+  supporting library objects (materials/finishes/textures/parts) from the bundle were not filed, same as
+  how the Rocks Millwork Walls bundle's non-script contents weren't individually filed.
+- Removed the README Source provenance paragraph describing the `cabinet-vision` skill as a
+  separately-maintained deep-dive resource to periodically cross-check. User clarified the original intent
+  was to fold in the specific deep-dive content itself when it's general-purpose (which already happened —
+  `docs/cv-object-reference.md`), not to keep a standing pointer at "the skill" as a resource. Since the
+  fold-in is already reflected elsewhere (the structure listing, and the ongoing process in
+  `docs/external-sync-rules.md`), the paragraph was redundant and is now removed rather than reworded.
+- Trimmed the structure listing's `blum-tandembox/` entry to match how other undocumented scripts
+  (`keku-panel-clips/`, `miterfold/`, `visible-part-splits/`) are listed — a plain path/description line,
+  no "typ." annotation or explanatory note about the missing write-up. The earlier wording read as a
+  special-cased flag when it was meant to just be the normal listing style.
+
+## 2026-08-04 — Settled `CO`'s abbreviation and its Z/DZ limitation
+
+- User confirmed directly that `CO` literally stands for "Case Open," or "Case Opening" — resolving the
+  functional-only guess ("sectioning / cut-out opening object") `docs/notch-construction-jonah.md` had
+  carried since the previous CO write-up.
+- Independently corroborated by a Hexagon Nexus "Ideas" post from Matt Bauman (already a named source in
+  this repo), found by the user by accident while looking at the screenshot for an unrelated reason. Its
+  own title, "Interior Case Openings (CO)," spells the name out directly. Captured verbatim at
+  `source-threads/nexus-idea-co-z-dz-values.txt`.
+- That post also resolves a caution the notch-construction write-up had explicitly flagged as unconfirmed
+  (`CO.DZ` "is not exercised" by the script): `Z` and `DZ` on a `CO` are always `0`, unconditionally — a
+  standing Hexagon limitation, not a field this script happened not to exercise. `X`/`DX` (and by
+  extension `Y`/`DY`) are the fields that actually carry real geometry.
+- Updated `docs/notch-construction-jonah.md`'s "Closed: what `CO` is" section with both findings, and the
+  README's structure listing to reflect the third `source-threads/` capture.

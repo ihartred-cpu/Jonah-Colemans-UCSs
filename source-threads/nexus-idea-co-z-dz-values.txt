@@ -1,0 +1,64 @@
+NOTE ON THIS CAPTURE (added when filing, not part of the source):
+This is a Hexagon Nexus "Ideas" post (a different sub-forum than the CV User
+Created Standards discussion forum the other two source-threads in this repo
+came from), captured from two screenshots the user supplied on 2026-08-04
+while looking for something else ("wholly unrelated context but the object
+tree is shown well" -- the user's own words). No URL was captured for this
+one, only the screenshot content itself. Status and vote count are as shown
+at capture time, not necessarily current.
+
+Author: Matt Bauman -- already a known named source in this repo, from
+`nexus-thread-134912-assembly-edit-location-params.txt`-equivalent material
+folded into the cabinet-vision skill (see `docs/external-sync-rules.md`).
+
+================================================================================
+
+CABINET VISION > Ideas
+
+Status: Under Review (posted over 4 years ago as of capture; dated Jun 8, 2022)
+Votes: +67
+
+Title: "Interior Case Openings (CO) > Provide Meaningful Values to the Z & DZ
+Parameters (for referencing in UCS)"
+
+Body (Matt Bauman):
+
+Currently the Z & DZ parameters for interior case openings are both 0.
+
+[Screenshot: CV Object Tree, path "Cab.Interior.CO", showing a Standard Upper
+Cabinet (Std Upper) > Case > Face Frame with Door (Frame w_Door - Upper) >
+Interior, with several "Case Opening ( CO )" nodes alongside "Vertical
+Partition ( PT )" and "Horizontal Partition ( FS )" siblings. Two red arrows
+point from two of the "Case Opening ( CO )" tree rows to the Parameters panel
+on the right, both landing on the DZ row -- visually emphasizing that DZ reads
+0 for both. The full Parameters panel for the selected CO, all rows marked
+[Static]:
+  AX = 0.00
+  AY = 0.00
+  AZ = 0.00
+  DX = 75 3/4
+  DY = 74
+  DZ = 0
+  ID = 1
+  PARID = 0
+  PID = 20100.000
+  STYPE = 0
+  TYPE = 1
+  X = 1 1/4
+  Y = 0
+  Z = 0
+]
+
+It would be helpful if instead, these captured the actual interior case
+opening Z location and depth dimension. So the Z would be oriented at the face
+of the back, or be 0 if there was no back. The DZ would be from this point to
+behind the face frame (if applicable). These would be helpful values to
+reference in a UCS at times. I realize there are ways around this, but it
+would simplify things a bit -- for example, you wouldn't need to account for
+all the different scenarios of an unfinished back, finished back, or no back
+when placing a formula to add a part. Any part you potentially could reference
+may not always be present, so you have to somehow capture all the possibilities
+in the code. For this reason, I often reference INTERIOR.CO.X or INTERIOR.CO.DX
+-- so why not Z & DZ?
+
+-- Matt Bauman

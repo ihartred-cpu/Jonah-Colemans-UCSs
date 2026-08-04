@@ -22,12 +22,16 @@ scripts/
   visible-part-splits/    jonah-visible-part-splits.txt
   overlay-calculations/   jonah-overlay-calculations.txt
                            jonah-overlay-calculations-19ucs.txt   (Order 4 in the casework-wall stack)
+  blum-tandembox/         jonah-blum-tandembox-77ucs.txt   (UCS 77, "Blum Tandembox New")
   tools/                  two recovered AutoIt tool sources: aa-create-index-autoit.txt,
                            jonah-multiple-operations-copier-autoit.txt (not UCS -- compiled Win32 tools)
 docs/                     curated technique/defect write-ups for the three largest systems, plus
                            cv-object-reference.md (general `For Each`/`Dim` object-type and Assembly
-                           Class/Type reference, folded in from the cabinet-vision skill)
-source-threads/           the two Hexagon Nexus forum threads these scripts came from, captured verbatim
+                           Class/Type reference, folded in from the cabinet-vision skill) and
+                           external-sync-rules.md (how this repo reconciles with that skill)
+source-threads/           the two Hexagon Nexus discussion threads these scripts came from, plus a
+                           third capture (a Nexus "Ideas" post) confirming what `CO` stands for and a
+                           real CV limitation on its Z/DZ fields -- all captured verbatim
 ```
 
 ## Authorship
@@ -160,18 +164,9 @@ this repo is which of the above actually held up and which didn't.
 Full provenance, dating, and technique write-ups are in `docs/`. Raw forum thread captures (setup instructions,
 known-issue reports, and the author's own explanations) are in `source-threads/`.
 
-A separate, independently-maintained deep technique write-up of these same scripts lives in the user's
-`cabinet-vision` Claude skill (outside this repo). It goes well beyond bug-tracking into full language and
-structure analysis, and it's where the "currently disabled in the Manager," revision-numbering, and
-`_CB:525` notes above came from — cross-checking that write-up against this pack's own docs periodically is
-worth doing, since the two are maintained independently and can drift. One general-purpose piece has since
-been folded in outright rather than just cross-checked: `docs/cv-object-reference.md`, the officially-published
-`For Each`/`Dim` object-type keyword lists and Assembly Class/Type constants from Hexagon's own CV help,
-which apply to this pack's scripts as much as to anything else in classic UCS.
-
-**Why bother version-controlling someone else's forum scripts at all.** A separate Hexagon Nexus thread
-("Jonah I want to see a list of the UCSs you have shared!") makes the case better than this repo can:
-asked for a compiled, linked list of his own UCSs so users could keep them up to date, Jonah Coleman
+**Why bother version-controlling someone else's forum scripts at all.** A separate Hexagon Nexus thread,
+["Jonah I want to see a list of the UCSs you have shared!"](https://nexus.hexagon.com/community/cabinet_vision/f/cv-user-created-standards/38341/jonah-i-want-to-see-a-list-of-the-ucss-you-have-shared),
+makes the case better than this repo can: asked for a compiled, linked list of his own UCSs so users could keep them up to date, Jonah Coleman
 replied "I won't have time to compile this but someone else could" — and, in the same reply, flagged that
 another user was still running an old script that "fixes a bug that was fixed in a later build of 8." No
 canonical, versioned source ever existed on his end; whatever's in circulation is whatever got pasted into

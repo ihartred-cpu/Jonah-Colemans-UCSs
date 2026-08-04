@@ -1,0 +1,1079 @@
+;Generates Graphic and Machining for Blum Tandembox System {~~}M{~~}  and {~~}N{~~} for Drawers and Roll Outs
+;Written by Javier Salazar/David Herrej�n
+;Translation by Chip Martin
+;Version 2.0 -- 10/29/2012
+
+;Revised by Jonah Coleman (JonahC@ArchitecturalArts.com) - more efficient, allows for section editor drawer top clearance to affect size of tandembox, public variables for construction ids
+
+For Each DG|ROG|ROSG|ROF|BBK|ROBK|GFRVBORE|DWR|DWR_OPEN|TRAY_OPEN PART  
+
+	Public DWRCID<int> = 18         ;Drawer box construction ID
+	Public ROCID<int> = 19          ;Rollout construction ID
+	
+	TEMP_Exit_Due_To_Non_Tandembox<bool> := false
+	
+	if ::name == 'DWR_OPEN' or :name == 'DWR_OPEN' or name == 'DWR_OPEN' then
+		if DWR_OPEN.DG.CONSTID != DWRCID then
+			TEMP_Exit_Due_To_Non_Tandembox<bool> := true
+		end if
+	end if
+	
+	if ::name == 'TRAY_OPEN' or :name == 'TRAY_OPEN' or name == 'TRAY_OPEN' then
+		if TRAY_OPEN.ROBT.CONSTID != ROCID then
+			TEMP_Exit_Due_To_Non_Tandembox<bool> := true
+		end if
+	end if
+	
+	if TEMP_Exit_Due_To_Non_Tandembox then
+		delete DWRCID
+		delete ROCID
+		;delete TEMP_Exit_Due_To_Non_Tandembox 
+		exit
+	end if
+	
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX----------------------------------------------  Correction Code for Series N  ----------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX    
+	;moved above everything else so we can exit from GFRVBORE for performance reasons - this has the most objects acted on by the UCS
+	If Name = 'GFRVBORE' Then         
+		If :Name = 'DG'  Then   
+			If TANDEMBOX_USE_OPEN_HEIGHT <= MINM  Then  
+				If :X < Imp(80) Then
+					X -= Imp(15)
+				End If 
+				If :X > Imp(80) Then
+					X += Imp(15)
+				End If   
+			End If  
+		End If   
+		exit
+	End If    
+	If Name = 'DG'  Then  
+		If x>IMP(80) Then 
+			EDX = -DG.DX
+			EDY = -DG.DY
+			EDZ = -DG.DZ  
+		End If
+	End If      
+	If Name = 'ROG'  Then   
+		If x>IMP(80) Then 
+			EDX = -ROG.DX
+			EDY = -ROG.DY
+			EDZ = -ROG.DZ  
+		End If
+	End If   
+	
+	if name == 'DWR_OPEN' or name == 'TRAY_OPEN' then
+		;we only want to calculate this on the opening and leave it so we don't calculate it for each and every part we operate on
+		If Case.TO.DZ != 0 Then 
+		  DZCORREC<meas> := Case.TO.DZ
+		End If
+		If Case.TS.DZ != 0 Then 
+		  DZCORREC<meas> := Case.TS.DZ
+		End If 
+		DIFESPESOR<meas> := DZCORREC*1.5 - Imp(24)  
+		MINN<meas> := Imp(105.4)+ DIFESPESOR
+		MINM<meas> := Imp(120.4)+ DIFESPESOR  
+		MINO<meas> := Imp(183.9)+ DIFESPESOR   
+		MINP<meas> := Imp(247.9)+ DIFESPESOR 
+		TANDEMBOX_USE_OPEN_HEIGHT := DY
+		if this.BTC != null then
+			TANDEMBOX_USE_OPEN_HEIGHT -= this.BTC
+		end if
+		
+		exit
+	end if
+	
+	
+	  If name = 'DWR' Then
+	   If dwr_open.DG._m:SchedID = 194 or dwr_open.DG._m:SchedID = 195 then
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= MINP Then
+	     If dwr_open.DG.dy >= imp(450) Then
+	     If this.BOXSIDE = Null then
+	        BOXSIDE<bool> = False
+	        BOXSIDE<DESC> = 'Use Boxside?'
+	        BOXSIDE<Style> = 1
+	     End IF
+	     End if
+	    END IF
+	    If TANDEMBOX_USE_OPEN_HEIGHT < MINP then
+	     If this.BOXSIDE != Null then
+	      Delete BOXSIDE
+	     END IF
+	    End IF    
+	    If dwr_open.DG.dy < imp(450) Then
+	     If this.BOXSIDE != Null then
+	      Delete BOXSIDE
+	     END IF
+	    End if 
+	   End if 
+	  End IF  
+	  If name = 'DWR'    Then  
+	   If dwr_open.DG._m:SchedID = 194 then   
+	    If dwr_open.DG.dy >= imp(450) Then
+	     If dwr_open.dy >= MINM Then
+	     If this.Stronger = Null then
+	        Stronger<bool> = False
+	        Stronger<DESC> = 'Stronger Guide?'
+	        Stronger<Style> = 1
+	     End IF
+	     End if     
+	    END IF    
+	    If dwr_open.DG.dy < imp(450) then
+	     If this.stronger != Null then
+	      Delete Stronger
+	     END IF
+	    End IF    
+	    If dwr_open.dy < MINM Then
+	     If this.Stronger != Null then
+	      Delete Stronger
+	      End if
+	      End if        
+	   End if
+	  End if  
+	  If name = 'DWR'    Then
+	   If dwr_open.DG._m:SchedID = 194 then    
+	    If stronger = true then
+	     If this.Kilograms = Null then
+	        Kilograms<meas> = '<lst>50=50|65=65'
+	        Kilograms<DESC> = '50Kg or 65Kg ?'
+	        Kilograms<Style> = 1         
+	     End IF
+	    End If
+	    If stronger = False then
+	     If this.Kilograms != Null then
+	        Delete Kilograms
+	     End IF
+	    End If             
+	   End IF
+	  end if   
+	    If name = 'DWR'    Then     
+	   If dwr_open.DG._m:SchedID = 195 then
+	    If this.stronger != Null then
+	      Delete Stronger
+	    END IF    
+	   End IF
+	 end if  
+	   If name = 'ROF'    Then  
+	   If TRAY_OPEN.ROG._m:SchedID = 194 then   
+	    If TRAY_OPEN.ROG.dy >= imp(450) Then
+	     If this.Stronger = Null then
+	        Stronger<bool> = False
+	        Stronger<DESC> = 'Stronger Guide?'
+	        Stronger<Style> = 1
+	     End IF     
+	    END IF    
+	    If dwr_open.DG.dy < imp(450) then
+	     If this.stronger != Null then
+	      Delete Stronger
+	     END IF
+	    End IF    
+	   End if
+	  End if  
+	  If name = 'ROF'    Then
+	   If TRAY_OPEN.ROG._m:SchedID = 194 then    
+	    If stronger = true then
+	     If this.Kilograms = Null then
+	        Kilograms<meas> = '<lst>50=50|65=65'
+	        Kilograms<DESC> = '50Kg or 65Kg ?'
+	        Kilograms<Style> = 1         
+	     End IF
+	    End If
+	    If stronger = False then
+	     If this.Kilograms != Null then
+	        Delete Kilograms
+	     End IF
+	    End If             
+	   End IF
+	  end if   
+	    If name = 'ROF'    Then     
+	   If TRAY_OPEN.ROG._m:SchedID = 195 then
+	    If this.stronger != Null then
+	      Delete Stronger
+	    END IF    
+	   End IF
+	 end if 
+	  If name = 'ROF'    Then  
+	   If TRAY_OPEN.ROG._m:SchedID = 194 then
+	     If this.TallerROF = Null then
+	        TallerROF<bool> = False
+	        TallerROF<DESC> = 'Taller Roll Out?'
+	        TallerROF<Style> = 1
+	     End IF     
+	    END IF
+	   End if  
+	If _M:SchedID = 194  or _M:SchedID = 195 Then
+	    
+	;Blum Tandembox Guide Schedule
+	                         
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX------------------------------------------------------   Determine Guide   -------------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	  If Name = 'DG'    Then                        
+	    Desc = 'Tandembox Guide M (Pair)'   
+	     If TANDEMBOX_USE_OPEN_HEIGHT <= MINN Then
+	       If x<IMP(80) Then 
+	         DX = Imp(80)
+	         LibPart = 'BLUM\Tandembox\Not Available'
+	         Name = 'Guide Out of Range' 
+	         if _M:MatID != 131 then
+	         	MatID = 131 
+	         end if
+	         DZ = Imp(30)
+	         AY<deg> = 0 
+	         Y = Imp(0)  
+	         X -= Imp(32)
+	       End If
+	       If x>IMP(80) Then 
+	         Qty = 0 
+	       End If       
+	     End If 
+	           
+	     If TANDEMBOX_USE_OPEN_HEIGHT > MINN and TANDEMBOX_USE_OPEN_HEIGHT <= MINM  Then 						;Height Between 103mm and 118mm N
+	        If _M:SchedID = 194 then
+	        	if _M:MatID != 868 then
+	        		MatID = 868  
+	        	end if
+		        If DY < Imp(540) Then									;Determines the ID of the Material for the Guide
+		          if _M:MatID != 870 then
+		          	MatID<int> = 870 
+		          end if
+		        End If 
+		        If DY < Imp(500) Then 
+		          MatID<int> = 871 
+		        End If 
+	        If DY < Imp(450) Then 
+	          MatID<int> = 855 
+	        End If													;End of ID Determination
+	        DZ = Imp(30)
+	        Name = 'Tandembox Guide N (Pair)'
+	        end if
+	         If _M:SchedID = 195 then
+	        	if _M:MatID != 889 then
+	        		MatID = 889
+	        	end if  
+	        If DY < Imp(540) Then									;Determines the ID of the Material for the Guide
+	          MatID<int> = 888 
+	        End If 
+	        If DY < Imp(500) Then 
+	          MatID<int> = 887 
+	        End If 
+	        If DY < Imp(450) Then 
+	          MatID<int> = 886 
+	        End If													;End of ID Determination
+	        DZ = Imp(30)
+	        Name = 'Tandembox Guide N (Pair)'
+	        end if
+	        
+	        
+	               
+	     End If  
+	   
+	    ;---------0000000000----------------00000000000000-----------------000000000000--------------0000000000000-----------00000000000 
+	     
+	     If TANDEMBOX_USE_OPEN_HEIGHT > MINN Then											;Major areas of 815mm in Height
+	       
+	       If x<IMP(80) Then										;Left Guide
+	         LibPart = 'BLUM\Tandembox\Guide TB-L'  
+	       End If
+	 
+	       If x>IMP(80) Then										;Right Guide
+	         LibPart = 'BLUM\Tandembox\Guide TB-R' 
+	       End If
+	       DX = Imp(40)    
+	     End If   
+	   
+	    If TANDEMBOX_USE_OPEN_HEIGHT > MINN and TANDEMBOX_USE_OPEN_HEIGHT <= MINM  Then							;Spaces between 103mm and 118mm in Height
+	      If DY < Imp(400) Then
+	        If x<IMP(80) Then 
+	         Dy = Imp(380)  
+	         LibPart = 'BLUM\Tandembox\Not Available'
+	         Name = 'Guide Out of Range'
+	         if _M:MatID != 131 then
+	         	MatID = 131 
+	         end if
+	         AY<deg> = 0 
+	         Y = Imp(0)  
+	         X -= Imp(32)
+	        End If
+	        If x>IMP(80) Then 
+	         Qty = 0 
+	        End If                  
+	      End If
+	    End If 
+	  End If 
+	   
+	  If Name = 'ROG'  Then                        
+	    Name = 'Tandembox Guide ROG (Pair)'
+	    
+	
+	        
+	    If x<IMP(80) Then											;Left Guide
+	      LibPart = 'BLUM\Tandembox\Guide TB-L'  
+	    End If 
+	    If x>IMP(80) Then											;Right Guide
+	      LibPart = 'BLUM\Tandembox\Guide TB-R' 
+	    End If
+	    DX = Imp(40)    
+	  End If
+	         
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX------------------------------------------------------   Insert Profile   --------------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	
+	  If Name = 'DG'   Then
+	  
+	     If Dwr.Kilograms = 50 then   
+	      If DY = Imp(550) Then										
+	        if _M:MatID != 843 then
+	        	MatID = 843
+	        end if
+	        dz = imp(30) 
+	      End If 
+	      If DY = Imp(500) Then
+	        if _M:MatID != 845 then
+	        	MatID = 845
+	        end if
+	        dz = imp(30) 
+	      End If 
+	      If DY = Imp(450) Then
+	        if _M:MatID != 854 then
+	        	MatID = 854
+	        end if
+	        dz = imp(30) 
+	      End If    
+	     End if
+	     If Dwr.Kilograms = 65 then
+	      If DY = Imp(650) Then										
+	        if _M:MatID != 898 then
+	        	MatID = 898
+	        end if
+	        dz = imp(30) 
+	      End If
+	      If DY = Imp(600) Then										
+	        if _M:MatID != 897 then
+	        	MatID = 897
+	        end if
+	        dz = imp(30) 
+	      End If  
+	      If DY = Imp(550) Then										
+	        if _M:MatID != 896 then
+	        	MatID = 896
+	        end if
+	        dz = imp(30) 
+	      End If 
+	      If DY = Imp(500) Then
+	        if _M:MatID != 895 then
+	        	MatID = 895
+	        end if
+	        dz = imp(30) 
+	      End If 
+	      If DY = Imp(450) Then
+	        if _M:MatID != 894 then
+	        	MatID = 894
+	        end if
+	        dz = imp(30) 
+	      End If    
+	     End if
+	     
+	    If TANDEMBOX_USE_OPEN_HEIGHT > MINN Then
+	    Dim DG as New Guide
+	    DG.Visible<bool> = True     
+	    DG.DY = :DY - Imp(8)
+	    DG.X = Imp(8)
+	    DG.Y = :Z													;From the Inside to the Outside
+	    DG.Z = Imp(-15)												;From Left to Right
+	    
+	    If x>IMP(80) Then 
+	        DG.EDX = -DG.DX
+	        DG.EDY = -DG.DY
+	        DG.EDZ = -DG.DZ  
+	     End If
+	    
+	    DG.AX<deg> = 0
+	    DG.AY<deg> = 0
+	    DG.AZ<deg> = 0          
+	    If TANDEMBOX_USE_OPEN_HEIGHT > MINN and DY > Imp(399.9) Then						;Spaces between 103mm and 118mm in Height - N
+	      DG.Name = 'Tandembox Profile N (Pair)'  
+	      DG.MatID<int> = 869        
+	      If DY < Imp(550) Then										;Determines the Material ID for the Profile - N
+	        DG.MatID<int> = 872 
+	      End If 
+	      If DY < Imp(500) Then
+	        DG.MatID<int> = 873 
+	      End If  
+	      If DY < Imp(450) Then
+	        DG.MatID<int> = 874 
+	      End If      											    ;End of Profile ID
+	      DG.DX = Imp(68)
+	      DG.DZ = Imp(40)
+	      If X<IMP(80) Then											;Left Guide
+	        DG.LibPart = 'BLUM\Tandembox\PTB-N'
+	      End If
+	      If X>=IMP(80) Then										;Right Guide
+	        DG.LibPart = 'BLUM\Tandembox\PTB-N'
+	        DG.X = Imp(32)											;From Top to Bottom
+	        DG.Y = :Z+:DY-Imp(8)   
+	        DG.Z += Imp(0)											;From Left to Right
+	        DG.AZ = 180   
+	      End If
+	    End If  
+	  
+	    If TANDEMBOX_USE_OPEN_HEIGHT > MINM Then											;Major areas of 118mm in Height - M
+	      DG.Name = 'Tandembox Profile M (Pair)' 
+	      DG.DX = Imp(85.5) 
+	      DG.MatID<int> = 881
+	      If DY < Imp(650) Then										;Determines the Material ID for the Profile - N
+	        DG.MatID<int> = 880 
+	      End If    
+	      If DY < Imp(600) Then										;Determines the Material ID for the Profile - N
+	        DG.MatID<int> = 859 
+	      End If
+	      If DY < Imp(550) Then										;Determines the Material ID for the Profile - M
+	        DG.MatID<int> = 860 
+	      End If 
+	      If DY < Imp(500) Then
+	        DG.MatID<int> = 861 
+	      End If 
+	      If DY < Imp(450) Then
+	        DG.MatID<int> = 862 
+	      End If  
+	      If DY < Imp(400) Then
+	        DG.MatID<int> = 863 
+	      End If 
+	      If DY < Imp(350) Then
+	        DG.MatID<int> = 864 
+	      End If
+	      If DY < Imp(300) Then										;Determines the Material ID for the Profile - N
+	        DG.MatID<int> = 882 
+	      End If      													;End of Profile ID
+	      DG.DZ = Imp(40)
+	      If X<IMP(80) Then											;Left Guide
+	        DG.LibPart = 'BLUM\Tandembox\PTB-1'
+	      End If
+	      If X>=IMP(80) Then										;Right Guide
+	        DG.LibPart = 'BLUM\Tandembox\PTB-1'
+	        DG.X = Imp(32)											;From Top to Bottom
+	        DG.Y = :Z+:DY-Imp(8)   
+	        DG.Z += Imp(0)											;From Left to Right 
+	        
+	        If x>IMP(80) Then 
+	        DG.EDX = -DG.DX
+	        DG.EDY = -DG.DY
+	        DG.EDZ = -DG.DZ  
+	        End If
+	        
+	        DG.AZ = 180   
+	      End If
+	    End If
+	    End If 
+	  End If
+	
+	;-------------   R  O  G   ----------------------                                                                                            
+	              
+	  If Name = 'ROG'  Then
+	  
+	   If ROF.Kilograms = 50 then   
+	      If DY = Imp(550) Then										
+	        if _M:MatID != 843 then
+	        	MatID = 843
+	        end if
+	        dz = imp(30) 
+	      End If 
+	      If DY = Imp(500) Then
+	        if _M:MatID != 845 then
+	        	MatID = 845
+	        end if
+	        dz = imp(30) 
+	      End If 
+	      If DY = Imp(450) Then
+	        if _M:MatID != 854 then
+	        	MatID = 854
+	        end if
+	        dz = imp(30) 
+	      End If    
+	     End if
+	     If ROF.Kilograms = 65 then
+	      If DY = Imp(650) Then										
+	        if _M:MatID != 898 then
+	        	MatID = 898
+	        end if
+	        dz = imp(30) 
+	      End If
+	      If DY = Imp(600) Then										
+	        if _M:MatID != 897 then
+	        	MatID = 897
+	        end if
+	        dz = imp(30) 
+	      End If  
+	      If DY = Imp(550) Then										
+	        if _M:MatID != 896 then
+	        	MatID = 896
+	        end if
+	        dz = imp(30) 
+	      End If 
+	      If DY = Imp(500) Then
+	        if _M:MatID != 895 then
+	        	MatID = 895
+	        end if
+	        dz = imp(30) 
+	      End If 
+	      If DY = Imp(450) Then
+	        if _M:MatID != 894 then
+	        	MatID = 894
+	        end if
+	        dz = imp(30) 
+	      End If    
+	     End if
+	     
+	     Dim DG as New Guide
+	     DG.Visible<bool> = True     
+	     DG.DY = :DY - Imp(8)
+	     DG.X = Imp(8)
+	     DG.Y = :Z													;From Inside to Outside
+	     DG.Z = Imp(-15)											;From Left to Right
+	     If x>IMP(80) Then 
+	        DG.EDX = -DG.DX
+	        DG.EDY = -DG.DY
+	        DG.EDZ = -DG.DZ  
+	     End If
+	     DG.AX<deg> = 0
+	     DG.AY<deg> = 0
+	     DG.AZ<deg> = 0        
+	     DG.Name = 'Tandembox Profile M (Pair)'  
+	     DG.MatID<int> = 881    
+	     If DY < Imp(640) Then										;Determines the Material ID for the Profile - N
+	       DG.MatID<int> = 880 
+	     End If
+	     If DY < Imp(600) Then										;Determines the Material ID for the Profile - N
+	       DG.MatID<int> = 859 
+	     End If
+	     If DY < Imp(550) Then										;Determines the Material ID for the Profiel - M
+	       DG.MatID<int> = 860 
+	     End If 
+	     If DY < Imp(500) Then
+	       DG.MatID<int> = 861 
+	     End If 
+	     If DY < Imp(450) Then
+	       DG.MatID<int> = 862 
+	     End If  
+	     If DY < Imp(400) Then
+	       DG.MatID<int> = 863 
+	     End If 
+	     If DY < Imp(350) Then
+	       DG.MatID<int> = 864 
+	     End If
+	     If DY < Imp(300) Then										;Determines the Material ID for the Profile - N
+	       DG.MatID<int> = 882 
+	     End If     														;End of Profile ID
+	     DG.DZ = Imp(40)
+	     If X<IMP(80) Then											;Left Guide
+	       DG.LibPart = 'BLUM\Tandembox\PTB-1' 
+	       DG.DX = Imp(85.5)
+	     End If
+	     If X>=IMP(80) Then											;Right Guide
+	        DG.LibPart = 'BLUM\Tandembox\PTB-1'
+	        DG.X = Imp(32)											;From Top to Bottom  
+	        DG.Y = :Z+:DY-Imp(8)   
+	        DG.Z += Imp(0)											;From Left to Right
+	        DG.AZ = 180   
+	     End If 
+	  End If   
+	  
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX------------------------------------------------------   Insert Logo   -----------------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	     
+	 If Name = 'DG' or Name = 'ROG' Then 
+	   If TANDEMBOX_USE_OPEN_HEIGHT > MINN or Name = 'ROG' Then 
+	     Dim LOGOBLUM as New Part
+	     LOGOBLUM.Visible<bool> = Verdadero
+	     LOGOBLUM.MatID<int> = 844
+	     LOGOBLUM.DX = Imp(50)
+	     LOGOBLUM.DY = Imp(21)
+	     LOGOBLUM.DZ = Imp(2)
+	     LOGOBLUM.Z = Imp(21)
+	
+	
+	     If Name = 'ROG' Then 
+	        LOGOBLUM.EDX = -DG.DX
+	        LOGOBLUM.EDY = -DG.DY
+	        LOGOBLUM.EDZ = -DG.DZ  
+	     End If
+	             
+	     If X < IMP(80) Then										;Left Guide
+	       LOGOBLUM.X = Imp(58.4)									;Top to Bottom
+	       LOGOBLUM.Y = :z+Imp(73)									;Inside to Outside
+	       LOGOBLUM.AZ<deg> = -90									;Orients Logo
+	       If TANDEMBOX_USE_OPEN_HEIGHT >= MINN and TANDEMBOX_USE_OPEN_HEIGHT < MINM  Then						;Spaces between 103mm and 118mm in Height
+	         LOGOBLUM.X = Imp(47.4)									;Up and Down Adjustment
+	       End If   
+	     End If                   
+	     If X >= IMP(80) Then										;Right Guide
+	       LOGOBLUM.X = Imp(-18.4)									;Top to Bottom                             
+	       LOGOBLUM.Y = :z+Imp(23)									;Inside to Outside                       
+	       LOGOBLUM.AZ<deg> = 90									;Orients Logo                            
+	       If TANDEMBOX_USE_OPEN_HEIGHT >= MINN and TANDEMBOX_USE_OPEN_HEIGHT < MINM  Then						;Spaces between 103mm and 118mm in Height
+	         LOGOBLUM.X = Imp(-7.4)									;Up and Down Adjustment                  
+	       End If       
+	     End If   
+	     LOGOBLUM.LibPart = 'BLUM\Tandembox\Logo TB'
+	   End If      
+	 End If
+	 
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX------------------------------------------------------   Rear Adapter   ----------------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	
+	   If Name = 'DG' Then  
+	    If TANDEMBOX_USE_OPEN_HEIGHT > MINN Then         
+	    Dim SOPORTE as New Guide
+	    SOPORTE.Visible<bool> = True  
+	    SOPORTE.DX = Imp(47)
+	    SOPORTE.DY = Imp(84)
+	    SOPORTE.Dz = Imp(28.5)
+	    SOPORTE.X = Imp(9)											;Top to Bottom
+	    SOPORTE.Y = :Z+:DY-Imp(6)									;Inside to Outside
+	    SOPORTE.Z = Imp(16.5)										;De Derecha a Izquierda - 18
+	    
+	     If x>IMP(80) Then 
+	        SOPORTE.EDX = -DG.DX
+	        SOPORTE.EDY = -DG.DY
+	        SOPORTE.EDZ = -DG.DZ  
+	     End If
+	    
+	    SOPORTE.AX<deg> = 90
+	    SOPORTE.AY<deg> = 90
+	    SOPORTE.AZ<deg> = 0  
+	    SOPORTE.QTY<int> = 1 
+	    SOPORTE.MatID = 847   
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= MINN and TANDEMBOX_USE_OPEN_HEIGHT < MINM  Then							;Spaces between 103mm and 118mm in Height - N
+	      SOPORTE.MatID = 875  
+	      If X<IMP(80) Then											;Left Guide
+	        SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket N-L'
+	      End If 
+	      If X>=IMP(80) Then										;Right Guide
+	        SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket N-R'  
+	        SOPORTE.AY<deg> = -90 
+	        SOPORTE.X = Imp(31)
+	        SOPORTE.Z = Imp(-29)  
+	      End If  
+	    End If  
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= MINM and TANDEMBOX_USE_OPEN_HEIGHT < MINO Then							;Over 200 mm in Height - M
+	      SOPORTE.MatID = 847  
+	      If X<IMP(80) Then											;Left Guide
+	        SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-L'
+	      End If 
+	      If X>=IMP(80) Then										;Right Guide
+	        SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-R'  
+	         SOPORTE.AY<deg> = -90 
+	         SOPORTE.X = Imp(31)
+	         SOPORTE.Z = Imp(-29)  
+	       End If  
+	    End If   
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= MINO  and TANDEMBOX_USE_OPEN_HEIGHT <= MINP Then						;Over 200 mm in Height
+	      SOPORTE.MatID = 848  
+	      If X<IMP(80) Then											;Left Guide
+	        SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-135-L'
+	      End If 
+	      If X>=IMP(80) Then										;Right Guide
+	        SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-135-R'  
+	        SOPORTE.AY<deg> = -90 
+	        SOPORTE.X = Imp(31)
+	        SOPORTE.Z = Imp(-29)  
+	      End If  
+	    End If    
+	    If TANDEMBOX_USE_OPEN_HEIGHT > MINP Then											;Over 224 mm in Height
+	      If  DY >= Imp(350)  Then
+	        SOPORTE.MatID = 858  
+	        If X<IMP(80) Then										;Left Guide
+	          SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-199-L'
+	        End If 
+	        If X>=IMP(80) Then										;Right Guide
+	         SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-199-R'  
+	         SOPORTE.AY<deg> = -90 
+	         SOPORTE.X = Imp(31)
+	         SOPORTE.Z = Imp(-29)  
+	         End If 
+	      End If
+	      If DY < Imp(350) Then 
+	        If X<IMP(80) Then										;Left Guide
+	          SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-L'
+	        End If 
+	        If X>=IMP(80) Then										;Right Guide
+	          SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-R'  
+	          SOPORTE.AY<deg> = -90 
+	          SOPORTE.X = Imp(31)
+	          SOPORTE.Z = Imp(-29)  
+	        End If 
+	        SOPORTE.MatID = 847 
+	      End If               
+	    End If
+	    End If     
+	  End If 
+	  
+	  If Name = 'ROG'  Then
+	    Dim SOPORTE as New Guide
+	  
+	  
+	   if  ROF.TallerROF = False  then 
+	    SOPORTE.Visible<bool> = True  
+	    SOPORTE.DX = Imp(47)
+	    SOPORTE.DY = Imp(84)
+	    SOPORTE.Dz = Imp(28.5)
+	    SOPORTE.X = Imp(9)											;Top to Bottom
+	    SOPORTE.Y = :Z+:dy-Imp(6)									;Inside to Outside
+	    SOPORTE.Z = Imp(16.5)										;Right to Left
+	    
+	    If x>IMP(80) Then 
+	        SOPORTE.EDX = -DG.DX
+	        SOPORTE.EDY = -DG.DY
+	        SOPORTE.EDZ = -DG.DZ  
+	     End If
+	    
+	    SOPORTE.AX<deg> = 90
+	    SOPORTE.AY<deg> = 90
+	    SOPORTE.AZ<deg> = 0   
+	    SOPORTE.MatID = 847  
+	      If X<IMP(80) Then											;Left Guide
+	        SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-L'
+	      End If 
+	      If X>=IMP(80) Then										;Right Guide
+	        SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-R'  
+	         SOPORTE.AY<deg> = -90 
+	         SOPORTE.X = Imp(31)
+	         SOPORTE.Z = Imp(-29)  
+	       End If 
+	   End if            
+	    if  ROF.TallerROF = True  then 
+	    SOPORTE.Visible<bool> = True
+	    SOPORTE.MatID = 858   
+	    SOPORTE.DX = Imp(47)
+	    SOPORTE.DY = Imp(350)
+	    SOPORTE.Dz = Imp(28.5)
+	    SOPORTE.X = Imp(9)											;Top to Bottom
+	    SOPORTE.Y = :Z+:dy-Imp(6)									;Inside to Outside
+	    SOPORTE.Z = Imp(16.5)										;Right to Left    
+	    If x>IMP(80) Then 
+	        SOPORTE.EDX = -DG.DX
+	        SOPORTE.EDY = -DG.DY
+	        SOPORTE.EDZ = -DG.DZ  
+	    End If    
+	    SOPORTE.AX<deg> = 90
+	    SOPORTE.AY<deg> = 90
+	    SOPORTE.AZ<deg> = 0     
+	      If X<IMP(80) Then										;Left Guide
+	          SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-199-L'
+	      End If  
+	      If X>=IMP(80) Then										;Right Guide
+	         SOPORTE.LibPart = 'BLUM\Tandembox\Back Bracket-199-R'  
+	         SOPORTE.AY<deg> = -90 
+	         SOPORTE.X = Imp(31)
+	         SOPORTE.Z = Imp(-29)  
+	      End If 
+	   End if           
+	  End If      
+	    
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX------------------------------------------------------   Front Adapter   ---------------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	 
+	 If Name = 'ROG' Then 
+	  if  ROF.TallerROF = False  then 
+	   Dim ADAPTA as New Part
+	   ADAPTA.Visible<bool> = True  
+	   ADAPTA.MatID = 846
+	   ADAPTA.DX = Imp(38)
+	   ADAPTA.DY = Imp(83)
+	   ADAPTA.DZ = Imp(28.5)
+	   ADAPTA.X = Imp(8)											;Top to Bottom
+	   ADAPTA.Y = :Z + Imp(27)
+	   ADAPTA.Z = Imp(25)											;Left to Right  ROF.
+	   If x>IMP(80) Then 
+	        ADAPTA.EDX = -DG.DX
+	        ADAPTA.EDY = -DG.DY
+	        ADAPTA.EDZ = -DG.DZ  
+	   End If
+	   ADAPTA.AX<deg> = 90
+	   ADAPTA.AY<deg> = 90
+	   ADAPTA.AZ<deg> = 0  
+	   If X<IMP(80) Then											;Left Guide
+	     ADAPTA.LibPart = 'BLUM\Tandembox\RO-Front-L'  
+	   End If
+	   If X>=IMP(80) Then											;Right Guide
+	    ADAPTA.LibPart = 'BLUM\Tandembox\RO-Front-R'
+	    ADAPTA.AY<deg> = -90 
+	    ADAPTA.X = Imp(32) 
+	    ADAPTA.Z = Imp(-12.5)
+	   End If
+	  End if 
+	
+	  if  ROF.TallerROF = true  then   
+	   Dim ADAPTA as New Part
+	   ADAPTA.Visible = True  
+	   ADAPTA.MatID = 900
+	   ADAPTA.DX = Imp(39)
+	   ADAPTA.DY = Imp(199)
+	   ADAPTA.DZ = Imp(28.5)
+	   ADAPTA.X = Imp(8)											;Top to Bottom
+	   ADAPTA.Y = :Z + Imp(27)
+	   ADAPTA.Z = Imp(25.5)											;Left to Right
+	   If x>IMP(80) Then 
+	        ADAPTA.EDX = -DG.DX
+	        ADAPTA.EDY = -DG.DY
+	        ADAPTA.EDZ = -DG.DZ  
+	   End If
+	   ADAPTA.AX<deg> = 90
+	   ADAPTA.AY<deg> = 90
+	   ADAPTA.AZ<deg> = 0  
+	   If X<IMP(80) Then											;Left Guide
+	     ADAPTA.LibPart = 'BLUM\Tandembox\ROFB Tall L'  
+	   End If
+	   If X>=IMP(80) Then											;Right Guide 
+	    ADAPTA.LibPart = 'BLUM\Tandembox\ROFB Tall R'
+	    ADAPTA.AY<deg> = -90 
+	    ADAPTA.X = Imp(32) 
+	    ADAPTA.Z = Imp(-13.5)
+	   End If   
+	  If X<IMP(80) Then 
+	   Dim GDACPO as New Guide
+	      GDACPO.Visible<bool> = True
+	      GDACPO.MatID = 901
+	      GDACPO.Name = 'Tandembox Front Gallery Rod' 
+	      GDACPO.DX = Imp(25) 
+	      GDACPO.DY = ROF.dy
+	      GDACPO.DZ = Imp(15)
+	      GDACPO.x = imp(180)      
+	      GDACPO.Y = :Z												
+	      GDACPO.Z = imp(-13.5)    											
+	      GDACPO.AX<deg> = -90
+	      GDACPO.AY<deg> = 0
+	      GDACPO.AZ<deg> = 0
+	      GDACPO.LibPart = 'Blum\Tandembox\Tandembox Gallery Rod Front' 
+	  End if    
+	  End if        
+	 End If 
+	 
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX------------------------------------------------------   Gallery Rails  ----------------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	     
+	 If Name = 'DG' Then											;Drawer Guide Qualifier
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= MINO Then											;Only for Boxes with free space over 160 mm
+	      If DY >= Imp(350) Then
+	      Anchocorr<meas> := DX 
+	      Dim GDACPO as New Guide
+	      GDACPO.Visible<bool> = True 
+	      GDACPO.DX = Imp(15) 
+	      GDACPO.DY = :dy-ImP(8)      
+	      GDACPO.Y = :Z												;Inside to Outside
+	      GDACPO.Z = IMP(7)											;Left to Right
+	      GDACPO.AX<deg> = 0
+	      GDACPO.AY<deg> = 0
+	      GDACPO.AZ<deg> = 0
+	      GDACPO.LibPart = 'BLUM\Tandembox\Gallery Rod'       
+	      
+	      ;------Initialize----------Determines the Material ID of the Part---------------------- 
+	      GDACPO.MatID<int> = 849 
+	      If DY < Imp(540) Then
+	        GDACPO.MatID<int> = 850 
+	      End If 
+	      If DY < Imp(500) Then
+	        GDACPO.MatID<int> = 851 
+	      End If 
+	      If DY < Imp(450) Then
+	        GDACPO.MatID<int> = 852 
+	      End If  
+	      If DY < Imp(400) Then
+	        GDACPO.MatID<int> = 853 
+	      End If 
+	      ;-------Ends --------------Determines the Material ID of the Part----------------------   
+	      If X <= IMP(80) Then										;Left Guide
+	        GDACPO.X = Imp(151)-Imp(15)								;Top to Bottom
+	      End if 
+	      If X > IMP(80) Then										;Right Guide
+	       GDACPO.X = Imp(-151)+Anchocorr							;Top to Bottom
+	      End If 
+	        If TANDEMBOX_USE_OPEN_HEIGHT > MINP Then										;Interior Drawers with space greater than 248mm
+	          If X <= IMP(80) Then									;Left Guide
+	            GDACPO.X = Imp(215)-Imp(15)							;Top to Bottom
+	          End if 
+	          If X > IMP(80) Then									;Right Guide
+	           GDACPO.X = Imp(-215)+Anchocorr						;Top to Bottom
+	          End If
+	        End If  
+	      End If  
+	    End If   
+	 End If     
+	
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX------------------------------------------------------   Box ID ------------------------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
+	
+	If Name = 'ROG' Then											
+	    if  ROF.TallerROF = true  then
+	      Largocorr<meas> := DY
+	      Dim BOXSIDE as New Guide
+	      BOXSIDE.Visible<bool> = True 
+	      BOXSIDE.DX = Imp(120) 
+	      BOXSIDE.DY = :dy-ImP(8)
+	      If x<IMP(80) Then
+	      BOXSIDE.X = Imp(85.1)
+	      end if
+	      If x>=IMP(80) Then
+	      BOXSIDE.X = Imp(-165.1)
+	      end if      
+	      BOXSIDE.Y = :Z  												
+	      BOXSIDE.Z = IMP(5.8)											
+	      BOXSIDE.AX<deg> = 0
+	      BOXSIDE.AY<deg> = 0
+	      BOXSIDE.AZ<deg> = 0      
+	      If x>IMP(80) Then 
+	        BOXSIDE.EDX = -DG.DX
+	        BOXSIDE.EDY = -DG.DY
+	        BOXSIDE.EDZ = -DG.DZ  
+	   End If
+	      
+	      BOXSIDE.LibPart = 'Blum\Tandembox\Boxcap'
+	      BOXSIDE.Name = 'Tandembox Boxcap (Pair)'
+	      
+	     if Largocorr = Imp(650) Then							
+	          BOXSIDE.MatID<int> = 910         
+	        End If        
+	        If Largocorr = Imp(600) Then							
+	          BOXSIDE.MatID<int> = 909
+	        End If         
+	        If Largocorr = Imp(550) Then							;
+	          BOXSIDE.MatID<int> = 908
+	        End If          
+	        If Largocorr = Imp(500) Then
+	          BOXSIDE.MatID<int> = 907
+	        End If
+	        if Largocorr = Imp(450) Then							
+	          BOXSIDE.MatID<int> = 906        
+	        End If        
+	        If Largocorr = Imp(400) Then							
+	          BOXSIDE.MatID<int> = 905
+	        End If         
+	        If Largocorr = Imp(350) Then							;
+	          BOXSIDE.MatID<int> = 904
+	        End If          
+	        If Largocorr = Imp(300) Then
+	          BOXSIDE.MatID<int> = 903
+	        End If
+	        If Largocorr = Imp(270) Then
+	          BOXSIDE.MatID<int> = 902
+	        End If  
+	    End If      
+	 End If         
+	 If dwr.Boxside = 1 Then 
+	  If Name = 'DG' Then											;Drawer Guide Qualifier          
+	    If DY >= Imp(450) Then										;Only for Boxes with depth greater then 450 mm
+	      If TANDEMBOX_USE_OPEN_HEIGHT >= MINP Then										;Only for Boxes with free space over 224 mm
+	        Largocorr<meas> := DY 
+	        Dim BOXSIDE as New Guide
+	        BOXSIDE.Visible<bool> = True         
+	        BOXSIDE.DX = Imp(141)
+	        BOXSIDE.DY = Largocorr-Imp(8) 
+	        BOXSIDE.DZ = Imp(2)  
+	        BOXSIDE.Y = :Z
+	        BOXSIDE.Z = Imp(4)										;Left to Right
+	        BOXSIDE.AX<deg> = 0
+	        BOXSIDE.AY<deg> = 0
+	        BOXSIDE.AZ<deg> = 0     
+	        BOXSIDE.LibPart = 'BLUM\Tandembox\Boxside 55'           ;ojo falta pieza en libreria
+	        BOXSIDE.MatID<int> = 893
+	        BOXSIDE.Name = 'Blum Boxside'        
+	        If Largocorr < Imp(640) Then							;Inititalize - Determines the Parts Material ID
+	          BOXSIDE.MatID<int> = 892
+	          BOXSIDE.LibPart = 'BLUM\Tandembox\Boxside 55'         ;ojo falta pieza en libreria
+	        End If        
+	        If Largocorr < Imp(590) Then							;Inititalize - Determines the Parts Material ID
+	          BOXSIDE.MatID<int> = 865
+	          BOXSIDE.LibPart = 'BLUM\Tandembox\Boxside 55'   
+	        End If         
+	        If Largocorr < Imp(540) Then							;Inititalize - Determines the Parts Material ID
+	          BOXSIDE.MatID<int> = 866
+	          BOXSIDE.LibPart = 'BLUM\Tandembox\Boxside 50'   
+	        End If          
+	        If Largocorr < Imp(490) Then
+	          BOXSIDE.MatID<int> = 867
+	          BOXSIDE.LibPart = 'BLUM\Tandembox\Boxside 45' 
+	        End If													;End - Determines the Parts Material ID    
+	      If X <= IMP(80) Then										;Left Guide
+	       BOXSIDE.X = Imp(80)										;Box Height
+	      End if          
+	      If X > IMP(80) Then										;Right Guide
+	       BOXSIDE.X = Imp(-80)+:DX  
+	       BOXSIDE.AX<deg> = 0
+	       BOXSIDE.AY<deg> = 0
+	       BOXSIDE.AZ<deg> = 180
+	       BOXSIDE.Y = :Z+DY
+	      End If
+	    End If       
+	    End If  
+	  End If   
+	 End If 
+	 End If      
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX------------------------------------------------------  Rear Bracket  ------------------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	
+	   If Name = 'BBK' Then											;Box Back Qualifier
+	   ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++    
+	   If :DWR_OPEN.BBK.ConstID = DWRCID Then						;++++++++++++++++++++++++++++++++++++++++     +++
+	   ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	     Z += Imp(8) 
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= Imp(90.4) Then									;Only Drawers (Ranging between 81.5mm & 96.4mm)
+	      DX = Imp(69) 
+	      Y -= Imp(15)
+	    End If 
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= MINM Then											;Only Drawers(Ranging between 96.5mm & 159.9mm)
+	      DX = Imp(84) 
+	      Y += Imp(15)
+	    End If   
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= MINO Then		     						  	    ;Only Drawers(Ranging between 160mm & 183.9mm)
+	      DX = Imp(135) 
+	      Y += Imp(51)
+	    End If 
+	    If TANDEMBOX_USE_OPEN_HEIGHT >= MINP Then										;Over 200 mm
+	      If  :BOXD >= Imp(350) Then
+	        DX = Imp(199) 
+	        Y += Imp(64)  
+	      End If 
+	      If :BOXD < Imp(350) Then
+	        DX = Imp(84)
+	        Y -= Imp(51)
+	      End If  
+	    End If 
+	   End If
+	  End If     
+	   If Name = 'ROBK' Then										;Roll Out Back Qualifier
+	   ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++     
+	   If :Tray_OPEN.ROBK.ConstID = ROCID Then						;++++++++++++++++++++++++++++++++++  ++++
+	   ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++             
+	    if  ROF.TallerROF = False  then  
+	      DX = Imp(84) 
+	      Y += Imp(53)
+	    End if        
+	    if  ROF.TallerROF = true  then  
+	      DX = Imp(199) 
+	      Y += Imp(168)
+	    End if        
+	   End If
+	  End If 
+	  ;+++++++++++++++++++++++++++++++++++--Support Positionals---+++++++++++++++---- 
+	
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	;XXXXXX----------------------------------------------  Interior Drawer Front Bracket  ---------------------------------------------------------XXXXXX
+	;XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+	  If :Tray_OPEN.ROBK.ConstID = ROCID Then ;++++++++++++++++++++++++++++++++++  ++++
+	  If Name = 'ROF' Then
+	   LibPart = 'Blum\Tandembox\ROF'
+	    MatID<int> = 899
+	    AY<deg> += 180
+	    Dx = Imp(81)
+	    Y = dx + imp(8)
+	    Z = -dz
+	  End If  
+	  End If
