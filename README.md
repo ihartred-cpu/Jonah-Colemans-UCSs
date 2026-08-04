@@ -25,10 +25,7 @@ scripts/
   blum-tandembox/         jonah-blum-tandembox-77ucs.txt   (UCS 77, "Blum Tandembox New")
   tools/                  two recovered AutoIt tool sources: aa-create-index-autoit.txt,
                            jonah-multiple-operations-copier-autoit.txt (not UCS -- compiled Win32 tools)
-docs/                     curated technique/defect write-ups for the three largest systems, plus
-                           cv-object-reference.md (general `For Each`/`Dim` object-type and Assembly
-                           Class/Type reference, folded in from the cabinet-vision skill) and
-                           external-sync-rules.md (how this repo reconciles with that skill)
+docs/                     curated technique/defect write-ups for the three largest systems,
 source-threads/           the two Hexagon Nexus discussion threads these scripts came from, plus a
                            third capture (a Nexus "Ideas" post) confirming what `CO` stands for and a
                            real CV limitation on its Z/DZ fields -- all captured verbatim
