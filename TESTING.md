@@ -246,8 +246,3 @@ but worth checking next time someone's in the Assembly Manager wizard near a hor
 
 ---
 
-## After you run these
-
-Send me results (and screenshots of any error dialogs, same as the last two) in order — partial
-progress is fine. I'll update README.md/CHANGELOG.md with what's confirmed, flip flags to tested
-defaults, apply any corrections the tests reveal, and commit each round separately.
