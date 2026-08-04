@@ -14,7 +14,7 @@ that haven't been run — see `TESTING.md` for what's confirmed versus still ope
 scripts/
   notch-construction/     jonah-notch-construction.txt   (Rev 12 + this repo's Rev 13 patch)
   shelf-standards/        jonah-shelf-standards-rev17.txt
-                           patched version, CV2025-PATCH fixes applied (see below)
+                            patched version, CV2025-PATCH fixes applied (see below)
                           jonah-shelf-standards-rev17-raw.txt
                             unmodified original, kept verbatim for provenance
   casework-walls/         the 12-script "Jonah Rocks Millwork Walls Revision 3" stack, in load-bearing order
