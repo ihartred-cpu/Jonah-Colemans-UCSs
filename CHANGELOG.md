@@ -20,11 +20,6 @@
 - Marked the six screencast.com links in `docs/casework-walls-jonah.md` presumed dead (2018-era, legacy
   hosting tier, automated check blocked by robots.txt) rather than left as an open question.
 
-## 2026-07-31 — Remove unnamed overlay-calculations duplicate
-
-- Deleted `scripts/overlay-calculations/overlays-calculation.txt` (the uncredited, unnamed copy of
-  `jonah-overlay-calculations.txt`) and all mentions of the duplicate pair.
-
 ## 2026-07-31 — CV 2025.3 casework-wall fix, from a skill update
 
 - The cabinet-vision skill's reference material was updated and surfaced a confirmed CV 2025.3 regression
