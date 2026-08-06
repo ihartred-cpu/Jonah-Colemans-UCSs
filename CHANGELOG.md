@@ -20,6 +20,11 @@
 - Marked the six screencast.com links in `docs/casework-walls-jonah.md` presumed dead (2018-era, legacy
   hosting tier, automated check blocked by robots.txt) rather than left as an open question.
 
+## 2026-07-31 — Remove unnamed overlay-calculations duplicate
+
+- Deleted `scripts/overlay-calculations/overlays-calculation.txt` (the uncredited, unnamed copy of
+  `jonah-overlay-calculations.txt`) and all mentions of the duplicate pair.
+
 ## 2026-07-31 — CV 2025.3 casework-wall fix, from a skill update
 
 - The cabinet-vision skill's reference material was updated and surfaced a confirmed CV 2025.3 regression
@@ -382,18 +387,55 @@ corrections and additions, folded into README.md and TESTING.md.
   no "typ." annotation or explanatory note about the missing write-up. The earlier wording read as a
   special-cased flag when it was meant to just be the normal listing style.
 
-## 2026-08-04 — Settled `CO`'s abbreviation and its Z/DZ limitation
+## 2026-08-06 — Rebased the three technique docs on the user's own manually-edited copies; collapsed inference-plus-later-Update passages into single settled statements
 
-- User confirmed directly that `CO` literally stands for "Case Open," or "Case Opening" — resolving the
-  functional-only guess ("sectioning / cut-out opening object") `docs/notch-construction-jonah.md` had
-  carried since the previous CO write-up.
-- Independently corroborated by a Hexagon Nexus "Ideas" post from Matt Bauman (already a named source in
-  this repo), found by the user by accident while looking at the screenshot for an unrelated reason. Its
-  own title, "Interior Case Openings (CO)," spells the name out directly. Captured verbatim at
-  `source-threads/nexus-idea-co-z-dz-values.txt`.
-- That post also resolves a caution the notch-construction write-up had explicitly flagged as unconfirmed
-  (`CO.DZ` "is not exercised" by the script): `Z` and `DZ` on a `CO` are always `0`, unconditionally — a
-  standing Hexagon limitation, not a field this script happened not to exercise. `X`/`DX` (and by
-  extension `Y`/`DY`) are the fields that actually carry real geometry.
-- Updated `docs/notch-construction-jonah.md`'s "Closed: what `CO` is" section with both findings, and the
-  README's structure listing to reflect the third `source-threads/` capture.
+- User has been editing `docs/shelf-standards-jonah.md`, `docs/casework-walls-jonah.md`, and
+  `docs/notch-construction-jonah.md` directly in a separate local checkout, ahead of what this session had
+  on file — most notably the `CO` = "Case Open"/"Case Opening" abbreviation settlement and its Z/DZ
+  limitation (corroborated by a Hexagon Nexus Ideas post from Matt Bauman, captured at
+  `source-threads/nexus-idea-co-z-dz-values.txt`). Took the user's copies as the base for all three files
+  rather than this repo's own prior versions.
+- Per user request: went through all three looking for passages that stated something as an inference or
+  open question and then bolted a separately-dated "Update, <date>: ..." (or "Cross-checked against...")
+  paragraph onto it once the answer came in. Collapsed each into one clean paragraph that just states the
+  current, settled understanding — dropping the "here's what we said, here's what we found out later"
+  narration, whether the later check fully confirmed the original claim or only partly did. Five instances:
+  - `docs/shelf-standards-jonah.md`: `OBJECT == 17` = Part — folded the "third and fourth attestation" +
+    "Update, 2026-08-03: now independently confirmed by Hexagon's published table" pair into one paragraph.
+  - `docs/casework-walls-jonah.md`: `OBJECT == 15` (the author's own "Face" label vs. the published
+    Subassembly label) — folded the original claim + "Cross-checked against Hexagon's own published table"
+    paragraph into one.
+  - `docs/casework-walls-jonah.md`: `OBJECT == 10`/`37` (the author's "copied"/"library" labels vs. the
+    published Cabinet/Order labels) — same treatment; kept the plausible-but-unverified mechanism caveat
+    since that's a real, still-open epistemic gap, not narrative scaffolding to cut.
+  - `docs/notch-construction-jonah.md`: the CV2023+ drawer-stretcher origin regression — folded the original
+    forum-report paragraph and the separate "Updated 2026-07-31, from real click-testing..." paragraph into
+    one, keeping the install-specific caveat (doesn't reproduce *here*, not proven false generally).
+  - `docs/notch-construction-jonah.md`: the `CO` section — folded the separately-dated "Update, 2026-08-04 —
+    the abbreviation itself... are now both settled" paragraph directly into the main write-up, since the
+    name and the Z/DZ finding are both just facts about `CO` now, not a later correction to narrate.
+- `docs/cv-object-reference.md` and `docs/external-sync-rules.md` (added earlier in this repo's own history)
+  aren't in the user's local checkout and weren't touched this pass — `cv-object-reference.md` has the same
+  "Update, 2026-08-03" pattern in its own intro and would get the same treatment if/when the user wants it
+  folded back into their local copy.
+- No content claims were changed by this pass, only how already-settled ones are presented.
+
+## 2026-08-06 — Removed `docs/cv-object-reference.md`; trimmed README's "What was changed" section
+
+- User confirmed `docs/cv-object-reference.md` (the folded-in `OBJECT`/`CLASS` numeric tables, `For
+  Each`/`Dim` keyword lists, and Assembly Class/Type constants) "slipped in" and isn't wanted — deleted the
+  file and every mention of it: README's structure listing, `docs/external-sync-rules.md`'s fold-in example,
+  and the three `docs/*.md` citations that pointed to it (`OBJECT == 17`, `OBJECT == 15`, `OBJECT ==
+  10`/`37`). The underlying facts those three citations supported — that Hexagon has published an `OBJECT`
+  code table and what it says for those specific codes — came from screenshots the user supplied directly,
+  so they stayed in the docs; only the dangling pointer to the now-deleted file was removed.
+- Updated README's "CV2025 status" section to match: it previously said `OBJECT` codes are unpublished and
+  empirically observed, which is now only true for codes this pack doesn't specifically cite — `17`, `15`,
+  `10`, and `37` are confirmed against Hexagon's own published table per the relevant `docs/*.md` write-up.
+- Historical CHANGELOG entries describing when `cv-object-reference.md` was added and later trimmed are left
+  as-is — this is an append-only log of what actually happened, not rewritten to look like the file never
+  existed.
+- Rewrote README's "What was changed in this pack" section, which had grown into a blow-by-blow duplicate of
+  TESTING.md's round-by-round story and each `docs/*.md` write-up. Cut it down to one short paragraph per
+  script — what was fixed, the verified status, and a pointer to TESTING.md/`docs/*.md` for the full account
+  — rather than re-narrating it all inline.
