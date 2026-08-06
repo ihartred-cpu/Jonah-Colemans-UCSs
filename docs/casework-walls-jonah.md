@@ -28,8 +28,6 @@ The `.ucs` records in the bundle carry the whole UCS Manager row, so stack posit
 
 Two scripts are Apply-Before-Build (`Order` 1 and 9). Ordering is otherwise load-bearing and unenforced: `117.ucs` line 1 is just a comment, `;This should be before any other part level UCS`, and nothing in CV checks it — yet it ships at position 13. That contradiction is in the source as delivered; don't read the comment as describing the shipped stack.
 
-**`19.ucs` is deliberately not filed.** It is an *earlier* revision of the already-filed `examples/jonah-overlay-calculations.txt` — 17 diff lines, and the filed copy (204 lines) is the newer one, carrying a `DOOR_IS_STILE_AND_RAIL` / `DOR.DOORSTYLEID` block and `{JONAH_Interior_Split_Above_Path}.PCTR` lines that the bundle's 187-line version lacks. So the filed copy post-dates 2018-08-08. Refiling the older text would have created a third copy of a script this skill already stores twice (see the note on `overlays-calculation.txt` in `examples/README.md`).
-
 ## Setup chain — Jonah Coleman's own installation instructions
 
 Verbatim source: `full-docs/nexus-thread-1106-jonah-rocks-millwork-walls.txt`, first post. Paraphrased in order, with the reasons he gives:
