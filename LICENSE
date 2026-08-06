@@ -1,21 +1,39 @@
+This repository is not a single-licensed body of work — it mixes someone else's shared scripts with this
+repo's own original documentation and bug fixes, and those are covered differently.
+
+## Scripts (`scripts/`)
+
+Everything under `scripts/` is Jonah Coleman's own authored work — classic UCS scripts, and two recovered
+AutoIt tools — that he shared publicly on the Hexagon Nexus community forum for other Cabinet Vision users
+to use and adapt (see `source-threads/` for the original threads, and README.md's Authorship section for
+how authorship is identified where a file carries no explicit credit line). No license is granted here over
+that material beyond what he already extended by sharing it publicly for other users to use and build on.
+This repo is a version-controlled, bug-fixed copy of what he shared, kept with attribution — it is not a
+transfer of his copyright, and nothing here should be read as permission to redistribute, sell, or relicense
+his scripts. If you want to use them beyond your own reference/shop use, or you're Jonah Coleman and want
+something here changed or removed, please reach out.
+
+## Everything else (this repo's own documentation and bug-fix diffs)
+
+The curated write-ups in `docs/`, `README.md`, `CHANGELOG.md`, `TESTING.md`, and the specific documented
+bug-fix diffs applied on top of Jonah Coleman's original scripts (see each script's "What was changed"
+notes and `CHANGELOG.md` for exactly what changed and why) are this repo's own original work.
+
 MIT License
 
 Copyright (c) 2026 ihartred-cpu
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of this documentation and the
+specific bug-fix diffs described above (not the underlying scripts they are applied to) to deal in them
+without restriction, including without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies, and to permit persons to whom it is furnished to do so, subject
+to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all copies or substantial
+portions of the covered material.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+THE MATERIAL IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE MATERIAL OR THE USE
+OR OTHER DEALINGS IN THE MATERIAL.
