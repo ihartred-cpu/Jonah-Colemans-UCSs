@@ -178,15 +178,9 @@ The code splits an X-range test and a Y-range test into nested `if`s rather than
 
 **Revision 11's history entry names a real trap:** `;Fix for loop variables becoming a measurement.` An integer loop counter can acquire a `<meas>` type from arithmetic, after which comparisons and increments behave as measurements. This is why every counter in the file is re-typed on every touch — `TEMP_Loop1<int> += 1`, not `TEMP_Loop1 += 1`. **Carry the type suffix on every assignment to a counter.**
 
-## `JCS_` — a third Jonah Coleman prefix, and what it does to the fingerprint rule
-
-Every parameter in this script is prefixed `JCS_`, on a file whose credit line is `Jonah@FletcherWoodProducts.com`. That matters for the attribution fingerprint recorded in this repo's own `README.md` (Authorship section), which says he namespaces by **employer** initials — `FWP_` for Fletcher Wood Products, `AA_` for Architectural Arts. Here the employer is FWP and the prefix is `JCS_`, which reads as his own initials rather than the shop's.
-
-So the rule needs widening rather than correcting: **he consistently namespaces, but not always by employer.** `JCS_` is the earliest form and personal; `FWP_` and `AA_` are the later, employer-keyed forms. As an authorship tell that is *stronger*, not weaker — a dense, consistently-prefixed parameter namespace with `<desc>`/`<style>` labels and a revision history at the end of the file is the signature, whichever prefix it uses. As a *dating* tell it is useful too: `JCS_` on a file suggests the FWP era or earlier.
-
 ## Practical notes from the thread
 
-**Where the controls appear.** Jared spent a while stuck because he assumed Section Level; Adam Mauss's answer is the useful one — from an ortho view, click the partition or fixed shelf and the options are in the list at the **bottom left of the screen**. Enabling `Notch: Enable` there causes the remaining parameters to appear, because they are declared inside `if JCS_NotchConstruction_Run_Me_Through then`.
+**Where the controls appear.** Jared spent a while stuck because he assumed Section Level; Adam M.'s answer is the useful one — from an ortho view, click the partition or fixed shelf and the options are in the list at the **bottom left of the screen**. Enabling `Notch: Enable` there causes the remaining parameters to appear, because they are declared inside `if JCS_NotchConstruction_Run_Me_Through then`.
 
 **Copying UCS code off the Nexus forum mangles it.** linfordz got "one really long line"; Other Bruce got a parse failure that moved to a different blank line each time he deleted line three. Jonah Coleman's advice: double-click the text first, then copy — and in Chrome, double-click, then click at the start and drag to the bottom before copying. Bluntly, later: "Yep use internet explorer." Anything pasted out of that forum should be checked for collapsed line breaks before it is blamed on the code.
 
