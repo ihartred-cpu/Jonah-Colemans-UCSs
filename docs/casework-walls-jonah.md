@@ -85,7 +85,7 @@ end if
 
 Radius cleats are excluded from CNC behind a user flag — `122.ucs:542-543`: `if Cab.AA_CaseworkWall_SendRadiusCleatsToCNC == 0 then` / `WALLCLEAT._NOCNC<int> := 1 ;we don't let these go to CNC`.
 
-## Verified techniques worth stealing
+## Verified techniques worth absorbing
 
 Each of these was checked line-by-line against the filed source. They are general classic-UCS technique, not casework-wall-specific, and several are the only known example in this skill.
 
