@@ -114,3 +114,7 @@ another user was still running an old script that "fixes a bug that was fixed in
 canonical, versioned source ever existed on his end; whatever's in circulation is whatever got pasted into
 whichever forum post, at whatever revision was current that day. That's the gap this repo is filling for
 this shop's own copies.
+
+**Confirmed directly, 2026-08-13.** Asked point-blank whether he was fine with this repo publicly documenting
+his old CV work, Jonah Coleman replied "Sure, go for it." This isn't inferred from the forum reply above
+anymore — it's his direct yes to this specific repo.

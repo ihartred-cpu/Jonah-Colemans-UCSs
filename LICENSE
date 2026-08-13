@@ -6,12 +6,12 @@ repo's own original documentation and bug fixes, and those are covered different
 Everything under `scripts/` is Jonah Coleman's own authored work — classic UCS scripts, and two recovered
 AutoIt tools — that he shared publicly on the Hexagon Nexus community forum for other Cabinet Vision users
 to use and adapt (see `source-threads/` for the original threads, and README.md's Authorship section for
-how authorship is identified where a file carries no explicit credit line). No license is granted here over
-that material beyond what he already extended by sharing it publicly for other users to use and build on.
-This repo is a version-controlled, bug-fixed copy of what he shared, kept with attribution — it is not a
-transfer of his copyright, and nothing here should be read as permission to redistribute, sell, or relicense
-his scripts. If you want to use them beyond your own reference/shop use, or you're Jonah Coleman and want
-something here changed or removed, please reach out.
+how authorship is identified where a file carries no explicit credit line). Publishing this repo was
+confirmed directly with him (see README.md's Source provenance section, 2026-08-13: "Sure, go for it"), but
+that confirmation covers this repo's existence and publication, not a transfer of his copyright — no license
+is granted here over his scripts beyond that. This repo is a version-controlled, bug-fixed copy of what he
+shared, kept with attribution; it is not permission to redistribute, sell, or relicense his scripts beyond
+what's here. If you want to use them beyond your own reference/shop use, please reach out to him directly.
 
 ## Everything else (this repo's own documentation and bug-fix diffs)
 
